@@ -1,2 +1,3 @@
+include LICENSE.md README.md
 graft NEMO/static
 graft NEMO/templates
