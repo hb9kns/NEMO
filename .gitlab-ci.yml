@@ -3,7 +3,7 @@ before_script:
 
 build:
   script:
-  - pip3.6 install -p -U pip setuptools wheel twine keyring
+  - pip3.6 install -U pip setuptools wheel twine keyring
   - python3.6 setup.py sdist bdist_wheel
 
 test:
