@@ -1,0 +1,11 @@
+before_script:
+  - yum update -y && yum -y install https://centos7.iuscommunity.org/ius-release.rpm && yum -y install python36u python36u-pip
+
+build:
+  script:
+  - pip3.6 install -p -U pip setuptools wheel twine keyring
+  - python3.6 setup.py sdist bdist_wheel
+
+test:
+  script:
+  - echo hellow world
