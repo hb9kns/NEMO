@@ -1,0 +1,46 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="font-family: 'Avenir Next', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'">
+<!--[if mso]><table width="600" align="center"><tr><td><![endif]-->
+<table align="center" style="width:100%; max-width:600px">
+	<tr>
+		<td align="center" style="color: white; background: #5bc0de; margin: 0; padding: 50px 0;" bgcolor="#5bc0de">
+			<h1 style="max-width: 90%; margin: 0 auto; padding: 0;">
+				RESERVATION CANCELLED
+			</h1>
+		</td>
+	</tr>
+	<tr>
+		<td style="margin: 10px 10px 20px; padding: 10px;">
+			<h2>
+				Hi {{ reservation.user.first_name }},
+			</h2>
+			<p>{{ staff_member }} cancelled your reservation for the {{ reservation.tool }} starting on {{ reservation.start }} and ending on {{ reservation.end }}.</p>
+			<p>{{ staff_member.first_name }} provided this reason for cancelling the reservation:</p>
+			<div style="border-left: 5px solid #5bc0de; padding-left: 7px; font-style: italic">{{ reason }}</div>
+			<p>You can reply to this message to contact {{ staff_member.first_name }} if you believe the reservation should not have been cancelled, or log in to NEMO to schedule a new reservation.</p>
+			<table align="center">
+				<tr>
+					<td>
+						<a href="https://nemo.nist.gov/" style="display: inline-block; color: white; background: #5bc0de; border: solid #5bc0de; border-width: 10px 20px 8px; font-weight: bold; border-radius: 4px; text-decoration: none">
+							Go to NEMO
+						</a>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td style="text-align: center; background-color:#efefef; color:#888888; padding-top: 20px; padding-bottom: 20px">
+			<a href="mailto:nanofabuseroffice@nist.gov" style="text-decoration: none; color: #888888; font-weight: bold">Email</a> or <a href="tel:18776266871" style="text-decoration: none; color: #888888; font-weight: bold">call</a> the NanoFab User Office<br>
+			View the <a href="http://www.nist.gov/cnst/" style="text-decoration: none; color: #888888; font-weight: bold">CNST website</a><br>
+			Get <a href="https://www.google.com/maps/dir//39.1319856,-77.2150922/@39.1354129,-77.2207066,16.08z" style="text-decoration: none; color: #888888; font-weight: bold">driving directions</a> to CNST
+		</td>
+	</tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</body>
+</html>

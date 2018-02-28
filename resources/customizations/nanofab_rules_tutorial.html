@@ -1,0 +1,249 @@
+<h1>NanoFab Rules</h1>
+
+<form action="{% url 'nanofab_rules' %}" method="post">
+
+	{% csrf_token %}
+
+	<div id="introduction">
+		<h4>Introduction</h4>
+		<p>The NanoFab operates on a cost recovery model which endeavors to set the rates for each tool or service at a level that enables us to cover our costs each year assuming a specific level of utilization. In setting the costs, we assume that each tool user is charged for the total amount of time that they are preventing others from using the tool. This time includes, for example, the time used loading the tool, setting up the tool, as well as the time the tool has been reserved but is not being used.</p>
+		<p>In many instances, we use interlocks to ensure that only trained and qualified users may operate a tool. One must log in to a tool in order to use it when it is interlocked. Our financial model depends on people being logged in for the use of the tool during the entire period that they are utilizing it, not simply for the possibly much shorter time that the interlock is enabled. <strong>Please be sure that you log in as soon as you begin using each tool and log out only after the tool is available for the next user.</strong></p>
+		<button type="button" class="btn btn-success" onclick="$('#introduction').hide(); $('#important_considerations_question').show(); window.scrollTo(0,0);">I understand and agree</button>
+	</div>
+
+	<div id="important_considerations_question" style="display:none">
+		<h4>Which one of these assertions do you think is a valid and important consideration for NanoFab tool use? Click the correct answer.</h4>
+		<ul>
+			<li><a href="javascript:select_answer_important_considerations('#wrong_consideration_1')">Predicting when others want to use the tool is the most important consideration. There are <strong>{{ active_user_count }} active user accounts</strong> for the whole NanoFab but no one else wants to use the tool right now... so it should be fine to start/finish prepping the tool without enabling it. No one else wants to use it. Probably.</a></li>
+			<li><a href="javascript:select_answer_important_considerations('#wrong_consideration_2')">The project's budget is the primary concern. With limited funds, I need to produce the best possible results for the money I spend in the NanoFab. So, stealing some tool usage time should be fine, right?</a></li>
+			<li><a href="javascript:select_answer_important_considerations('#wrong_consideration_3')">My project has groundbreaking implications and is <strong>clearly more important than the other {{ active_project_count }} active projects</strong> in the NanoFab. Plus, I'm up against a deadline. I should be able to use the tool whenever I want, regardless of being logged in.</a></li>
+			<li><a href="javascript:select_answer_important_considerations('#correct_consideration')">By accurately recording my complete tool usage (include preparation and final steps) NanoFab <strong>prices are kept low</strong>, I'm being <strong>honest</strong> with my funds, and NanoFab logistics <strong>planning is easier</strong> for everybody.</a></li>
+		</ul>
+
+		<div id="wrong_consideration_1" style="display:none">
+			<div class="panel panel-danger">
+				<div class="panel-heading">The answer you selected is not correct. Try again, and please choose the correct answer.</div>
+				<div class="panel-body">It is difficult to predict everyone's needs and schedule since there are many NanoFab users. Please do not try to predict tool usage demand. Instead, please record your NanoFab usage in an accurate manner. This allows everyone to view exactly which tools are in use and saves time for everybody.</div>
+			</div>
+		</div>
+		<div id="wrong_consideration_2" style="display:none">
+			<div class="panel panel-danger">
+				<div class="panel-heading">The answer you selected is not correct. Try again, and please choose the correct answer.</div>
+				<div class="panel-body">While your project budget may be important, that does not justify stealing from the United States Federal Government. In addition to being morally wrong, the NanoFab must ultimately cover costs... so not recording tool usage effectively raises the cost for everyone else.</div>
+			</div>
+		</div>
+		<div id="wrong_consideration_3" style="display:none">
+			<div class="panel panel-danger">
+				<div class="panel-heading">The answer you selected is not correct. Try again, and please choose the correct answer.</div>
+				<div class="panel-body">Please remember that the NanoFab is a shared resource and there are many people that use it. Tool usage is on a reservation and first-come-first-serve basis. &quot;Project importance&quot; and deadlines are not factors to consider when using a tool.</div>
+			</div>
+		</div>
+		<div id="correct_consideration" style="display:none">
+			<div class="panel panel-success">
+				<div class="panel-heading">This is the correct answer.</div>
+				<div class="panel-body">By accurately recording your tool usage, you are part of the majority of NanoFab users who help make things easier for everyone. Thanks for being awesome.</div>
+			</div>
+			<button type="button" class="btn btn-success" style="white-space:normal" onclick="$('#important_considerations_question').hide(); $('#reservation_policy').show(); window.scrollTo(0,0);">Great! What else do I need to know about the NanoFab rules?</button>
+		</div>
+	</div>
+
+	<div id="reservation_policy" style="display:none">
+		<h4>Reservation Policy</h4>
+		<p>Our reservation policy is implemented for several reasons, all of which are designed to allow the smooth and efficient use of the toolset for everyone. While it is never possible to anticipate every eventuality (particularly in a research environment!) reservations need to be carefully made and, if necessary, modified in order to allow others full access to our tool environment. Please remember that the actual time of tool utilization should begin at or shortly after the reservation time and end shortly before the end of the reservation time. Reserved time that is not utilized is time that deprives everyone from the opportunity to use the tools.</p>
+		<button type="button" class="btn btn-success" onclick="$('#reservation_policy').hide(); $('#general_nanofab_rules').show(); window.scrollTo(0,0);">I understand</button>
+	</div>
+
+	<div id="general_nanofab_rules" style="display:none">
+		<h4>General NanoFab Rules</h4>
+		<p>The following rules are our attempt to provide guidelines and enforceable actions to implement the general policies described previously. More than anything else, your cooperation in observing these policies will allow us to maintain and improve your NanoFab.</p>
+
+		<ul>
+			<li>Users who enter the cleanroom <strong>must log in as a cleanroom user in room 215/D101 before entering</strong>. Logging in as a cleanroom user from inside of the cleanroom is not allowed.</li>
+			<li>A reservation on a tool holds that tool for your exclusive use and is a commitment by you to use the tool for the time you reserved.</li>
+			<li>A user with a reservation has priority to access a tool at their reserved time.</li>
+			<li>Users that game or abuse the system will have their reservation privileges suspended or NanoFab access revoked.</li>
+		</ul>
+
+		<button type="button" class="btn btn-success" style="white-space: normal" onclick="$('#general_nanofab_rules').hide(); $('#question__when_do_you_log_in').show(); window.scrollTo(0,0);">I understand and agree to these rules</button>
+	</div>
+
+	<div id="question__when_do_you_log_in" style="display:none">
+		<h4>When are you supposed to log in to the cleanroom?</h4>
+		<ul>
+			<li><a href="javascript:void(0)" onclick="$('#wrong_login_time').show(); $('#right_login_time').hide();">Once I have put on my cleanroom suit.</a></li>
+			<li><a href="javascript:void(0)" onclick="$('#wrong_login_time').hide(); $('#right_login_time').show();">In the cleanroom lobby, room 215/D101. And I should stay logged in for the entire duration that I am in the cleanroom.</a></li>
+			<li><a href="javascript:void(0)" onclick="$('#wrong_login_time').show(); $('#right_login_time').hide();">After I have entered the cleanroom and prepared to use a tool.</a></li>
+		</ul>
+
+		<div id="wrong_login_time" style="display:none">
+			<div class="panel panel-danger">
+				<div class="panel-heading">The answer you selected is not correct. Try again, and please choose the correct answer.</div>
+				<div class="panel-body">Cleanroom suits cost money to clean and there is significant financial overhead to keeping the cleanroom free of dust and contaminants. You should log in to the cleanroom <strong>before</strong> you enter the cleanroom.</div>
+			</div>
+		</div>
+		<div id="right_login_time" style="display:none">
+			<div class="panel panel-success">
+				<div class="panel-heading">This is the correct answer.</div>
+				<div class="panel-body">The NanoFab staff appreciate your help! Cleanroom suits cost money to clean and there is significant financial overhead to keeping the cleanroom free of dust and contaminants.</div>
+			</div>
+			<button type="button" class="btn btn-success" onclick="$('#question__when_do_you_log_in').hide(); $('#making_a_reservation').show(); window.scrollTo(0,0);">Continue</button>
+		</div>
+	</div>
+
+	<div id="making_a_reservation" style="display:none">
+		<h4>Making a Reservation</h4>
+		<p>Please remember these rules and recommendations when making a reservation:</p>
+		<ul>
+			<li><strong>It's always a good idea to reserve a tool in advance of your planned usage</strong>.</li>
+			<li>Make sure you have a reservation if you plan to run a process that cannot be interrupted. Remember, <strong>a user with a reservation has priority</strong> to access a tool at their reserved time.
+				<ul>
+					<li>For example, you start a 6 hour process without a reservation and another user makes a reservation that starts 3 hours into your process, you <strong>must</strong> stop using the tool when that users arrives.</li>
+				</ul>
+			</li>
+			<li><strong>Plan ahead</strong> so you can make a reservation only for the time you need and use the tool for the time reserved.
+				<ul>
+					<li>Underestimating the time you need can impact your ability to finish your work and the ability of the next user to start their work.
+						<ul>
+							<li>For example, you make a 60 minute reservation on an etch tool that requires a chamber clean run after usage. You show up on time and use the tool for 50 minutes then start a 30 minute chamber clean. The next user will not be able to start using the tool until 20 minutes after your reservation ends.</li>
+						</ul>
+					</li>
+					<li><strong>Excessive reservations limit other users' access to a tool</strong>. If you find that you will be using the tool for shorter period than expected, shorten your reservation as soon as you know.</li>
+					<li>Reserve an additional 30 minutes for any tool that requires configuration to allow time for the NanoFab staff to setup the tool for you.
+						<ul>
+							<li>For example, you want to use the sputter tool for 90 minutes and need two targets installed. Reserve 120 minutes so the staff has time at the beginning of your usage time to install the targets.</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><strong>Do not make &quot;place holder&quot; reservations with the intention of canceling them at the last minute</strong>.</li>
+		</ul>
+
+		<label>In your own words, how would you describe the general theme of these rules for making reservations? What are the most important concepts to remember?
+			<textarea id="making_reservations_summary" name="making_reservations_summary" rows="6" class="form-control" maxlength="3000"></textarea>
+		</label>
+		<p>
+			<button type="button" class="btn btn-success" onclick="$('#making_a_reservation').hide(); $('#using_a_reservation').show(); window.scrollTo(0,0);">Record my answer</button>
+	</div>
+
+	<div id="using_a_reservation" style="display:none">
+		<h4>Using a Reservation</h4>
+		<p>Log in at the beginning of your reservation and log out at the end. <strong>Multiple log in and log out events during a reservation are not acceptable</strong>.</p>
+		<p>If the tool will be unavailable to other users, you must be logged in. Here are some examples of when you must remain logged in:
+		<ul>
+			<li>Tool setup by staff (target changes, blade changes, aligner filter, et cetera), overnight pump downs, etch or CVD plasma chamber clean runs, leaving your sample in a tool while you go to lunch, leaving a mask in the stepper or aligner while you develop a wafer, analyzing test runs, or developing a test pattern on the e-beam before you run your sample.</li>
+			<li>If you have a reservation from 7 pm to 11 am the following day, you cannot log in at 7 pm to load your sample to pump down overnight, log out at 7:15 pm, then log in at 10 am the next day to perform your process.</li>
+			<li>If you plan to use the sputter tool and require targets installed, you must log into the tool while the targets are being installed because the tool is unavailable to other users while it is being configured for your use.</li>
+			<li>If you use a reactive ion etch tool, you must run a plasma chamber clean after use. You must stay logged into the tool while the chamber clean process is running.</li>
+		</ul>
+		<button type="button" class="btn btn-success" style="white-space: normal" onclick="$('#using_a_reservation').hide(); $('#question__which_is_abuse').show(); window.scrollTo(0,0);">I understand and agree to use reservations appropriately</button>
+	</div>
+
+	<div id="question__which_is_abuse" style="display:none">
+		<h4>Which of the following actions violate the reservation policy and generally make planning difficult for everyone else? Check all that apply in order to continue.</h4>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_1" onclick="$('#abuse_answer_1').toggle(); check_abuse_answers();"> Making many small reservations and cancelling the ones I don't use.<span id="abuse_answer_1" style="display:none" class="success-highlight"> - Correct.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_2" onclick="$('#abuse_answer_2').toggle(); check_abuse_answers();"> Using a tool without a reservation.<span id="abuse_answer_2" style="display:none" class="danger-highlight"> - It is prudent, but not required, that you make a reservation before using a tool. If someone with a reservation needs to use a tool and you do not have one, their use will take priority.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_3" onclick="$('#abuse_answer_3').toggle(); check_abuse_answers();"> Accidentally over-estimating time needed for a reservation.<span id="abuse_answer_3" style="display:none" class="danger-highlight"> - Sometimes it's impossible to accurately estimate the amount of time needed for a reservation. Try to estimate as accurately as possible.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_4" onclick="$('#abuse_answer_4').toggle(); check_abuse_answers();"> <strong>Repeatedly</strong> moving, resizing, or otherwise changing <strong>many</strong> reservations on short notice.<span id="abuse_answer_4" style="display:none" class="success-highlight"> - Correct.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_5" onclick="$('#abuse_answer_5').toggle(); check_abuse_answers();"> Running a long process that cannot be interrupted and overtaking someone else's reservation.<span id="abuse_answer_5" style="display:none" class="success-highlight"> - Correct.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_6" onclick="$('#abuse_answer_6').toggle(); check_abuse_answers();"> Accidentally under-estimating time needed for a reservation.<span id="abuse_answer_6" style="display:none" class="danger-highlight"> - Sometimes it's impossible to accurately estimate the amount of time needed for a reservation. Try to estimate as accurately as possible.</span></label></div>
+		<div class="checkbox"><label><input type="checkbox" id="abuse_checkbox_7" onclick="$('#abuse_answer_7').toggle(); check_abuse_answers();"> Logging in to a tool <strong>multiple</strong> times while running a <strong>single process</strong> in order to &quot;save money&quot;.<span id="abuse_answer_7" style="display:none" class="success-highlight"> - Correct. This is definitely not ok.</span></label></div>
+		<button type="button" class="btn btn-success" id="abuse_continue" style="display:none; white-space: normal" onclick="$('#question__which_is_abuse').hide(); $('#late_and_no_show').show(); window.scrollTo(0,0);">You got all the right answers! Continue ...</button>
+	</div>
+
+	<div id="late_and_no_show" style="display:none">
+		<h4>Arriving Late or Not Showing Up</h4>
+		Arriving late for a reservation or not showing up at all inhibits the productivity of other NanoFab users.
+		<ul>
+			<li>Always log in promptly at your reserved start time.</li>
+			<li>If you arrive more than 30 minutes late, your reservation will be automatically cancelled and your account will be charged 30 minutes of usage at the unsubsidised rate.
+				<ul>
+					<li>If the tool is shutdown in NEMO, you will not be charged.</li>
+				</ul>
+			</li>
+			<li>Making short consecutive reservations to avoid late penalties is not allowed.</li>
+			<li>If you are running late, adjust your reservation or contact the user office so they can adjust it for you.</li>
+		</ul>
+		<button type="button" class="btn btn-success" style="white-space: normal" onclick="$('#late_and_no_show').hide(); $('#question__how_late').show(); window.scrollTo(0,0);">I understand and agree to these rules</button>
+	</div>
+
+	<div id="question__how_late" style="display:none">
+		<h4>If you are late for a reservation or don't show up at all, when will your reservation be automatically cancelled and tool usage charged to your project?</h4>
+		<div class="row">
+			<div class="col-sm-3">
+				<input type="number" id="lateness" oninput="check_lateness()" class="form-control" min="0" inputmode="numeric" pattern="[0-9]*" placeholder="Enter a number">
+				minutes after the reservation starts
+			</div>
+		</div>
+		<p>
+			<span id="higher" style="display:none" class="danger-highlight">(Nope, the duration is higher than the value you entered!)</span>
+			<span id="lower" style="display:none" class="danger-highlight">(Nope, the duration is lower than the value you entered!)</span>
+		</p>
+		<button type="button" class="btn btn-success" style="display:none; white-space: normal" id="lateness_continue" onclick="$('#question__how_late').hide(); $('#cancelling_a_reservation').show(); window.scrollTo(0,0);">Correct! Continue ...</button>
+	</div>
+
+	<div id="cancelling_a_reservation" style="display:none">
+		<h4>Cancelling a Reservation</h4>
+		As soon as you know your reservation will go unused, cancel it. If you are off campus, alert the user office so they can cancel it for you.
+		<p>
+			<button type="button" class="btn btn-success" onclick="$('#cancelling_a_reservation').hide(); $('#enforcement').show(); window.scrollTo(0,0);">Got it</button>
+	</div>
+
+	<div id="enforcement" style="display:none">
+		<h4>Enforcement</h4>
+		Reservation and usage patterns are continuously monitored by NEMO and the staff. Monthly metrics are tracked and reviewed. If reservation abuse is suspected the user will be contacted by NanoFab management. Specific enforcement actions are based on many factors and is at the sole discretion of the NanoFab management.
+		<p>
+			<button type="button" class="btn btn-success" style="white-space: normal" onclick="$('#enforcement').hide(); $('#conclusion').show(); window.scrollTo(0,0);">Let's hope it doesn't come to that</button>
+	</div>
+
+	<div id="conclusion" style="display:none">
+		Ultimately, the staff want to make your NanoFab experience as productive and fun as possible. We hope these rules will make everyone's life better.<br>
+		<p>
+			<button type="submit" style="white-space: normal" class="btn btn-success">Click here to officially complete your training</button>
+	</div>
+
+</form>
+
+<script>
+	function select_answer_important_considerations(id)
+	{
+		$('#wrong_consideration_1').hide();
+		$('#wrong_consideration_2').hide();
+		$('#wrong_consideration_3').hide();
+		$('#correct_consideration').hide();
+		$(id).show();
+	}
+
+	function check_abuse_answers()
+	{
+		if(
+				$('#abuse_checkbox_1').is(":checked") && !$('#abuse_checkbox_2').is(":checked") && !$('#abuse_checkbox_3').is(":checked") &&
+				$('#abuse_checkbox_4').is(":checked") &&
+				$('#abuse_checkbox_5').is(":checked") && !$('#abuse_checkbox_6').is(":checked") &&
+				$('#abuse_checkbox_7').is(":checked")
+		)
+			$('#abuse_continue').show();
+		else
+			$('#abuse_continue').hide();
+	}
+
+	function check_lateness()
+	{
+		$('#higher').hide();
+		$('#lower').hide();
+		$('#lateness_continue').hide();
+		var lateness = $("#lateness").val();
+		if(lateness === 30)
+			$('#lateness_continue').show();
+		else if(lateness === 3 || lateness === '')
+		{
+			{# Don't display anything #}
+		}
+		else
+		{
+			if(lateness < 30)
+				$('#higher').show();
+			if(lateness > 30)
+				$('#lower').show();
+		}
+	}
+</script>

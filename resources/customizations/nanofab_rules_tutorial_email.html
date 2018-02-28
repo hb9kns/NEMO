@@ -1,0 +1,35 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="font-family: 'Avenir Next', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'">
+<!--[if mso]><table width="600" align="center"><tr><td><![endif]-->
+<table align="center" style="width:100%; max-width:600px">
+	<tr>
+		<td align="center" style="color: white; background: {% if making_reservations_rule_summary %}#5bc0de{% else %}#d9534f{% endif %}; margin: 0; padding: 50px 0;" bgcolor="{% if making_reservations_rule_summary %}#5bc0de{% else %}#d9534f{% endif %}">
+			<h1 style="max-width: 90%; margin: 0 auto; padding: 0;">
+				NANOFAB RULES TUTORIAL
+			</h1>
+		</td>
+	</tr>
+	<tr>
+		<td style="margin: 10px 10px 20px; padding: 10px;">
+			{% if making_reservations_rule_summary %}
+				<p>
+					{{ user }} just completed the NanoFab rules tutorial. The following is how they described the general theme of these rules for making reservations and the most important concepts to remember:
+				</p>
+				<div style="border-left: 5px solid #5bc0de; padding-left: 7px; font-style: italic">
+					{{ making_reservations_rule_summary|linebreaksbr }}
+				</div>
+			{% else %}
+				<p>
+					{{ user }} just completed the NanoFab rules tutorial, but did not enter any information regarding rules for making reservations and the most important concepts to remember.
+				</p>
+			{% endif %}
+		</td>
+	</tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</body>
+</html>
