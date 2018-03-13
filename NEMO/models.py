@@ -295,10 +295,10 @@ class Tool(models.Model):
 			return None
 
 	def scheduled_outage(self):
-			try:
-				return ScheduledOutage.objects.get(tool=self.id, start__lte=timezone.now(), end__gt=timezone.now())
-			except ScheduledOutage.DoesNotExist:
-				return None
+		try:
+			return ScheduledOutage.objects.get(tool=self.id, start__lte=timezone.now(), end__gt=timezone.now())
+		except ScheduledOutage.DoesNotExist:
+			return None
 			
 	def is_configurable(self):
 		return self.configuration_set.exists()
@@ -1130,4 +1130,4 @@ class ScheduledOutage(models.Model):
 	tool = models.ForeignKey(Tool)
 	
 	def __str__(self):
-			return str(self.title)
+		return str(self.title)
