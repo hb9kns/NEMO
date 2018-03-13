@@ -86,10 +86,12 @@ class ToolTreeHelper:
 		"""
 		Recursively dive through the tree structure and convert it to unordered HTML lists.
 		Each node is output as an HTML list item. If the node has children then those are also output.
+		A checkbox has been added to each leaf for a multitool calendar view
 		"""
 		result += '<li>'
 		if node.__is_leaf():
-			result += f'<a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a>'
+			result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck"></span>'
+			result += f'<span><a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a></span>'
 		if not node.__is_leaf():
 			result += f'<label class="tree-toggler nav-header"><div>{node.name}</div></label><ul class="nav nav-list tree" data-category="{node.name}">'
 			for child in node.children:
