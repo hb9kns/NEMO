@@ -1126,6 +1126,7 @@ class ScheduledOutage(models.Model):
 	end = models.DateTimeField()
 	creator = models.ForeignKey(User)
 	title = models.CharField(max_length=100)
+	details = models.TextField(blank=True)
 	tool = models.ForeignKey(Tool)
 	
 	def __str__(self):
