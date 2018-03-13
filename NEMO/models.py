@@ -2,6 +2,7 @@ import datetime
 import socket
 import struct
 from datetime import timedelta
+from pymodbus3.client.sync import ModbusTcpClient
 
 from django.conf import settings
 from django.contrib import auth
@@ -270,7 +271,7 @@ class Tool(models.Model):
 		required_resources_available = not self.unavailable_required_resources().exists()
 		nonrequired_resources_available = not self.unavailable_nonrequired_resources().exists()
 		if required_resources_available and nonrequired_resources_available:
-			return True
+				return True
 		return False
 
 	def unavailable_required_resources(self):
@@ -294,11 +295,11 @@ class Tool(models.Model):
 			return None
 
 	def scheduled_outage(self):
-		try:
-			return ScheduledOutage.objects.get(tool=self.id, start__lte=timezone.now(), end__gt=timezone.now())
-		except ScheduledOutage.DoesNotExist:
-			return None
-
+			try:
+				return ScheduledOutage.objects.get(tool=self.id, start__lte=timezone.now(), end__gt=timezone.now())
+			except ScheduledOutage.DoesNotExist:
+				return None
+			
 	def is_configurable(self):
 		return self.configuration_set.exists()
 	is_configurable.admin_order_field = 'configuration'
@@ -504,8 +505,6 @@ def pre_delete_entity(sender, instance, using, **kwargs):
 	ActivityHistory.objects.filter(object_id=instance.id, content_type=content_type).delete()
 	MembershipHistory.objects.filter(parent_object_id=instance.id, parent_content_type=content_type).delete()
 	MembershipHistory.objects.filter(child_object_id=instance.id, child_content_type=content_type).delete()
-
-
 # Call the function "pre_delete_entity" every time an account, project, tool, or user is deleted:
 pre_delete.connect(pre_delete_entity, sender=Account)
 pre_delete.connect(pre_delete_entity, sender=Project)
@@ -623,7 +622,7 @@ class Interlock(models.Model):
 		UNKNOWN = -1
 		# The numeric command types for the interlock hardware:
 		UNLOCKED = 1
-		LOCKED = 2
+		LOCKED = 0
 		Choices = (
 			(UNKNOWN, 'Unknown'),
 			(UNLOCKED, 'Unlocked'),  # The 'unlocked' and 'locked' constants match the hardware command types to control the interlocks.
@@ -656,42 +655,47 @@ class Interlock(models.Model):
 		# '18s' means that the message ends with a 18 character string.
 		# More information on Python structs can be found at:
 		# http://docs.python.org/library/struct.html
-		command_schema = struct.Struct('!20siiiiiiiiibbbbb18s')
-		command_message = command_schema.pack(
-			b'EQCNTL_BEGIN_COMMAND',
-			1,  # Instruction count
-			self.card.number,
-			self.card.even_port,
-			self.card.odd_port,
-			self.channel,
-			0,  # Command return value
-			command_type,  # Type
-			0,  # Command
-			0,  # Delay
-			0,  # SD overload
-			0,  # RD overload
-			0,  # ADC done
-			0,  # Busy
-			0,  # Instruction return value
-			b'EQCNTL_END_COMMAND'
-		)
-
-		reply_message = ""
+# 		command_schema = struct.Struct('!20siiiiiiiiibbbbb18s')
+# 		command_message = command_schema.pack(
+# 			b'EQCNTL_BEGIN_COMMAND',
+# 			1,  # Instruction count
+# 			self.card.number,
+# 			self.card.even_port,
+# 			self.card.odd_port,
+# 			self.channel,
+# 			0,  # Command return value
+# 			command_type,  # Type
+# 			0,  # Command
+# 			0,  # Delay
+# 			0,  # SD overload
+# 			0,  # RD overload
+# 			0,  # ADC done
+# 			0,  # Busy
+# 			0,  # Instruction return value
+# 			b'EQCNTL_END_COMMAND'
+# 		)
+# 
+# 		reply_message = ""
 
 		# Create a TCP socket to send the interlock command.
-		sock = socket.socket()
+# 		sock = socket.socket()
 		try:
-			sock.settimeout(3.0)  # Set the send/receive timeout to be 3 seconds.
-			server_address = (self.card.server, self.card.port)
-			sock.connect(server_address)
-			sock.send(command_message)
-			# The reply schema is the same as the command schema except there are no start and end strings.
-			reply_schema = struct.Struct('!iiiiiiiiibbbbb')
-			reply = sock.recv(reply_schema.size)
-			reply = reply_schema.unpack(reply)
+# 			sock.settimeout(3.0)  # Set the send/receive timeout to be 3 seconds.
+# 			server_address = (self.card.server, self.card.port)
+# 			sock.connect(server_address)
+# 			sock.send(command_message)
+# 			# The reply schema is the same as the command schema except there are no start and end strings.
+# 			reply_schema = struct.Struct('!iiiiiiiiibbbbb')
+# 			reply = sock.recv(reply_schema.size)
+# 			reply = reply_schema.unpack(reply)
+
+			client = ModbusTcpClient(self.card.server)
+			client.connect()
+			client.write_coil(self.channel, command_type, unit=1)
+			reply = client.read_coils(self.channel, 1, unit=1)
 
 			# Update the state of the interlock in the database if the command succeeded.
-			if reply[5]:
+			if reply.bits[0] == command_type:
 				self.state = command_type
 			else:
 				self.state = self.State.UNKNOWN
@@ -705,24 +709,24 @@ class Interlock(models.Model):
 			else:
 				reply_message += "Unknown"
 			reply_message += " command "
-			if reply[5]:  # Index 5 of the reply is the return value of the whole command.
+			if reply.bits[0] == command_type:  # Index 5 of the reply is the return value of the whole command.
 				reply_message += "succeeded."
 			else:
-				reply_message += "failed. Response information: " +\
-								"Instruction count = " + str(reply[0]) + ", " +\
-								"card number = " + str(reply[1]) + ", " +\
-								"even port = " + str(reply[2]) + ", " +\
-								"odd port = " + str(reply[3]) + ", " +\
-								"channel = " + str(reply[4]) + ", " +\
-								"command return value = " + str(reply[5]) + ", " +\
-								"instruction type = " + str(reply[6]) + ", " +\
-								"instruction = " + str(reply[7]) + ", " +\
-								"delay = " + str(reply[8]) + ", " +\
-								"SD overload = " + str(reply[9]) + ", " +\
-								"RD overload = " + str(reply[10]) + ", " +\
-								"ADC done = " + str(reply[11]) + ", " +\
-								"busy = " + str(reply[12]) + ", " +\
-								"instruction return value = " + str(reply[13]) + "."
+				reply_message += "failed. Response information: " #+\
+# 								"Instruction count = " + str(reply[0]) + ", " +\
+# 								"card number = " + str(reply[1]) + ", " +\
+# 								"even port = " + str(reply[2]) + ", " +\
+# 								"odd port = " + str(reply[3]) + ", " +\
+# 								"channel = " + str(reply[4]) + ", " +\
+# 								"command return value = " + str(reply[5]) + ", " +\
+# 								"instruction type = " + str(reply[6]) + ", " +\
+# 								"instruction = " + str(reply[7]) + ", " +\
+# 								"delay = " + str(reply[8]) + ", " +\
+# 								"SD overload = " + str(reply[9]) + ", " +\
+# 								"RD overload = " + str(reply[10]) + ", " +\
+# 								"ADC done = " + str(reply[11]) + ", " +\
+# 								"busy = " + str(reply[12]) + ", " +\
+# 								"instruction return value = " + str(reply[13]) + "."
 
 		# Log any errors that occurred during the operation into the database.
 		except OSError as error:
@@ -738,7 +742,7 @@ class Interlock(models.Model):
 			reply_message = "General exception. " + str(error)
 			self.state = self.State.UNKNOWN
 		finally:
-			sock.close()
+			client.close()
 			self.most_recent_reply = reply_message
 			self.save()
 			# If the command type equals the current state then the command worked which will return true:
@@ -957,18 +961,18 @@ class Door(models.Model):
 		return reverse('welcome_screen', args=[self.id])
 	get_absolute_url.short_description = 'URL'
 
-
+#Changed restricted access level from 7-midnight to 9-5. David Barth, Jan 2018
 class PhysicalAccessLevel(models.Model):
 	name = models.CharField(max_length=100)
 	area = models.ForeignKey(Area)
 
 	class Schedule(object):
 		ALWAYS = 0
-		WEEKDAYS_7AM_TO_MIDNIGHT = 1
+		WEEKDAYS_9AM_TO_5PM = 1
 		WEEKENDS = 2
 		Choices = (
 			(ALWAYS, "Always"),
-			(WEEKDAYS_7AM_TO_MIDNIGHT, "Weekdays, 7am to midnight"),
+			(WEEKDAYS_9AM_TO_5PM, "Weekdays, 9am to 5pm"),
 			(WEEKENDS, "Weekends"),
 		)
 	schedule = models.IntegerField(choices=Schedule.Choices)
@@ -979,13 +983,13 @@ class PhysicalAccessLevel(models.Model):
 		sunday = 7
 		if self.schedule == self.Schedule.ALWAYS:
 			return True
-		elif self.schedule == self.Schedule.WEEKDAYS_7AM_TO_MIDNIGHT:
+		elif self.schedule == self.Schedule.WEEKDAYS_9AM_TO_5PM:
 			if now.isoweekday() == saturday or now.isoweekday() == sunday:
 				return False
-			seven_am = datetime.time(hour=7, tzinfo=timezone.get_current_timezone())
-			midnight = datetime.time(hour=23, minute=59, second=59, tzinfo=timezone.get_current_timezone())
+			nine_am = datetime.time(hour=9, tzinfo=timezone.get_current_timezone())
+			five_pm = datetime.time(hour=17, tzinfo=timezone.get_current_timezone())
 			current_time = now.time()
-			if seven_am < current_time < midnight:
+			if nine_am < current_time < five_pm:
 				return True
 		elif self.schedule == self.Schedule.WEEKENDS:
 			if now.isoweekday() == saturday or now.isoweekday() == sunday:
@@ -1116,8 +1120,7 @@ class Customization(models.Model):
 
 	def __str__(self):
 		return str(self.name)
-
-
+	
 class ScheduledOutage(models.Model):
 	start = models.DateTimeField()
 	end = models.DateTimeField()
@@ -1125,6 +1128,6 @@ class ScheduledOutage(models.Model):
 	title = models.CharField(max_length=100)
 	details = models.TextField(blank=True)
 	tool = models.ForeignKey(Tool)
-
+	
 	def __str__(self):
-		return str(self.title)
+			return str(self.title)
