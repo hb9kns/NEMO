@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.static import serve
 from rest_framework import routers
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
 
 from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users
 
@@ -23,6 +25,14 @@ urlpatterns = [
 	# Authentication & error pages:
 	url(r'^login/$', authentication.login_user, name='login'),
 	url(r'^logout/$', authentication.logout_user, name='logout'),
+	
+	url(
+		r'^favicon.ico$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('favicon.ico'),
+			permanent=False),
+		name="favicon"
+	),
 
 	# Root URL defaults to the calendar page on desktop systems, and the mobile homepage for mobile devices:
 	url(r'^$', landing.landing, name='landing'),
