@@ -1,11 +1,12 @@
 from datetime import timedelta
+from copy import deepcopy
 
 from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import Template, Context
 from django.utils import timezone
 
-from NEMO.models import Reservation, AreaAccessRecord, ScheduledOutage
+from NEMO.models import Reservation, AreaAccessRecord, ScheduledOutage, Tool
 from NEMO.utilities import format_datetime
 from NEMO.views.customization import get_customization, get_media_file_contents
 
@@ -78,6 +79,26 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 	# Users may not enable a tool during a scheduled outage. Staff are exempt from this rule.
 	if tool.scheduled_outage() and not operator.is_staff:
 		return HttpResponseBadRequest("Scheduled outage is in effect.")
+
+	#Refuses login on configurable tools if there is no reservation
+	if tool.is_configurable() and not operator.is_staff:
+		td=timedelta(minutes=15)
+		try:
+			current_reservation = Reservation.objects.get(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=user, tool=tool)
+			# Resize the user's reservation to the current time. This is necessary because otherwise, if they log in and log out before the official start of their reservation, it will not be shortened
+			new_reservation = deepcopy(current_reservation)
+			new_reservation.id = None
+			new_reservation.pk = None
+			now=timezone.now()
+			new_reservation.start=now
+			new_reservation.save()
+			current_reservation.cancelled = True
+			current_reservation.cancellation_time = now
+			current_reservation.cancelled_by = user
+			current_reservation.descendant = new_reservation
+			current_reservation.save()
+		except Reservation.DoesNotExist:
+			return HttpResponseBadRequest("A reservation is required to enable this tool.")
 
 	return HttpResponse()
 
