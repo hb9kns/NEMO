@@ -92,9 +92,30 @@ function update_event_sources()
 		else
 			return;
 	}
+	
+	
+	
+	
 
 	$("#calendar").fullCalendar("addEventSource", tool_event_source);
-
+	if(event_type === 'reservations' || event_type === 'nanofab usage')
+	{
+		if(item !== 'personal_schedule')
+		{
+			checkedTools=$('input:checked');
+			len=Object.keys(checkedTools).length - 4;
+			for (var i = 0; i<len; i++)
+			{
+				if (checkedTools[i].id != item)
+				{
+					tool_event_source.data.tool_id = checkedTools[i].id;
+					$("#calendar").fullCalendar("addEventSource", tool_event_source);
+				}
+			}
+			tool_event_source.data.tool_id = item;
+		}
+	}
+	
 	refresh_sidebar_icons();
 }
 
@@ -356,8 +377,9 @@ function scheduled_outage()
 
 function refresh_calendar_and_sidebar()
 {
-	$("#calendar").fullCalendar('refetchEvents');
+	
 	refresh_sidebar_icons();
+	update_event_sources();
 }
 
 function change_calendar_event_type(calling_element)
