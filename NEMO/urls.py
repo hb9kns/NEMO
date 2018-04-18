@@ -7,7 +7,7 @@ from rest_framework import routers
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users
+from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -25,7 +25,10 @@ urlpatterns = [
 	# Authentication & error pages:
 	url(r'^login/$', authentication.login_user, name='login'),
 	url(r'^logout/$', authentication.logout_user, name='logout'),
-	
+	url(r'^forgot_password/$', forgot_password.forgot_password, name='forgot_password'),
+	url(r'^forgot_password_process/$', forgot_password.forgot_password_process, name='forgot_password_process'),
+	url(r'^password_reset_token/(?P<token>[a-zA-Z0-9]+)/$', forgot_password.password_reset_token, name='password_reset_token'),
+
 	url(
 		r'^favicon.ico$',
 		RedirectView.as_view(
