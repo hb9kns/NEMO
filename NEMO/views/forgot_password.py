@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from NEMO.models import User, ForgotPasswordToken, UserAuth
-from NEMO.views.customization import get_media_file_contents
+from NEMO.views.customization import get_customization, get_media_file_contents
 from django.template import Template, Context
 
 @require_http_methods(['GET'])
@@ -28,7 +28,8 @@ def forgot_password_process(request):
 
 	dictionary = {"link": link}
 	rendered_message = Template(message).render(Context(dictionary))
-	send_mail(subject, '', None, [email], html_message=rendered_message)
+	user_office_email = get_customization('user_office_email_address')
+	send_mail(subject, '', user_office_email, [email], html_message=rendered_message)
 
 	return render(request, 'db_authentication/forgot_password_process.html', {'email': email})
 
@@ -58,4 +59,3 @@ def reset_password_by_token(token: ForgotPasswordToken, password):
 	user_auth.save()
 	token.expired = True
 	token.save()
-

@@ -3,12 +3,13 @@
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth.backends import ModelBackend
 
 from NEMO.models import UserAuth
 
-class DbAuthenticationBackend:
+class DbAuthenticationBackend(ModelBackend):
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, username=None, password=None, **keyword_arguments):
         User = get_user_model()
         try:
             user_auth = UserAuth.objects.get(username=username)
@@ -25,4 +26,3 @@ class DbAuthenticationBackend:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-
