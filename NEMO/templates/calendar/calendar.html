@@ -92,30 +92,35 @@ function update_event_sources()
 		else
 			return;
 	}
-	
-	
-	
-	
 
+	var color_array = ["#8a2be2", "#ffa500", "#20b2aa", "#ff00ff", "#794044", "#0000ff", "#6897bb", "#999999"];
 	$("#calendar").fullCalendar("addEventSource", tool_event_source);
 	if(event_type === 'reservations' || event_type === 'nanofab usage')
 	{
 		if(item !== 'personal_schedule')
 		{
 			checkedTools=$('input:checked');
-			len=Object.keys(checkedTools).length - 4;
+			var len=Object.keys(checkedTools).length - 4;
 			for (var i = 0; i<len; i++)
 			{
 				if (checkedTools[i].id != item)
 				{
-					tool_event_source.data.tool_id = checkedTools[i].id;
-					$("#calendar").fullCalendar("addEventSource", tool_event_source);
+					var tool_event_source_check =
+					{
+						url: "{url 'event_feed' %}",
+						data:
+						{
+							event_type: event_type
+						}
+					};
+					tool_event_source_check.data.tool_id = checkedTools[i].id;
+					tool_event_source_check.color = color_array[i % 8];
+					$("#calendar").fullCalendar("addEventSource", tool_event_source_check);
 				}
 			}
-			tool_event_source.data.tool_id = item;
 		}
 	}
-	
+
 	refresh_sidebar_icons();
 }
 
@@ -377,9 +382,8 @@ function scheduled_outage()
 
 function refresh_calendar_and_sidebar()
 {
-	
+	$("#calender").fullCalendar('refetchEvents');
 	refresh_sidebar_icons();
-	update_event_sources();
 }
 
 function change_calendar_event_type(calling_element)
