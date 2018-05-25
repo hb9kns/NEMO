@@ -85,6 +85,7 @@ function update_event_sources()
 		else if(item)
 			tool_event_source.data.tool_id = item;
 	}
+
 	else if(event_type === 'specific user')
 	{
 		if($("#user_search").typeahead('val'))
@@ -93,8 +94,8 @@ function update_event_sources()
 			return;
 	}
 
-	var color_array = ["#8a2be2", "#ffa500", "#20b2aa", "#ff00ff", "#794044", "#0000ff", "#6897bb", "#999999"];
-	$("#calendar").fullCalendar("addEventSource", tool_event_source);
+	var color_array = ["#8a2be2", "#ffa500", "#006400", "#ff00ff", "#800000", "#0000ff", "#008080", "#999999"];
+	$("#calendar").fullCalendar("addSourceDavid", tool_event_source);
 	if(event_type === 'reservations' || event_type === 'nanofab usage')
 	{
 		if(item !== 'personal_schedule')
@@ -113,15 +114,16 @@ function update_event_sources()
 							event_type: event_type
 						}
 					};
+
 					tool_event_source_check.data.tool_id = checkedTools[i].id;
-					tool_event_source_check.color = color_array[i % 8];
-					$("#calendar").fullCalendar("addEventSource", tool_event_source_check);
+					tool_event_source_check.color = color_array[checkedTools[i].id % 8];
+					$("#calendar").fullCalendar("addSourceDavid", tool_event_source_check);
+
 				}
 			}
 		}
 	}
-
-	refresh_sidebar_icons();
+  refresh_calendar_and_sidebar();
 }
 
 {# This function is a callback for when a reservation is successfully created by the user. #}
@@ -382,7 +384,7 @@ function scheduled_outage()
 
 function refresh_calendar_and_sidebar()
 {
-	$("#calender").fullCalendar('refetchEvents');
+	$("#calendar").fullCalendar('refetchEvents');
 	refresh_sidebar_icons();
 }
 
@@ -457,6 +459,11 @@ function on_load()
 	$('#tool_search').autocomplete('tools', on_tool_search_selection, {{ tools|json_search_base }});
 	$("#tool_search").focus();
 	load_sidebar_state();
+	var temp = document.getElementsByClassName("chk");
+	var i;
+	for (i = 0; i < temp.length; i++) {
+		temp[i].style.visibility = "visible";
+	}
 	$("#tool_tree").show(); {# Tool tree is initially hidden so that previous expand/collapse state of categories is configured before it's visible. #}
 	{% if auto_select_tool %}
 		expand_to_tool({{ auto_select_tool }});
