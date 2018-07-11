@@ -90,7 +90,7 @@ class ToolTreeHelper:
 		"""
 		result += '<li>'
 		if node.__is_leaf():
-			result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck"></span>'
+			result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden"></span>'
 			result += f'<span><a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a></span>'
 		if not node.__is_leaf():
 			result += f'<label class="tree-toggler nav-header"><div>{node.name}</div></label><ul class="nav nav-list tree" data-category="{node.name}">'

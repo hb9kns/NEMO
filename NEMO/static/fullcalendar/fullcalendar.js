@@ -9750,7 +9750,7 @@ function Calendar_constructor(element, overrides) {
 
 
 	function refetchEvents() { // can be called as an API method
-//		destroyEvents(); // <-- Commented out by Dylan Klomparens. Previous versions of FullCalendar did not have this line. It causes the calendar to visually "flash" every time events are refreshed.
+	//	destroyEvents(); // <-- Commented out by Dylan Klomparens. Previous versions of FullCalendar did not have this line. It causes the calendar to visually "flash" every time events are refreshed.
 		fetchAndRenderEvents();
 	}
 
@@ -10575,6 +10575,7 @@ function EventManager(options) { // assumed to be a calendar
 	t.mutateEvent = mutateEvent;
 	t.normalizeEventDates = normalizeEventDates;
 	t.normalizeEventTimes = normalizeEventTimes;
+	t.addSourceDavid = addSourceDavid;
 	
 	
 	// imports
@@ -10784,6 +10785,14 @@ function EventManager(options) { // assumed to be a calendar
 			sources.push(source);
 			pendingSourceCnt++;
 			fetchEventSource(source, currentFetchID); // will eventually call reportEvents
+		}
+	}
+
+    //adds a source without refreshing calendar. Added by David Barth, 2018-05-25
+	function addSourceDavid(sourceInput) {
+        var source = buildEventSource(sourceInput);
+		if (source) {
+			sources.push(source);
 		}
 	}
 
