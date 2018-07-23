@@ -17,9 +17,12 @@ router = routers.DefaultRouter()
 router.register(r'users', api.UserViewSet)
 router.register(r'projects', api.ProjectViewSet)
 router.register(r'accounts', api.AccountViewSet)
+router.register(r'tools', api.ToolViewSet)
 router.register(r'reservations', api.ReservationViewSet)
 router.register(r'usage_events', api.UsageEventViewSet)
 router.register(r'area_access_records', api.AreaAccessRecordViewSet)
+router.register(r'tasks', api.TaskViewSet)
+router.register(r'scheduled_outages', api.ScheduledOutageViewSet)
 
 urlpatterns = [
 	# Authentication & error pages:
@@ -133,7 +136,9 @@ urlpatterns = [
 
 	# Resources:
 	url(r'^resources/$', resources.resources, name='resources'),
-	url(r'^modify_resource/(?P<resource_id>\d+)/$', resources.modify_resource, name='modify_resource'),
+	url(r'^resources/modify/(?P<resource_id>\d+)/$', resources.modify_resource, name='modify_resource'),
+	url(r'^resources/schedule_outage/$', resources.schedule_outage, name='schedule_resource_outage'),
+	url(r'^resources/delete_scheduled_outage/(?P<outage_id>\d+)/$', resources.delete_scheduled_outage, name='delete_scheduled_resource_outage'),
 
 	# Consumables:
 	url(r'^consumables/$', consumables.consumables, name='consumables'),

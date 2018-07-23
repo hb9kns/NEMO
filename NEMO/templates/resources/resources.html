@@ -6,18 +6,23 @@
 		Below is a list of resources, grouped by category. Resources in <span class="success-highlight">green</span> are currently
 		available while resources in <span class="danger-highlight">red</span> are unavailable. Click on a resource to modify its
 		availability and status message. When a resource is unavailable, users are blocked from using tools that fully depend on that
-		resource.
+		resource. You can also <a href="{% url 'schedule_resource_outage' %}">schedule resource outages</a>.
 	</p>
-	{% for category in resource_categories %}
-		<h3>{{ category }}</h3>
-		<div id="resource_list">
-			{% for resource in category.resource_set.all %}
-				<a href="{% url 'modify_resource' resource.id %}" class="{% if resource.available %}success-highlight{% else %}danger-highlight{% endif %}">{{ resource }}</a>
-				{% if not resource.available %}
-					- {{ resource.restriction_message }}
-				{% endif %}
-				<br>
-			{% endfor %}
-		</div>
-	{% endfor %}
+	{% if resources %}
+		{% regroup resources by category as category_list %}
+		{% for category in category_list %}
+			{% if category.grouper %}<h3>{{ category.grouper }}</h3>{% endif %}
+			<div id="resource_list">
+				{% for resource in category.list %}
+					<a href="{% url 'modify_resource' resource.id %}" class="{% if resource.available %}success-highlight{% else %}danger-highlight{% endif %}">{{ resource }}</a>
+					{% if not resource.available %}
+						- {{ resource.restriction_message }}
+					{% endif %}
+					<br>
+				{% endfor %}
+			</div>
+		{% endfor %}
+	{% else %}
+		<h3>No resources exist yet. You can <a href="{% url 'admin:index' %}">create some in the Resources section of 'Detailed Administration'</a>.</h3>
+	{% endif %}
 {% endblock %}

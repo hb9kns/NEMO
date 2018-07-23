@@ -8,7 +8,9 @@ from django.contrib.auth.backends import RemoteUserBackend, ModelBackend
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse, resolve
-from django.views.decorators.http import require_http_methods, require_GET
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_http_methods, require_GET, logger
 from ldap3 import Tls, Server, Connection, AUTO_BIND_TLS_BEFORE_BIND, SIMPLE
 from ldap3.core.exceptions import LDAPBindError, LDAPExceptionError
 
@@ -40,16 +42,16 @@ class NginxKerberosAuthorizationHeaderAuthenticationBackend(ModelBackend):
 		try:
 			user = User.objects.get(username=username)
 		except User.DoesNotExist:
-			return None
-
-		if not user:
+			logger.warning(f"Username {username} attempted to authenticate with Kerberos via Nginx, but that username does not exist in the NEMO database. The user was denied access.")
 			return None
 
 		# The user must be marked active.
 		if not user.is_active:
+			logger.warning(f"User {username} successfully authenticated with Kerberos via Nginx, but that user is marked inactive in the NEMO database. The user was denied access.")
 			return None
 
 		# All security checks passed so let the user in.
+		logger.debug(f"User {username} successfully authenticated with Kerberos via Nginx and was granted access to NEMO.")
 		return user
 
 	def clean_username(self, username):
@@ -69,6 +71,8 @@ class NginxKerberosAuthorizationHeaderAuthenticationBackend(ModelBackend):
 
 class LDAPAuthenticationBackend(ModelBackend):
 	""" This class provides LDAP authentication against an LDAP or Active Directory server. """
+
+	@method_decorator(sensitive_post_parameters('password'))
 	def authenticate(self, request, username=None, password=None, **keyword_arguments):
 		if not username or not password:
 			return None
@@ -77,10 +81,12 @@ class LDAPAuthenticationBackend(ModelBackend):
 		try:
 			user = User.objects.get(username=username)
 		except User.DoesNotExist:
+			logger.warning(f"Username {username} attempted to authenticate with LDAP, but that username does not exist in the NEMO database. The user was denied access.")
 			return None
 
 		# The user must be marked active.
 		if not user.is_active:
+			logger.warning(f"User {username} successfully authenticated with LDAP, but that user is marked inactive in the NEMO database. The user was denied access.")
 			return None
 
 		for server in settings.LDAP_SERVERS:
@@ -92,6 +98,7 @@ class LDAPAuthenticationBackend(ModelBackend):
 				# At this point the user successfully authenticated to at least one LDAP server.
 				return user
 			except LDAPBindError as e:
+				logger.warning(f"User {username} attempted to authenticate with LDAP, but entered an incorrect password. The user was denied access.")
 				pass  # When this error is caught it means the username and password were invalid against the LDAP server.
 			except LDAPExceptionError as e:
 				exception(e)
@@ -101,6 +108,7 @@ class LDAPAuthenticationBackend(ModelBackend):
 
 
 @require_http_methods(['GET', 'POST'])
+@sensitive_post_parameters('password')
 def login_user(request):
 	if 'NEMO.views.authentication.RemoteUserAuthenticationBackend' in settings.AUTHENTICATION_BACKENDS or 'NEMO.views.authentication.NginxKerberosAuthorizationHeaderAuthenticationBackend' in settings.AUTHENTICATION_BACKENDS:
 		if request.user.is_authenticated:

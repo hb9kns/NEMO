@@ -5,6 +5,7 @@ from re import match
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template import Template, Context
@@ -12,7 +13,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.decorators import disable_session_expiry_refresh
-from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, ScheduledOutage
+from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, ScheduledOutage, ScheduledOutageCategory
 from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string
 from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
@@ -87,7 +88,7 @@ def reservation_event_feed(request, start, end):
 	if tool:
 		events = events.filter(tool__id=tool)
 
-		outages = ScheduledOutage.objects.filter(tool=tool)
+		outages = ScheduledOutage.objects.filter(Q(tool=tool) | Q(resource__fully_dependent_tools__in=[tool]))
 		outages = outages.exclude(start__lt=start, end__lt=start)
 		outages = outages.exclude(start__gt=end, end__gt=end)
 
@@ -294,6 +295,7 @@ def create_outage(request):
 	# Create the new reservation:
 	outage = ScheduledOutage()
 	outage.creator = request.user
+	outage.category = request.POST.get('category', '')[:200]
 	outage.tool = tool
 	outage.start = start
 	outage.end = end
@@ -305,7 +307,8 @@ def create_outage(request):
 
 	# Make sure there is at least an outage title
 	if not request.POST.get('title'):
-		return render(request, 'calendar/scheduled_outage_information.html')
+		dictionary = {'categories': ScheduledOutageCategory.objects.all()}
+		return render(request, 'calendar/scheduled_outage_information.html', dictionary)
 
 	outage.title = request.POST['title']
 	outage.details = request.POST.get('details', '')
@@ -481,11 +484,11 @@ def cancel_reservation(request, reservation_id):
 @require_POST
 def cancel_outage(request, outage_id):
 	outage = get_object_or_404(ScheduledOutage, id=outage_id)
-	dictionary = {'event_type': 'Scheduled outage', 'tool': outage.tool}
 	outage.delete()
 	if request.device == 'desktop':
 		return HttpResponse()
 	if request.device == 'mobile':
+		dictionary = {'event_type': 'Scheduled outage', 'tool': outage.tool}
 		return render(request, 'mobile/cancellation_result.html', dictionary)
 
 
@@ -625,7 +628,7 @@ def cancel_unused_reservations(request):
 	missed_reservations = []
 	for tool in tools:
 		# If a tool is in use then there's no need to look for unused reservation time.
-		if tool.in_use() or tool.required_resource_is_unavailable():
+		if tool.in_use() or tool.required_resource_is_unavailable() or tool.scheduled_outage_in_progress():
 			continue
 		# Calculate the timestamp of how long a user can be late for a reservation.
 		threshold = (timezone.now() - timedelta(minutes=tool.missed_reservation_threshold))
