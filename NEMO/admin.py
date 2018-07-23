@@ -146,7 +146,7 @@ class ToolAdmin(admin.ModelAdmin):
 	list_filter = ('visible', 'operational', 'category')
 	form = ToolAdminForm
 	fieldsets = (
-		(None, {'fields': ('name', 'category', 'qualified_users'),}),
+		(None, {'fields': ('name', 'category', 'qualified_users', 'post_usage_questions'),}),
 		('Current state', {'fields': ('visible', 'operational'),}),
 		('Contact information', {'fields': ('primary_owner', 'secondary_owner', 'notification_email_address', 'location', 'phone_number'),}),
 		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'interlock', 'allow_delayed_logoff'),}),
@@ -281,7 +281,8 @@ class UsageEventAdmin(admin.ModelAdmin):
 
 @register(Consumable)
 class ConsumableAdmin(admin.ModelAdmin):
-	list_display = ('name', 'quantity', 'category', 'reminder_threshold', 'reminder_email')
+	list_display = ('name', 'quantity', 'category', 'visible', 'reminder_threshold', 'reminder_email')
+	list_filter = ('visible', 'category')
 
 
 @register(ConsumableCategory)
