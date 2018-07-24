@@ -1,6 +1,8 @@
-FROM python:3
+FROM python:3.6
 
 COPY . /nemo/
+
+RUN pip install -U pymodbus3
 RUN pip install /nemo/
 RUN rm --recursive --force /nemo
 

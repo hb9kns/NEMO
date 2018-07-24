@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.views.decorators.http import logger, require_GET, require_POST
 
 from NEMO.forms import nice_errors, CommentForm
-from NEMO.models import Tool, Project, UsageEvent, Task, Configuration, TaskCategory, ConfigurationHistory, Comment, User, StaffCharge, Reservation
+from NEMO.models import Comment, Configuration, ConfigurationHistory, Project, Reservation, StaffCharge, Task, TaskCategory, TaskStatus, Tool, UsageEvent, User
 from NEMO.utilities import quiet_int, extract_times
 from NEMO.views.policy import check_policy_to_enable_tool, check_policy_to_disable_tool
 from NEMO.widgets.tool_tree import ToolTree

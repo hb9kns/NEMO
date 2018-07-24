@@ -31,6 +31,8 @@ INSTALLED_APPS = [
 	'django_filters',
 ]
 
+ALLOWED_HOSTS = ['*']
+
 MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',
 	'django.middleware.common.CommonMiddleware',

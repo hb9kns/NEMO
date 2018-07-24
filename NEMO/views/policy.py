@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from datetime import timedelta
 from copy import deepcopy
 
@@ -342,7 +341,6 @@ def check_policy_to_create_outage(outage):
 
 	# No policy issues! The outage can be created...
 	return None
-=======
 from datetime import timedelta
 
 from django.core.mail import send_mail
@@ -654,4 +652,3 @@ def check_policy_to_create_outage(outage):
 
 	# No policy issues! The outage can be created...
 	return None
->>>>>>> upstream/master
