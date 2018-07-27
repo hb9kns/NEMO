@@ -1009,14 +1009,15 @@ class Door(models.Model):
 class PhysicalAccessLevel(models.Model):
 	name = models.CharField(max_length=100)
 	area = models.ForeignKey(Area)
-
+	hours_start = models.PositiveIntegerField(default=8, help_text="Time in 24 hour format of start of access, for restricted access type")
+	hours_end = models.PositiveIntegerField(default=20, help_text="Time in 24 hour format of end of access, for restricted access type")
 	class Schedule(object):
 		ALWAYS = 0
-		WEEKDAYS_7AM_TO_MIDNIGHT = 1
+		WEEKDAYS_RESTRICTED = 1
 		WEEKENDS = 2
 		Choices = (
 			(ALWAYS, "Always"),
-			(WEEKDAYS_7AM_TO_MIDNIGHT, "Weekdays, 7am to midnight"),
+			(WEEKDAYS_RESTRICTED, "Weekday Restricted Hours"),
 			(WEEKENDS, "Weekends"),
 		)
 	schedule = models.IntegerField(choices=Schedule.Choices)
@@ -1027,13 +1028,13 @@ class PhysicalAccessLevel(models.Model):
 		sunday = 7
 		if self.schedule == self.Schedule.ALWAYS:
 			return True
-		elif self.schedule == self.Schedule.WEEKDAYS_7AM_TO_MIDNIGHT:
+		elif self.schedule == self.Schedule.WEEKDAYS_RESTRICTED:
 			if now.isoweekday() == saturday or now.isoweekday() == sunday:
 				return False
-			seven_am = datetime.time(hour=7, tzinfo=timezone.get_current_timezone())
-			midnight = datetime.time(hour=23, minute=59, second=59, tzinfo=timezone.get_current_timezone())
+			start_time = datetime.time(hour=self.hours_start, tzinfo=timezone.get_current_timezone())
+			end_time = datetime.time(hour=self.hours_end, tzinfo=timezone.get_current_timezone())
 			current_time = now.time()
-			if seven_am < current_time < midnight:
+			if start_time < current_time < end_time:
 				return True
 		elif self.schedule == self.Schedule.WEEKENDS:
 			if now.isoweekday() == saturday or now.isoweekday() == sunday:
