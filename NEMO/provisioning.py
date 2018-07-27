@@ -259,16 +259,6 @@ def open_firewall_ports():
 	http_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=http'])
 	https_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=https'])
 	reload_result = run(['firewall-cmd', '--reload'])
-from datetime import timedelta, datetime
-from django.template import Template, Context
-from django.utils import timezone
-import kronos
-from NEMO.models import Tool, Reservation, UsageEvent, AreaAccessRecord, StaffCharge
-from NEMO.views.customization import get_customization, get_media_file_contents
-from NEMO.views.calendar import send_missed_reservation_notification
-from NEMO.utilities import format_datetime
-from django.core.mail import send_mail
-
 
 def usage_reminder():
 	print("Test")
