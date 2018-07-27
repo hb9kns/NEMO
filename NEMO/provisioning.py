@@ -16,7 +16,14 @@ from cryptography.x509 import NameAttribute, NameOID, DNSName, CertificateSignin
 from django.utils.crypto import get_random_string
 from ldap3 import Tls, Server, Connection, AUTO_BIND_TLS_BEFORE_BIND, SIMPLE
 from ldap3.core.exceptions import LDAPBindError, LDAPExceptionError
-
+from datetime import timedelta, datetime
+from django.template import Template, Context
+from django.utils import timezone
+from NEMO.models import Tool, Reservation, UsageEvent, AreaAccessRecord, StaffCharge
+from NEMO.views.customization import get_customization, get_media_file_contents
+from NEMO.views.calendar import send_missed_reservation_notification
+from NEMO.utilities import format_datetime
+from django.core.mail import send_mail
 
 def entry_point():
 	request = argv[1] if len(argv) == 2 else None
@@ -34,31 +41,33 @@ def entry_point():
 		uninstall_systemd_service()
 	elif request == 'open_firewall_ports':
 		open_firewall_ports()
+	elif request == 'usage_reminder':
+		usage_reminder()
 	else:
 		usage = \
 				"""
 				You can provision everything NEMO needs to run with these commands...
-				
+
 				generate_secret_key -
 					Prints a randomly generated secret key, used for hashing user sessions,
 					cryptographic signing, and more. More information is available from the Django documentation:
 					https://docs.djangoproject.com/en/1.11/ref/settings/#std:setting-SECRET_KEY
-				
+
 				query_public_key -
 					Opens a TLS connection to another server and prints the public TLS key.
 					This is useful if you want to verify correct TLS configuration,
 					or pin a particular certificate for LDAPS authentication.
-				
+
 				test_ldap_authentication -
 					Opens an encrypted connection (using only TLS 1.2) to an LDAP directory (such as Active Directory)
 					and tests authentication. You will be prompted for the hostname of the authentication server,
 					the domain name, a username, password, and public TLS key.
-				
+
 				generate_tls_keys -
 					Generates an RSA 4096 bit private key and certificate signing request. These can be used
 					to obtain a public key, enabling TLS encryption for your NEMO users. This keeps communication
 					between a user's web browser and the NEMO server secure.
-				
+
 				install_systemd_service -
 					Installs NEMO as a service with Systemd (by creating a file /etc/systemd/system/nemo.service).
 					After running this command you can manipulate NEMO with standard systemctl commands, such as:
@@ -69,10 +78,10 @@ def entry_point():
 					systemctl disable nemo
 					See this tutorial on Systemd for more information:
 					https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units
-				
+
 				uninstall_systemd_service -
 					Uninstalls NEMO as a service with Systemd (by simply deleting /etc/systemd/system/nemo.service).
-				
+
 				open_firewall_ports -
 					Configure the firewall to allow incoming web browser requests.
 					Requests received on port 80 are intended to be redirected to port 443 for improved security.
@@ -250,6 +259,56 @@ def open_firewall_ports():
 	http_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=http'])
 	https_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=https'])
 	reload_result = run(['firewall-cmd', '--reload'])
+from datetime import timedelta, datetime
+from django.template import Template, Context
+from django.utils import timezone
+import kronos
+from NEMO.models import Tool, Reservation, UsageEvent, AreaAccessRecord, StaffCharge
+from NEMO.views.customization import get_customization, get_media_file_contents
+from NEMO.views.calendar import send_missed_reservation_notification
+from NEMO.utilities import format_datetime
+from django.core.mail import send_mail
+
+
+def usage_reminder():
+	print("Test")
+	projects_to_exclude = []
+	busy_users = AreaAccessRecord.objects.filter(end=None, staff_charge=None).exclude(project__id__in=projects_to_exclude)
+	busy_tools = UsageEvent.objects.filter(end=None).exclude(project__id__in=projects_to_exclude)
+	aggregate = {}
+	for access_record in busy_users:
+		key = str(access_record.customer)
+		aggregate[key] = {
+			'email': access_record.customer.email,
+			'first_name': access_record.customer.first_name,
+			'resources_in_use': [str(access_record.area)],
+		}
+	for usage_event in busy_tools:
+		key = str(usage_event.operator)
+		if key in aggregate:
+			aggregate[key]['resources_in_use'].append(usage_event.tool.name)
+		else:
+			aggregate[key] = {
+				'email': usage_event.operator.email,
+				'first_name': usage_event.operator.first_name,
+				'resources_in_use': [usage_event.tool.name],
+			}
+	user_office_email = get_customization('user_office_email_address')
+	message = get_media_file_contents('usage_reminder_email.html')
+	if message:
+		subject = "NanoFab usage"
+		for user in aggregate.values():
+			rendered_message = Template(message).render(Context({'user': user}))
+			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
+		print(rendered_message)
+
+	message = get_media_file_contents('staff_charge_reminder_email.html')
+	if message:
+		busy_staff = StaffCharge.objects.filter(end=None)
+		for staff_charge in busy_staff:
+			subject = "Active staff charge since " + format_datetime(staff_charge.start)
+			rendered_message = Template(message).render(Context({'staff_charge': staff_charge}))
+			staff_charge.staff_member.email_user(subject, rendered_message, user_office_email)
 
 
 if __name__ == "__main__":
