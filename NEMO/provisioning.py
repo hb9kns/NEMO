@@ -19,10 +19,6 @@ from ldap3.core.exceptions import LDAPBindError, LDAPExceptionError
 from datetime import timedelta, datetime
 from django.template import Template, Context
 from django.utils import timezone
-from NEMO.models import Tool, Reservation, UsageEvent, AreaAccessRecord, StaffCharge
-from NEMO.views.customization import get_customization, get_media_file_contents
-from NEMO.views.calendar import send_missed_reservation_notification
-from NEMO.utilities import format_datetime
 from django.core.mail import send_mail
 
 def entry_point():
@@ -259,47 +255,6 @@ def open_firewall_ports():
 	http_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=http'])
 	https_result = run(['firewall-cmd', '--zone=public', '--permanent', '--add-service=https'])
 	reload_result = run(['firewall-cmd', '--reload'])
-
-def usage_reminder():
-	print("Test")
-	projects_to_exclude = []
-	busy_users = AreaAccessRecord.objects.filter(end=None, staff_charge=None).exclude(project__id__in=projects_to_exclude)
-	busy_tools = UsageEvent.objects.filter(end=None).exclude(project__id__in=projects_to_exclude)
-	aggregate = {}
-	for access_record in busy_users:
-		key = str(access_record.customer)
-		aggregate[key] = {
-			'email': access_record.customer.email,
-			'first_name': access_record.customer.first_name,
-			'resources_in_use': [str(access_record.area)],
-		}
-	for usage_event in busy_tools:
-		key = str(usage_event.operator)
-		if key in aggregate:
-			aggregate[key]['resources_in_use'].append(usage_event.tool.name)
-		else:
-			aggregate[key] = {
-				'email': usage_event.operator.email,
-				'first_name': usage_event.operator.first_name,
-				'resources_in_use': [usage_event.tool.name],
-			}
-	user_office_email = get_customization('user_office_email_address')
-	message = get_media_file_contents('usage_reminder_email.html')
-	if message:
-		subject = "NanoFab usage"
-		for user in aggregate.values():
-			rendered_message = Template(message).render(Context({'user': user}))
-			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
-		print(rendered_message)
-
-	message = get_media_file_contents('staff_charge_reminder_email.html')
-	if message:
-		busy_staff = StaffCharge.objects.filter(end=None)
-		for staff_charge in busy_staff:
-			subject = "Active staff charge since " + format_datetime(staff_charge.start)
-			rendered_message = Template(message).render(Context({'staff_charge': staff_charge}))
-			staff_charge.staff_member.email_user(subject, rendered_message, user_office_email)
-
 
 if __name__ == "__main__":
 	entry_point()
