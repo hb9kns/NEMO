@@ -194,12 +194,13 @@ def disable_tool(request, tool_id):
 	tool = get_object_or_404(Tool, id=tool_id)
 	if tool.get_current_usage_event() is None:
 		return HttpResponse()
+	current_usage_event = tool.get_current_usage_event()
 	downtime = timedelta(minutes=quiet_int(request.POST.get('downtime')))
 	response = check_policy_to_disable_tool(tool, request.user, downtime)
 	if response.status_code != HTTPStatus.OK:
 		return response
 	try:
-		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=request.user, tool=tool)
+		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=current_usage_event.user, tool=tool)
 		# Staff are exempt from mandatory reservation shortening when tool usage is complete.
 		if request.user.is_staff is False:
 			# Shorten the user's reservation to the current time because they're done using the tool.
@@ -221,7 +222,6 @@ def disable_tool(request, tool_id):
 		return HttpResponseServerError(error_message)
 
 	# End the current usage event for the tool
-	current_usage_event = tool.get_current_usage_event()
 	current_usage_event.end = timezone.now() + downtime
 
 	# Collect post-usage questions

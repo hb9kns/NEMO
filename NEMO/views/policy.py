@@ -84,7 +84,7 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 	if tool.is_configurable() and not operator.is_staff:
 		td=timedelta(minutes=15)
 		try:
-			current_reservation = Reservation.objects.get(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=user, tool=tool)
+			current_reservation = Reservation.objects.get(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
 			# Resize the user's reservation to the current time. This is necessary because otherwise, if they log in and log out before the official start of their reservation, it will not be shortened
 			new_reservation = deepcopy(current_reservation)
 			new_reservation.id = None
@@ -106,8 +106,13 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 def check_policy_to_disable_tool(tool, operator, downtime):
 	""" Check that the user is allowed to disable the tool. """
 	current_usage_event = tool.get_current_usage_event()
-	if current_usage_event.operator != operator and current_usage_event.user != operator and not operator.is_staff:
-		return HttpResponseBadRequest('You may not disable a tool while another user is using it unless you are a staff member.')
+	try:
+		current_reservation = Reservation.objects.get(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
+		allow_logoff_force = true
+	except Reservation.DoesNotExist:
+		allow_logoff_force = false
+	if current_usage_event.operator != operator and current_usage_event.user != operator and not operator.is_staff and not allow_logoff_force:
+		return HttpResponseBadRequest('You may not disable a tool while another user is using it unless you have a reservation at this time.')
 	if downtime < timedelta():
 		return HttpResponseBadRequest('Downtime cannot be negative.')
 	if downtime > timedelta(minutes=120):
