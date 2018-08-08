@@ -29,6 +29,8 @@ INSTALLED_APPS = [
 	'NEMO',
 	'rest_framework',
 	'django_filters',
+	'kronos',
+	'pymodbus3',
 ]
 
 ALLOWED_HOSTS = ['*']
