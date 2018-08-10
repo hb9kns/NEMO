@@ -4,11 +4,12 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.backends import ModelBackend
+from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 from NEMO.models import UserAuth
 
 class DbAuthenticationBackend(ModelBackend):
-    
+
     @method_decorator(sensitive_post_parameters('password'))
     def authenticate(self, username=None, password=None, **keyword_arguments):
         User = get_user_model()

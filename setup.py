@@ -36,7 +36,6 @@ setup(
 		'django-kronos==1.0'
 	],
 	entry_points={
-		'console_scripts': ['nemo=NEMO.provisioning:entry_point',
-		'manage.py = NEMO:manage'],
+		'console_scripts': ['nemo=NEMO.provisioning:entry_point'],
 	},
 )

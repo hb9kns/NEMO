@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 	'pymodbus3',
 ]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.99.100']
 
 MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',
@@ -81,9 +81,6 @@ ADMINS = [
 ]
 MANAGERS = ADMINS
 
-EMAIL_HOST = 'mail.example.org'
-EMAIL_PORT = 25
-
 TIME_ZONE = 'America/New_York'
 
 DATABASES = {
@@ -100,7 +97,7 @@ MEDIA_URL = '/media/'
 SECRET_KEY = 'abc123'
 
 ALLOW_CONDITIONAL_URLS = True
-AUTHENTICATION_BACKENDS = ['NEMO.views.authentication.RemoteUserAuthenticationBackend']
+AUTHENTICATION_BACKENDS = ['NEMO.views.fake_authentication.AllowAnyPasswordBackend']
 
 IDENTITY_SERVICE = {
 	'available': False,
