@@ -109,6 +109,7 @@ def check_policy_to_disable_tool(tool, operator, downtime):
 	try:
 		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
 		allow_logoff_force = true
+		print(allow_logoff_force)
 	except Reservation.DoesNotExist:
 		allow_logoff_force = false
 	if current_usage_event.operator != operator and current_usage_event.user != operator and not operator.is_staff and not allow_logoff_force:
