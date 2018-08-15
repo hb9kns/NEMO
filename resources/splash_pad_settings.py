@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 	'pymodbus3',
 ]
 
-ALLOWED_HOSTS = ['192.168.99.100']
+ALLOWED_HOSTS = ['*']
 
 MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',

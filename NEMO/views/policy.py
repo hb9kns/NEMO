@@ -108,9 +108,9 @@ def check_policy_to_disable_tool(tool, operator, downtime):
 	current_usage_event = tool.get_current_usage_event()
 	try:
 		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
-		allow_logoff_force = true
+		allow_logoff_force = True
 	except Reservation.DoesNotExist:
-		allow_logoff_force = false
+		allow_logoff_force = False
 	if current_usage_event.operator != operator and current_usage_event.user != operator and not operator.is_staff and not allow_logoff_force:
 		return HttpResponseBadRequest('You may not disable a tool while another user is using it unless you have a reservation at this time.')
 	if downtime < timedelta():
