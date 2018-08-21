@@ -507,31 +507,53 @@ def set_reservation_title(request, reservation_id):
 @require_GET
 def email_reservation_reminders(request):
 	# Exit early if the reservation reminder email template has not been customized for the organization yet.
-	reservation_reminder_message = get_media_file_contents('reservation_reminder_email.html')
-	reservation_warning_message = get_media_file_contents('reservation_warning_email.html')
-	if not reservation_reminder_message or not reservation_warning_message:
+	good_message = get_media_file_contents('reservation_reminder_email.html')
+	problem_message = get_media_file_contents('reservation_warning_email.html')
+	if not good_message or not problem_message:
 		return HttpResponseNotFound('The reservation reminder email template has not been customized for your organization yet. Please visit the NEMO customizable_key_values page to upload a template, then reservation reminder email notifications can be sent.')
 
-	# Find all reservations that are two hours from now, plus or minus 5 minutes to allow for time skew.
-	preparation_time = 120
-	tolerance = 5
-	earliest_start = timezone.now() + timedelta(minutes=preparation_time) - timedelta(minutes=tolerance)
-	latest_start = timezone.now() + timedelta(minutes=preparation_time) + timedelta(minutes=tolerance)
+	# Find all reservations in the next day
+	#preparation_time = 120  These were sending an email for each reservation 2 hrs in advance. I'm not using them
+	#tolerance = 5
+	earliest_start = timezone.now()
+	latest_start = timezone.now() + timedelta(hours=24)
 	upcoming_reservations = Reservation.objects.filter(cancelled=False, start__gt=earliest_start, start__lt=latest_start)
 	# Email a reminder to each user with an upcoming reservation.
+	goodAggregate = {}
+	problemAggregate = {}
 	for reservation in upcoming_reservations:
-		tool = reservation.tool
-		if tool.operational and not tool.problematic() and tool.all_resources_available():
-			subject = reservation.tool.name + " reservation reminder"
-			rendered_message = Template(reservation_reminder_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('success')}))
-		elif not tool.operational or tool.required_resource_is_unavailable():
-			subject = reservation.tool.name + " reservation problem"
-			rendered_message = Template(reservation_warning_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('danger'), 'fatal_error': True}))
+		key = str(reservation.user)
+		if reservation.tool.operational and not reservation.tool.problematic() and reservation.tool.all_resources_available():
+			if key in goodAggregate:
+				goodAggregate[key]['Tools'].append(reservation.tool.name + " starting " + format_datetime(reservation.start))
+			else:
+				goodAggregate[key] = {
+					'email': reservation.user.email,
+					'first_name': reservation.user.first_name,
+					'Tools': [reservation.tool.name + " starting " + format_datetime(reservation.start)],
+				}
 		else:
-			subject = reservation.tool.name + " reservation warning"
-			rendered_message = Template(reservation_warning_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('warning'), 'fatal_error': False}))
-		user_office_email = get_customization('user_office_email_address')
-		reservation.user.email_user(subject, rendered_message, user_office_email)
+			if key in problemAggregate:
+				problemAggregate[key]['Tools'].append(reservation.tool.name + " starting " + format_datetime(reservation.start))
+			else:
+				problemAggregate[key] = {
+					'email': reservation.user.email,
+					'first_name': reservation.user.first_name,
+					'Tools': [reservation.tool.name + " starting " + format_datetime(reservation.start)],
+				}
+	user_office_email = get_customization('user_office_email_address')
+	if good_message:
+		subject = "Upcoming PRISM Cleanroom Reservations"
+		for user in goodAggregate.values():
+			rendered_message = Template(good_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('success')}))
+			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
+
+	if problem_message:
+		subject = "Problem With Upcoming PRISM Cleanroom Reservations"
+		for user in problemAggregate.values():
+			rendered_message = Template(problem_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('danger')}))
+			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
+
 	return HttpResponse()
 
 
@@ -569,7 +591,7 @@ def email_usage_reminders(request):
 
 	message = get_media_file_contents('usage_reminder_email.html')
 	if message:
-		subject = "NanoFab usage"
+		subject = "PRISM Cleanroom usage"
 		for user in aggregate.values():
 			rendered_message = Template(message).render(Context({'user': user}))
 			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
