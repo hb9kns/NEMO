@@ -33,7 +33,6 @@ setup(
 		'requests==2.19.1',
 		'Pillow==5.2.0',
 		'pymodbus3==1.0.0',
-		'django-kronos==1.0'
 	],
 	entry_points={
 		'console_scripts': ['nemo=NEMO.provisioning:entry_point'],
