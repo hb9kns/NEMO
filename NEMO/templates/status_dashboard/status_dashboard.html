@@ -26,6 +26,7 @@
 				<li><a href="javascript:void(0)" onclick="filter('tools in use')">Tools in use</a></li>
 				<li><a href="javascript:void(0)" onclick="filter('problematic tools')">Problematic tools</a></li>
 				<li><a href="javascript:void(0)" onclick="filter('idle tools')">Idle tools</a></li>
+				<li><a href="javascript:void(0)" onclick="filter('my tools')">My Tools</a></li>
 			</ul>
 		</div>
 
@@ -95,6 +96,8 @@
 			set_style('.problematic { display: table-row } .healthy { display: none; }');
 		else if(show == "idle tools")
 			set_style('.idle { display: table-row; } .in_use { display: none; }');
+		else if(show == "my tools")
+			set_style('.user_qualified { display: table-row; } .not_qualified { display: none; }');
 	}
 </script>
 
