@@ -82,7 +82,9 @@
 				<h3>This tool is <strong>operational</strong> and <strong>idle</strong>.</h3>
 			</div>
 		{% endif %}
-
+		{% if next_res %}
+			The next reservation is at {{ next_res.start|date:"g:i A"}} by <a href="{% url 'get_email_form_for_user' next_res.user.id %}"> {{ next_res.user }} </a>
+		{% endif %}
 		{# Display any unavailable required resources... #}
 		{% for r in tool.unavailable_required_resources %}
 			<div class="media">
