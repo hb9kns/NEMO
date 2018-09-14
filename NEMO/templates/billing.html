@@ -1,20 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}Area access{% endblock %}
+{% block title %}Billing{% endblock %}
 {% block extrahead %}
 	{% load static %}
 	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
 	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
 {% endblock %}
 {% block content %}
-	<h1>Area access</h1>
-	<p>You can <a href="{% url 'new_area_access_record' %}">manually create an area access record</a> under extraordinary circumstances.</p>
-	View area access records for:
+	<h1>Billing</h1>
+	Compile billing report for:
 	<ul>
-		<li><a href="{{ today }}">Today</a></li>
-		<li><a href="{{ yesterday }}">Yesterday</a></li>
-		<li>Or, enter a custom date range</li>
+		<li>Enter a custom date range</li>
 	</ul>
-	<form id="view_records" action="{% url 'area_access' %}" class="form-inline" method="get">
+	<form id="view_records" action="{% url 'billing' %}" class="form-inline" method="get">
 		<div class="form-group">
 			<div class="datetimepicker-container">
 				<input type="text" id="start" name="start" class="form-control" autocomplete="off" placeholder="start" value="{{ start|date:"m/d/Y" }}">
@@ -26,29 +23,32 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<input type="submit" class="btn btn-default" value="View access records">
+			<input type="submit" class="btn btn-default" value="View billing records" onclick="javascript: form.action=' {% url 'billing' %}';">
+			<input type="submit" class="btn btn-default" value="Download billing CSV" onclick="javascript: form.action=' {% url 'billingcsv' %}';">
 		</div>
 	</form>
 	<div class="col-lg-12" style="margin-top:30px">
-		{% if access_records %}
+		{% if billing_result %}
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Identifier</th>
 						<th>User</th>
-						<th>Project</th>
-						<th>Start</th>
-						<th>End</th>
+						<th>Last Name</th>
+						<th>First Name</th>
+						<th>Email</th>
+						<th>Type</th>
+						<th>Billable Days</th>
 					</tr>
 				</thead>
 				<tbody>
-					{% for x in access_records %}
+					{% for x in billing_result %}
 						<tr>
-							<td>{{ x.id }}</td>
-							<td>{{ x.customer }}</td>
-							<td>{{ x.project }}</td>
-							<td>{{ x.start }}</td>
-							<td>{{ x.end|default:"In progress" }}</td>
+							<td>{{ x.username }}</td>
+							<td>{{ x.last_name }}</td>
+							<td>{{ x.first_name }}</td>
+							<td>{{ x.email }}</td>
+							<td>{{ x.type }}</td>
+							<td>{{ x.billable_days }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>

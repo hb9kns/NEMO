@@ -7,13 +7,13 @@ from NEMO.models import AreaAccessRecord, UsageEvent, Alert, Resource
 from NEMO.views.alerts import delete_expired_alerts
 
 
-@login_required
+
 @require_GET
 def jumbotron(request):
 	return render(request, 'jumbotron/jumbotron.html')
 
 
-@login_required
+
 @require_GET
 def jumbotron_content(request):
 	delete_expired_alerts()

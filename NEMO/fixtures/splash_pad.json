@@ -132,8 +132,32 @@
 			"area": 1,
 			"customer": 1,
 			"project": 2,
-			"start": "2018-06-21T20:10:00Z",
-			"end": null,
+			"start": "2018-09-02T20:10:00Z",
+			"end": "2018-09-10T20:10:00Z",
+			"staff_charge": null
+		}
+	},
+	{
+		"model": "NEMO.areaaccessrecord",
+		"pk": 2,
+		"fields": {
+			"area": 1,
+			"customer": 1,
+			"project": 2,
+			"start": "2018-09-10T20:10:00Z",
+			"end": "2018-09-11T20:10:00Z",
+			"staff_charge": null
+		}
+	},
+	{
+		"model": "NEMO.areaaccessrecord",
+		"pk": 3,
+		"fields": {
+			"area": 1,
+			"customer": 1,
+			"project": 2,
+			"start": "2018-09-11T20:10:00Z",
+			"end": "2018-09-11T20:10:00Z",
 			"staff_charge": null
 		}
 	},

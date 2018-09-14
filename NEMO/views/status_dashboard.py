@@ -18,13 +18,13 @@ def status_dashboard(request):
 	interest = request.GET.get('interest')
 	if interest is None:
 		dictionary = {
-			'tool_summary': create_tool_summary(),
+			'tool_summary': create_tool_summary(request),
 			'nanofab_occupants': AreaAccessRecord.objects.filter(end=None, staff_charge=None).prefetch_related('customer', 'project', 'area'),
 		}
 		return render(request, 'status_dashboard/status_dashboard.html', dictionary)
 	elif interest == "tools":
 		dictionary = {
-			'tool_summary': create_tool_summary(),
+			'tool_summary': create_tool_summary(request),
 		}
 		return render(request, 'status_dashboard/tools.html', dictionary)
 	elif interest == "occupancy":
@@ -34,21 +34,23 @@ def status_dashboard(request):
 		return render(request, 'status_dashboard/occupancy.html', dictionary)
 
 
-def create_tool_summary():
+def create_tool_summary(request):
 	tools = Tool.objects.filter(visible=True)
 	tasks = Task.objects.filter(cancelled=False, resolved=False, tool__visible=True).prefetch_related('tool')
 	unavailable_resources = Resource.objects.filter(available=False).prefetch_related('fully_dependent_tools', 'partially_dependent_tools')
 	usage_events = UsageEvent.objects.filter(end=None, tool__visible=True).prefetch_related('operator', 'user', 'tool')
 	scheduled_outages = ScheduledOutage.objects.filter(start__lte=timezone.now(), end__gt=timezone.now())
-	tool_summary = merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages)
+	user = request.user
+	tool_summary = merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages, user)
 	tool_summary = list(tool_summary.values())
 	tool_summary.sort(key=lambda x: x['name'])
 	return tool_summary
 
 
-def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages):
+def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages, user):
 	result = {}
 	tools_with_delayed_logoff_in_effect = [x.tool.id for x in UsageEvent.objects.filter(end__gt=timezone.now())]
+	user_qualified_on_tool = [y.id for y in user.qualifications.all()]
 	for tool in tools:
 		result[tool.id] = {
 			'name': tool.name,
@@ -63,6 +65,7 @@ def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages):
 			'required_resource_is_unavailable': False,
 			'nonrequired_resource_is_unavailable': False,
 			'scheduled_outage': False,
+			'user_qualified': tool.id in user_qualified_on_tool,
 		}
 	for task in tasks:
 		result[task.tool.id]['problematic'] = True

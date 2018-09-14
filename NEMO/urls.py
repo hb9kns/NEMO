@@ -7,7 +7,7 @@ from rest_framework import routers
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password
+from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -203,6 +203,10 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		# Area access
 		url(r'^area_access/$', area_access.area_access, name='area_access'),
 		url(r'^new_area_access_record/$', area_access.new_area_access_record, name='new_area_access_record'),
+
+		#billing
+		url(r'^billing/$', billing.billing, name='billing'),
+		url(r'^billingcsv/$', billing.billingcsv, name='billingcsv'),
 
 		# Reminders and periodic events
 		url(r'^email_reservation_reminders/$', calendar.email_reservation_reminders, name='email_reservation_reminders'),

@@ -62,6 +62,13 @@ def tool_status(request, tool_id):
 	except Reservation.DoesNotExist:
 		pass
 
+	try:
+		next_4hrs = Reservation.objects.filter(start__gt=timezone.now(), start__lte=timezone.now()+timedelta(hours=4), cancelled=False, missed=False, shortened=False, tool=tool).order_by('start')
+		if next_4hrs:
+			next_res = next_4hrs[0]
+			dictionary['next_res'] = next_res
+	except Reservation.DoesNotExist:
+		pass
 	# Staff need the user list to be able to qualify users for the tool.
 	if request.user.is_staff:
 		dictionary['users'] = User.objects.filter(is_active=True)

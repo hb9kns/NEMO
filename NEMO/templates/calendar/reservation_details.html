@@ -24,10 +24,10 @@
 		Title: {{ reservation.title }}<br>
 	{% endif %}
 
-	User: {{ reservation.user }}<br>
+	User: <a href="{% url 'get_email_form_for_user' reservation.user.id %}"> {{ reservation.user }} </a><br>
 	Created by: {{ reservation.creator }}<br>
 	Created on: {{ reservation.creation_time }}<br>
-	Tool: {{ reservation.tool }}<br>
+	Tool: <a href="{% url 'tool_control' reservation.tool.id %}"> {{ reservation.tool }} </a><br>
 	{% if reservation.project %}Project: {{ reservation.project }}<br>{% endif %}
 	Start: {{ reservation.start }}<br>
 	End: {{ reservation.end }}<br>
