@@ -36,6 +36,11 @@
 						{% endif %}
 						for the project named {{ current_usage_event.project.name }} since {{ current_usage_event.start|date:"l @ g:i A" }}.
 					</h3>
+					<h4>
+						{% if current_usage_event.operator.id != user.id %}
+							<a href="{% url 'get_email_form_for_user' current_usage_event.operator.id %}"> Click to email {{ current_usage_event.operator }} </a>
+						{% endif %}
+					</h4>
 				{% endwith %}
 			</div>
 			{% if time_left %}
