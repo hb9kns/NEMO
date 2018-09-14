@@ -206,6 +206,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 
 		#billing
 		url(r'^billing/$', billing.billing, name='billing'),
+		url(r'^billingcsv/$', billing.billingcsv, name='billingcsv'),
 
 		# Reminders and periodic events
 		url(r'^email_reservation_reminders/$', calendar.email_reservation_reminders, name='email_reservation_reminders'),
