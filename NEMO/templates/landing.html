@@ -28,8 +28,13 @@
 						<div class="alert {% if r.start < now %}alert-warning{% else %}alert-success{% endif %}">
 							{% if r.title %}<b>{{ r.title }}</b><br>{% endif %}
 							<b>{% if r.start < now %}You're late for your {{ r.tool }} reservation!{% else %}{{ r.tool }}{% endif %}</b><br>
-							Starting on {{ r.start|date:"l, F jS @ g:i A" }}<br>
-							Ending on {{ r.end|date:"l, F jS @ g:i A" }}
+							{% if r.start|date == now|date %}
+								Starting Today {{ r.start|date:"@ g:i A" }}<br>
+								Ending {{ r.end|date:"@ g:i A" }}
+							{% else %}
+								Starting on {{ r.start|date:"l, M jS @ g:i A" }}<br>
+								Ending on {{ r.end|date:"l, M jS @ g:i A" }}
+							{% endif %}
 						</div>
 					</a>
 				{% endfor %}
