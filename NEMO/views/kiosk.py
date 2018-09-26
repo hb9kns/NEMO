@@ -99,7 +99,7 @@ def choices(request):
 		'customer': customer,
 		'usage_events': UsageEvent.objects.filter(operator=customer.id, end=None).order_by('tool__name').prefetch_related('tool', 'project'),
 		'tools': Tool.objects.filter(visible=True, location=request.GET['location']),
-		'tool_summary': create_tool_summary(),
+		'tool_summary': create_tool_summary(request),
 	}
 	return render(request, 'kiosk/choices.html', dictionary)
 
