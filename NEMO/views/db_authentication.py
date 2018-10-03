@@ -11,7 +11,7 @@ from NEMO.models import UserAuth
 class DbAuthenticationBackend(ModelBackend):
 
     @method_decorator(sensitive_post_parameters('password'))
-    def authenticate(self, username=None, password=None, **keyword_arguments):
+    def authenticate(self, request, username=None, password=None, **keyword_arguments):
         User = get_user_model()
         try:
             user_auth = UserAuth.objects.get(username=username)
