@@ -5,9 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.static import serve
 from rest_framework import routers
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing
+from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -111,6 +112,7 @@ urlpatterns = [
 
 	# NanoFab feedback
 	url(r'^feedback/$', feedback.feedback, name='feedback'),
+	url(r'^consultation/$', consultation.consultation, name='consultation'),
 
 	# NanoFab rules tutorial
 	# TODO: this should be removed, since this is really a job for a Learning Management System...
@@ -250,7 +252,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 if settings.DEBUG:
 	# Static files
 	url(r'^static/(?P<path>.*$)', serve, {'document_root': settings.STATIC_ROOT}, name='static'),
-
+	#url(r'^media/(?P<path>.*$)', serve, {'document_root': settings.MEDIA_ROOT}, name='media'),
 	try:
 		# Django debug toolbar
 		import debug_toolbar
@@ -259,3 +261,4 @@ if settings.DEBUG:
 		]
 	except ImportError:
 		pass
+	urlpatterns += staticfiles_urlpatterns()

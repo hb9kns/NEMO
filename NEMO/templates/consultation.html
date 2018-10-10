@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Design Consultation Request{% endblock %}
+{% block content %}
+	{% if customization_required %}
+		<h1>The consultation page has not been customized yet</h1>
+		<p>
+			Consultation requests are emailed to an address specified by the NEMO site administrator.
+			{% if user.is_staff %}
+				Use the <a href="{% url 'customization' %}">customizations page</a>
+				to enter an email address, then all users will be able to send feedback.
+			{% endif %}
+		</p>
+	{% else %}
+		<h1>Request a Design Consultation with the PRISM Cleanroom Staff</h1>
+		<p>
+			We're continually working to improve the Cleanroom experience for everyone. By having a design consultation with the Cleanroom staff, you can take advantage of their experience to do your reseach more efficiently and effectively.<br>
+			Please give a brief description of your project and your availability to meet with staff. Upon submitting this form, you will recieve a Powerpoint template for the design consultation.
+		</p>
+		<form class="form" id="consultation_form" action="{% url 'consultation' %}" method="post">
+			{% csrf_token %}
+			<div class="form-group">
+				<label><textarea rows="6" cols="75" name="consultation" id="consultation" class="form-control" maxlength="5000" required></textarea></label>
+			</div>
+			<div class="form-group">
+				<input type="submit" value="Send request" class="btn btn-success">
+			</div>
+		</form>
+	{% endif %}
+{% endblock %}
