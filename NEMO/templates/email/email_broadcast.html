@@ -13,8 +13,10 @@
 	Compose an email to all users who...
 	<ul>
 		<li><a href="{% url 'email_broadcast' 'tool' %}">are qualified for a tool</a></li>
+		{% if user.is_staff %}
 		<li><a href="{% url 'email_broadcast' 'project' %}">are working on a project</a></li>
 		<li><a href="{% url 'email_broadcast' 'account' %}">bill to an account</a></li>
+		{% endif %}
 	</ul>
 
 	{% if search_base %}
