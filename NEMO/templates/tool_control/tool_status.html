@@ -185,6 +185,7 @@
 		{# Display tool control... #}
 		<form id="tool_control">
 			{% if tool.in_use %}
+				{% if tool.get_current_usage_event.operator.id == user.id or tool.get_current_usage_event.user.id == user.id %}
 					{{ post_usage_questions }}
 					{% if tool.allow_delayed_logoff and not tool.delayed_logoff_in_progress %}
 						<div class="form-group">
@@ -193,6 +194,7 @@
 						</div>
 					{% endif %}
 					<div id="stop_wrapper" style="display:inline-block" data-toggle="tooltip" data-placement="bottom" title="Please answer the required questions (above) to proceed"><button id="stop" class="btn btn-default" onclick="disable_tool('{% url 'disable_tool' tool.id %}'); return false"><span class="glyphicon glyphicon-stop"></span> Stop using the {{ tool.name }}</button></div><p>
+				{% endif %}
 			{% else %}
 				{% if user.is_staff %}
 					<h4>What would you like to do?</h4>
@@ -228,6 +230,8 @@
 	<div class="tab-pane" id="details">
 		{% if user.is_staff and tool.in_use %}
 			<p>You may <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">force {{ tool.get_current_usage_event.operator }} off this tool</a>.</p>
+		{% elif tool.in_use and not user == tool.user %}
+			<p>You may <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">force {{ tool.get_current_usage_event.operator }} off this tool if you have a current reservation. Please use this judiciously</a>.</p>
 		{% endif %}
 		<div class="media">
 			<span class="glyphicon glyphicon-info-sign pull-left notification-icon primary-highlight"></span>
@@ -243,11 +247,9 @@
 				<p>You may dial the phone that is closest to the {{ tool.name }} at extension <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
 			</div>
 		</div>
-		{% if user.is_staff %}
 			<div id="qualified_users_container" class="media">
 				{% include 'tool_control/qualified_users.html' %}
 			</div>
-		{% endif %}
 		{% if tool.required_resource_set.exists %}
 			<div class="media">
 				<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#required_resources" class="pointer">

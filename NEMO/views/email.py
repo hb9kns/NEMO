@@ -77,8 +77,7 @@ def email_broadcast(request, audience=''):
 	dictionary['audience'] = audience
 	return render(request, 'email/email_broadcast.html', dictionary)
 
-
-@staff_member_required(login_url=None)
+@login_required
 @require_GET
 def compose_email(request):
 	audience = request.GET.get('audience')
@@ -86,16 +85,21 @@ def compose_email(request):
 	try:
 		if audience == 'tool':
 			users = User.objects.filter(qualifications__id=selection).distinct()
-		elif audience == 'project':
-			users = User.objects.filter(projects__id=selection).distinct()
-		elif audience == 'account':
-			users = User.objects.filter(projects__account__id=selection).distinct()
+		elif request.user.is_staff:
+			if audience == 'project':
+				users = User.objects.filter(projects__id=selection).distinct()
+			elif audience == 'account':
+				users = User.objects.filter(projects__account__id=selection).distinct()
+			else:
+				dictionary = {'error': 'You specified an invalid audience'}
+				return render(request, 'email/email_broadcast.html', dictionary)
 		else:
-			dictionary = {'error': 'You specified an invalid audience'}
+			dictionary = {'error': 'You may not broadcast email to this audience'}
 			return render(request, 'email/email_broadcast.html', dictionary)
 	except:
 		dictionary = {'error': 'You specified an invalid audience parameter'}
 		return render(request, 'email/email_broadcast.html', dictionary)
+
 	generic_email_sample = get_media_file_contents('generic_email.html')
 	dictionary = {
 		'audience': audience,
@@ -107,12 +111,12 @@ def compose_email(request):
 			'title': 'TITLE',
 			'greeting': 'Greeting',
 			'contents': 'Contents',
+			'template_color': '#5bc0de',
 		}
 		dictionary['generic_email_sample'] = Template(generic_email_sample).render(Context(generic_email_context))
 	return render(request, 'email/compose_email.html', dictionary)
 
-
-@staff_member_required(login_url=None)
+@login_required
 @require_POST
 def send_broadcast_email(request):
 	if not get_media_file_contents('generic_email.html'):
@@ -147,7 +151,11 @@ def send_broadcast_email(request):
 	if not users:
 		dictionary = {'error': 'The audience you specified is empty. You must send the email to at least one person.'}
 		return render(request, 'email/compose_email.html', dictionary)
-	subject = form.cleaned_data['subject']
+	if audience == 'tool':
+		t = Tool.objects.filter(id=selection)
+		subject = t[0].name + ': ' + form.cleaned_data['subject']
+	else:
+		subject = form.cleaned_data['subject']
 	users = [x.email for x in users]
 	if form.cleaned_data['copy_me']:
 		users += [request.user.email]
