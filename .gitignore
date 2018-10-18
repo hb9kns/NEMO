@@ -1,6 +1,5 @@
 .idea/
 __pycache__/
-migrations/
 venv/
 settings.py
 fake_authentication.py
