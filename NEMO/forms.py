@@ -5,7 +5,7 @@ from django.forms import BaseForm, BooleanField, CharField, ChoiceField, DateFie
 from django.forms.utils import ErrorDict
 from django.utils import timezone
 
-from NEMO.models import Account, Alert, Comment, Consumable, ConsumableWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User
+from NEMO.models import Account, Alert, Comment, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User
 from NEMO.utilities import bootstrap_primary_color, format_datetime
 
 
@@ -160,6 +160,48 @@ class SafetyIssueUpdateForm(ModelForm):
 		return super(SafetyIssueUpdateForm, self).save(commit=commit)
 
 
+class StockroomWithdrawForm(ModelForm):
+	class Meta:
+		model = StockroomWithdraw
+		fields = ['customer', 'project', 'stock', 'quantity']
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fields['stock'].queryset = StockroomItem.objects.filter(visible=True)
+
+	def clean_customer(self):
+		customer = self.cleaned_data['customer']
+		if not customer.is_active:
+			raise ValidationError('A consumable withdraw was requested for an inactive user. Only active users may withdraw consumables.')
+		return customer
+
+	def clean_project(self):
+		project = self.cleaned_data['project']
+		if not project.active:
+			raise ValidationError('A stockroom item may only be billed to an active project. The user\'s project is inactive.')
+		if not project.account.active:
+			raise ValidationError('A stockroom item may only be billed to a project that belongs to an active account. The user\'s account is inactive.')
+		return project
+
+	def clean_quantity(self):
+		quantity = self.cleaned_data['quantity']
+		if quantity < 1:
+			raise ValidationError('Please specify a valid quantity of items to withdraw.')
+		return quantity
+
+	def clean(self):
+		if any(self.errors):
+			return
+		super(StockroomWithdrawForm, self).clean()
+		quantity = self.cleaned_data['quantity']
+		item = self.cleaned_data['stock']
+		if quantity > item.quantity:
+			raise ValidationError('The withdraw was not processed because there are not enough "' + stock.name + '". (There current quantity in stock is ' + str(stock.quantity) + '). Please order more as soon as possible.')
+		customer = self.cleaned_data['customer']
+		project = self.cleaned_data['project']
+		if project not in customer.active_projects():
+			raise ValidationError('{} is not a member of the project {}. Users can only bill to projects they belong to.'.format(customer, project))
+
 class ConsumableWithdrawForm(ModelForm):
 	class Meta:
 		model = ConsumableWithdraw
@@ -201,7 +243,6 @@ class ConsumableWithdrawForm(ModelForm):
 		project = self.cleaned_data['project']
 		if project not in customer.active_projects():
 			raise ValidationError('{} is not a member of the project {}. Users can only bill to projects they belong to.'.format(customer, project))
-
 
 class ReservationAbuseForm(Form):
 	cancellation_horizon = IntegerField(initial=6, min_value=1)

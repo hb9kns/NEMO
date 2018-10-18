@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Permission
 
 from NEMO.actions import lock_selected_interlocks, unlock_selected_interlocks
-from NEMO.models import Tool, UsageEvent, Reservation, Project, Account, Consumable, ConsumableWithdraw, InterlockCard, Interlock, Task, MembershipHistory, ActivityHistory, Configuration, TaskCategory, Comment, ConfigurationHistory, Resource, User, TrainingSession, StaffCharge, AreaAccessRecord, ConsumableCategory, ResourceCategory, Door, PhysicalAccessLevel, PhysicalAccessLog, SafetyIssue, Area, Alert, UserType, ContactInformationCategory, ContactInformation, LandingPageChoice, Customization, ScheduledOutage, TaskHistory, TaskStatus, ScheduledOutageCategory
+from NEMO.models import Tool, UsageEvent, Reservation, Project, Account, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, StockroomCategory, InterlockCard, Interlock, Task, MembershipHistory, ActivityHistory, Configuration, TaskCategory, Comment, ConfigurationHistory, Resource, User, TrainingSession, StaffCharge, AreaAccessRecord, ConsumableCategory, ResourceCategory, Door, PhysicalAccessLevel, PhysicalAccessLog, SafetyIssue, Area, Alert, UserType, ContactInformationCategory, ContactInformation, LandingPageChoice, Customization, ScheduledOutage, TaskHistory, TaskStatus, ScheduledOutageCategory
 
 admin.site.site_header = "NEMO"
 admin.site.site_title = "NEMO"
@@ -149,7 +149,7 @@ class ToolAdmin(admin.ModelAdmin):
 		(None, {'fields': ('name', 'category', 'qualified_users', 'post_usage_questions'),}),
 		('Current state', {'fields': ('visible', 'operational'),}),
 		('Contact information', {'fields': ('primary_owner', 'secondary_owner', 'notification_email_address', 'location', 'phone_number'),}),
-		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'interlock', 'allow_delayed_logoff'),}),
+		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'interlock', 'allow_delayed_logoff', 'reservation_required'),}),
 		('Dependencies', {'fields': ('required_resources', 'nonrequired_resources'),}),
 	)
 
@@ -199,7 +199,7 @@ class ConfigurationHistoryAdmin(admin.ModelAdmin):
 
 @register(Account)
 class AccountAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'active')
+	list_display = ('name', 'id', 'active', 'manager_email')
 	search_fields = ('name',)
 	list_filter = ('active',)
 
@@ -296,6 +296,22 @@ class ConsumableWithdrawAdmin(admin.ModelAdmin):
 	list_filter = ('date', 'consumable')
 	date_hierarchy = 'date'
 
+@register(StockroomItem)
+class StockroomItemAdmin(admin.ModelAdmin):
+	list_display = ('name', 'quantity', 'category', 'cost', 'visible', 'reminder_threshold', 'reminder_email')
+	list_filter = ('visible', 'category')
+
+
+@register(StockroomCategory)
+class StockroomCategoryAdmin(admin.ModelAdmin):
+	list_display = ('name',)
+
+
+@register(StockroomWithdraw)
+class StockroomWithdrawAdmin(admin.ModelAdmin):
+	list_display = ('id', 'customer', 'merchant', 'stock', 'quantity', 'project', 'date')
+	list_filter = ('date', 'stock')
+	date_hierarchy = 'date'
 
 @register(InterlockCard)
 class InterlockCardAdmin(admin.ModelAdmin):
