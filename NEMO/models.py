@@ -860,6 +860,7 @@ class TaskHistory(models.Model):
 	status = models.CharField(max_length=200, help_text="A text description of the task's status")
 	time = models.DateTimeField(auto_now_add=True, help_text='The date and time when the task status was changed')
 	user = models.ForeignKey(User, help_text='The user that changed the task to this status')
+	shutdown = models.BooleanField(default=False, help_text='Whether or not tool was shut down during this period')
 
 	class Meta:
 		verbose_name_plural = 'task histories'
