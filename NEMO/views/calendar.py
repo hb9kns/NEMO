@@ -13,13 +13,12 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.decorators import disable_session_expiry_refresh
-from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, ScheduledOutage, ScheduledOutageCategory
+from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, Account, ScheduledOutage, ScheduledOutageCategory, Task, StockroomItem, Consumable, SafetyIssue
 from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string
 from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.policy import check_policy_to_save_reservation, check_policy_to_cancel_reservation, check_policy_to_create_outage
 from NEMO.widgets.tool_tree import ToolTree
-
 
 @login_required
 @require_GET
@@ -507,31 +506,53 @@ def set_reservation_title(request, reservation_id):
 @require_GET
 def email_reservation_reminders(request):
 	# Exit early if the reservation reminder email template has not been customized for the organization yet.
-	reservation_reminder_message = get_media_file_contents('reservation_reminder_email.html')
-	reservation_warning_message = get_media_file_contents('reservation_warning_email.html')
-	if not reservation_reminder_message or not reservation_warning_message:
+	good_message = get_media_file_contents('reservation_reminder_email.html')
+	problem_message = get_media_file_contents('reservation_warning_email.html')
+	if not good_message or not problem_message:
 		return HttpResponseNotFound('The reservation reminder email template has not been customized for your organization yet. Please visit the NEMO customizable_key_values page to upload a template, then reservation reminder email notifications can be sent.')
 
-	# Find all reservations that are two hours from now, plus or minus 5 minutes to allow for time skew.
-	preparation_time = 120
-	tolerance = 5
-	earliest_start = timezone.now() + timedelta(minutes=preparation_time) - timedelta(minutes=tolerance)
-	latest_start = timezone.now() + timedelta(minutes=preparation_time) + timedelta(minutes=tolerance)
+	# Find all reservations in the next day
+	#preparation_time = 120  These were sending an email for each reservation 2 hrs in advance. I'm not using them
+	#tolerance = 5
+	earliest_start = timezone.now()
+	latest_start = timezone.now() + timedelta(hours=24)
 	upcoming_reservations = Reservation.objects.filter(cancelled=False, start__gt=earliest_start, start__lt=latest_start)
 	# Email a reminder to each user with an upcoming reservation.
+	goodAggregate = {}
+	problemAggregate = {}
 	for reservation in upcoming_reservations:
-		tool = reservation.tool
-		if tool.operational and not tool.problematic() and tool.all_resources_available():
-			subject = reservation.tool.name + " reservation reminder"
-			rendered_message = Template(reservation_reminder_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('success')}))
-		elif not tool.operational or tool.required_resource_is_unavailable():
-			subject = reservation.tool.name + " reservation problem"
-			rendered_message = Template(reservation_warning_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('danger'), 'fatal_error': True}))
+		key = str(reservation.user)
+		if reservation.tool.operational and not reservation.tool.problematic() and reservation.tool.all_resources_available():
+			if key in goodAggregate:
+				goodAggregate[key]['Tools'].append(reservation.tool.name + " starting " + format_datetime(reservation.start))
+			else:
+				goodAggregate[key] = {
+					'email': reservation.user.email,
+					'first_name': reservation.user.first_name,
+					'Tools': [reservation.tool.name + " starting " + format_datetime(reservation.start)],
+				}
 		else:
-			subject = reservation.tool.name + " reservation warning"
-			rendered_message = Template(reservation_warning_message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('warning'), 'fatal_error': False}))
-		user_office_email = get_customization('user_office_email_address')
-		reservation.user.email_user(subject, rendered_message, user_office_email)
+			if key in problemAggregate:
+				problemAggregate[key]['Tools'].append(reservation.tool.name + " starting " + format_datetime(reservation.start))
+			else:
+				problemAggregate[key] = {
+					'email': reservation.user.email,
+					'first_name': reservation.user.first_name,
+					'Tools': [reservation.tool.name + " starting " + format_datetime(reservation.start)],
+				}
+	user_office_email = get_customization('user_office_email_address')
+	if good_message:
+		subject = "Upcoming PRISM Cleanroom Reservations"
+		for user in goodAggregate.values():
+			rendered_message = Template(good_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('success')}))
+			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
+
+	if problem_message:
+		subject = "Problem With Upcoming PRISM Cleanroom Reservations"
+		for user in problemAggregate.values():
+			rendered_message = Template(problem_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('danger')}))
+			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
+
 	return HttpResponse()
 
 
@@ -569,7 +590,7 @@ def email_usage_reminders(request):
 
 	message = get_media_file_contents('usage_reminder_email.html')
 	if message:
-		subject = "NanoFab usage"
+		subject = "PRISM Cleanroom usage"
 		for user in aggregate.values():
 			rendered_message = Template(message).render(Context({'user': user}))
 			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
@@ -584,6 +605,77 @@ def email_usage_reminders(request):
 
 	return HttpResponse()
 
+@login_required
+@permission_required('NEMO.trigger_timed_services', raise_exception=True)
+@require_GET
+def email_daily_passdown(request):
+	# Make list of all events that belong in the daily passdown email"
+	#New shutdowns, New problems, Overnight access, Access and usage in the last day, Upcoming reservations, Upcoming configuration requests,
+	#Low stock items, Ongoing issues, Safety reports
+	passdown = {}
+	now = timezone.now()
+	yesterday = now - timedelta(hours = 24)
+	tomorrow = now + timedelta(hours = 24)
+	#Daily information
+	passdown['new_shutdowns'] = Task.objects.filter(creation_time__gt=yesterday, force_shutdown=True)
+	passdown['new_problems'] =  Task.objects.filter(creation_time__gt=yesterday, force_shutdown=False)
+	passdown['area_accesses'] = AreaAccessRecord.objects.filter(start__gt=yesterday)
+	passdown['tool_enables'] = UsageEvent.objects.filter(start__gt=yesterday)
+	overnight_access = AreaAccessRecord.objects.filter(start__gt=now - timedelta(hours = 12), start__lte=now)
+	overnight_usage=[]
+	for access in overnight_access:
+		if access.end == None:
+			end = now
+		else:
+			end = access.end
+		usage = UsageEvent.objects.filter(start__gt=access.start, start__lte=end, user=access.customer)
+		tools = Tool.objects.filter(id__in=usage.values_list('tool', flat=True))
+		overnight_usage.append({'user':access.customer, 'area':access.area, 'start':access.start, 'end':access.end, 'tools':tools})
+	passdown['overnight_usage'] = overnight_usage
+	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow)
+	tools = Tool.objects.exclude(configuration__isnull=True).exclude(configuration__exclude_from_configuration_agenda=True).values_list('id', flat=True)
+	reservations = Reservation.objects.filter(start__gt=now, start__lt=tomorrow, tool__id__in=tools, self_configuration=False, cancelled=False, missed=False, shortened=False).exclude(additional_information='').order_by('start')
+	passdown['configuration_requests'] = Tool.objects.filter(id__in=reservations.values_list('tool', flat=True))
+	stock = StockroomItem.objects.all()
+	low_stock = []
+	low_consumable = []
+	for i in stock:
+		if i.quantity <= i.reminder_threshold:
+			low_stock.append(i)
+	consumable = Consumable.objects.all()
+	for i in consumable:
+		if i.quantity <= i.reminder_threshold:
+			low_consumable.append(i)
+	passdown['low_stock'] = low_stock
+	passdown['low_consumable'] = low_consumable
+
+
+	#Ongoing issues
+	passdown['all_shutdowns'] = Task.objects.filter(force_shutdown=True, cancelled=False, resolved=False)
+	passdown['all_problems'] = Task.objects.filter(force_shutdown=False, cancelled=False, resolved=False)
+	passdown['safety_issues'] = SafetyIssue.objects.filter(resolved=False)
+
+	# Usage Data
+	# usage_data = {}
+	# cr = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area=7, customer.is_staff=False)
+	# main_cr_usage=len(cr)
+	# usage_data['main_cr'] = main_cr_usage
+	# pack = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area=8, customer.is_staff=False)
+	# pack_usage = len(pack)
+	# usage_data['packaging'] = pack_usage
+	# soft = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area__id__exact=3, customer.is_staff=False)
+	# smp_usage = len(soft)
+	# usage_data['smp'] = smp_usage
+
+	user_office_email = get_customization('user_office_email_address')
+	passdown_email = get_customization('daily_passdown_email_address')
+
+	message = get_media_file_contents('daily_passdown_email.html')
+	if message:
+		subject = "PRISM Cleanroom Daily Passdown"
+		rendered_message = Template(message).render(Context({'passdown': passdown}))
+		send_mail(subject, '', user_office_email, [passdown_email], html_message=rendered_message)
+	return HttpResponse()
 
 @login_required
 @require_GET

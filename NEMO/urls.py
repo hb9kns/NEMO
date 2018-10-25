@@ -215,6 +215,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		url(r'^email_reservation_reminders/$', calendar.email_reservation_reminders, name='email_reservation_reminders'),
 		url(r'^email_usage_reminders/$', calendar.email_usage_reminders, name='email_usage_reminders'),
 		url(r'^cancel_unused_reservations/$', calendar.cancel_unused_reservations, name='cancel_unused_reservations'),
+		url(r'^email_daily_passdown/$', calendar.email_daily_passdown, name='email_daily_passdown'),
 
 		# Abuse:
 		url(r'^abuse/$', abuse.abuse, name='abuse'),
