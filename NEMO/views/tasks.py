@@ -151,7 +151,7 @@ def task_update_form(request, task_id):
 		'categories': categories,
 		'urgency': Task.Urgency.Choices,
 		'task': task,
-		'task_statuses': TaskStatus.objects.all(),
+		'task_statuses': TaskStatus.objects.exclude(name="default"),
 	}
 	return render(request, 'tasks/update.html', dictionary)
 
@@ -169,14 +169,16 @@ def task_resolution_form(request, task_id):
 
 
 def set_task_status(request, task, status_name, user):
-	if not status_name:
-		return
 
 	if not user.is_staff:
 		raise ValueError("Only staff can set task status")
 
-	status = TaskStatus.objects.get(name=status_name)
-	TaskHistory.objects.create(task=task, status=status_name, user=user)
+		#If no status is given, assign to default status. This will make sure all tasks have a proper Task History
+	if not status_name:
+		status_name = "default"
+
+	status = TaskStatus.objects.get_or_create(name=status_name)
+	TaskHistory.objects.create(task=task, status=status_name, user=user, shutdown=task.force_shutdown)
 
 	status_message = f'On {format_datetime(timezone.now())}, {user.get_full_name()} set the status of this task to "{status_name}".'
 	task.progress_description = status_message if task.progress_description is None else task.progress_description + '\n\n' + status_message

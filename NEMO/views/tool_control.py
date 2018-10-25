@@ -51,7 +51,7 @@ def tool_status(request, tool_id):
 		'task_categories': TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT),
 		'rendered_configuration_html': tool.configuration_widget(request.user),
 		'mobile': request.device == 'mobile',
-		'task_statuses': TaskStatus.objects.all(),
+		'task_statuses': TaskStatus.objects.exclude(name="default"),
 		'post_usage_questions': DynamicForm(tool.post_usage_questions).render(),
 	}
 

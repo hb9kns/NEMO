@@ -43,7 +43,7 @@ def task_details(request, task_id):
 		'task': task,
 		'initial_assessment_categories': TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT),
 		'completion_categories': TaskCategory.objects.filter(stage=TaskCategory.Stage.COMPLETION),
-		'task_statuses': TaskStatus.objects.all(),
+		'task_statuses': TaskStatus.objects.exclude(name="default"),
 	}
 
 	if task.tool.is_configurable():
