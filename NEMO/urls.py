@@ -24,6 +24,7 @@ router.register(r'usage_events', api.UsageEventViewSet)
 router.register(r'area_access_records', api.AreaAccessRecordViewSet)
 router.register(r'tasks', api.TaskViewSet)
 router.register(r'scheduled_outages', api.ScheduledOutageViewSet)
+router.register(r'interlocks', api.InterlockViewSet)
 
 urlpatterns = [
 	# Authentication & error pages:
