@@ -194,8 +194,8 @@ class StockroomWithdrawForm(ModelForm):
 			return
 		super(StockroomWithdrawForm, self).clean()
 		quantity = self.cleaned_data['quantity']
-		item = self.cleaned_data['stock']
-		if quantity > item.quantity:
+		stock = self.cleaned_data['stock']
+		if quantity > stock.quantity:
 			raise ValidationError('The withdraw was not processed because there are not enough "' + stock.name + '". (There current quantity in stock is ' + str(stock.quantity) + '). Please order more as soon as possible.')
 		customer = self.cleaned_data['customer']
 		project = self.cleaned_data['project']
