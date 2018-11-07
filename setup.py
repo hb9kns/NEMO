@@ -33,6 +33,8 @@ setup(
 		'requests==2.19.1',
 		'Pillow==5.2.0',
 		'pymodbus3==1.0.0',
+		'numpy==1.15.3',
+		'pandas==0.23.4',
 	],
 	entry_points={
 		'console_scripts': ['nemo=NEMO.provisioning:entry_point'],

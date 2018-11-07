@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime
 from http import HTTPStatus
 from re import match
+from pandas import DataFrame, to_numeric
+from dateutil import relativedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
@@ -14,10 +16,11 @@ from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.decorators import disable_session_expiry_refresh
 from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, Account, ScheduledOutage, ScheduledOutageCategory, Task, StockroomItem, Consumable, SafetyIssue
-from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string
+from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string, get_month_timeframe
 from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.policy import check_policy_to_save_reservation, check_policy_to_cancel_reservation, check_policy_to_create_outage
+from NEMO.views.billing import get_billing_data
 from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
@@ -611,7 +614,7 @@ def email_usage_reminders(request):
 def email_daily_passdown(request):
 	# Make list of all events that belong in the daily passdown email"
 	#New shutdowns, New problems, Overnight access, Access and usage in the last day, Upcoming reservations, Upcoming configuration requests,
-	#Low stock items, Ongoing issues, Safety reports
+	#Low stock items, Ongoing issues, Safety reports, lab usage numbers
 	passdown = {}
 	now = timezone.now()
 	yesterday = now - timedelta(hours = 24)
@@ -655,9 +658,28 @@ def email_daily_passdown(request):
 	passdown['all_problems'] = Task.objects.filter(force_shutdown=False, cancelled=False, resolved=False)
 	passdown['safety_issues'] = SafetyIssue.objects.filter(resolved=False)
 
-	# Usage Data
-	# usage_data = {}
-	# cr = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area=7, customer.is_staff=False)
+	# Statistics
+	u = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now).exclude(customer__is_staff=True)
+	areadf = DataFrame.from_records(u.values('start', 'area__name', 'customer'))
+	startdate = [x.date() for x in areadf.loc[:,('start')]]
+	areadf['start_date'] = startdate
+	areacount = dict(areadf.groupby(['start_date', 'area__name']).nunique()['customer'].unstack().sum().astype(int))
+	area_unique_count = []
+	for i in range(0,len(areacount)):
+		area_unique_count.append({'area':list(areacount.keys())[i], 'entrances':list(areacount.values())[i]})
+	passdown['area_access_stats'] = area_unique_count
+	#startmonth, endmonth = get_month_timeframe((now.date()+relativedelta.relativedelta(months=-1)).strftime('%m/%d/%Y'))
+	billingstart, billingend = get_month_timeframe((now.date()+relativedelta.relativedelta(months=-1)).strftime('%m/%d/%Y'))
+	#billing_summary = get_billing_data(billingstart, billingend)
+	billingdf = DataFrame(get_billing_data(billingstart, billingend))
+	billingnumeric = to_numeric(billingdf['billable_days'], errors='coerce')
+	billingdf['billable_days'] = billingnumeric
+	billing_dict = dict(billingdf.groupby('type').sum()['billable_days'])
+	billing_summary = []
+	for i in range(0,len(billing_dict)):
+		billing_summary.append({'type':list(billing_dict.keys())[i], 'billable_days':list(billing_dict.values())[i]})
+	passdown['billing_summary'] = billing_summary
+
 	# main_cr_usage=len(cr)
 	# usage_data['main_cr'] = main_cr_usage
 	# pack = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area=8, customer.is_staff=False)

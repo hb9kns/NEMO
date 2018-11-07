@@ -14,13 +14,11 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from NEMO.utilities import parse_start_and_end_date, month_list, get_month_timeframe
 from NEMO.models import User, AreaAccessRecord, Account, Project
 
-@staff_member_required(login_url=None)
-@require_GET
-def get_billing_data(request):
+#@staff_member_required(login_url=None)
+#@require_GET
+def get_billing_data(start, end):
 	billing_result = []
 	try:
-		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
-
 		users = User.objects.all()
 		for user in users:
 			billable_days = 0
@@ -38,7 +36,7 @@ def get_billing_data(request):
 						billable_days += days
 					else:
 						billable_days += days + 1
-			user_billing = {'username': user.username, 'last_name': user.last_name, 'first_name': user.first_name, 'email': user.email, 'type': user.type, 'billable_days': billable_days}
+			user_billing = {'username': user.username, 'last_name': user.last_name, 'first_name': user.first_name, 'email': user.email, 'type': user.type.name, 'billable_days': billable_days}
 			billing_result.append(user_billing)
 	except:
 		pass
@@ -53,7 +51,7 @@ def billing(request):
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 		dictionary['start'] = start
 		dictionary['end'] = end
-		dictionary['billing_result'] = get_billing_data(request)
+		dictionary['billing_result'] = get_billing_data(start, end)
 	except:
 		pass
 	return render(request, 'billing.html', dictionary)
@@ -65,7 +63,7 @@ def billingcsv(request):
 	try:
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 		fn = "billing_" + start.strftime("%Y%m%d") + "_" + end.strftime("%Y%m%d") + ".csv"
-		billing_result = get_billing_data(request)
+		billing_result = get_billing_data(start, end)
 		response = HttpResponse(content_type='text/csv')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
 		fields = ['username', 'last_name', 'first_name', 'email', 'type', 'billable_days']
