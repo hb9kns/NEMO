@@ -7,21 +7,12 @@
 			Consultation requests are emailed to an address specified by the NEMO site administrator.
 			{% if user.is_staff %}
 				Use the <a href="{% url 'customization' %}">customizations page</a>
-<<<<<<< HEAD
-				to enter an email address, then all users will be able to send feedback.
-=======
 				to enter an email address, then all users will be able to send feedback and consultation requests.
->>>>>>> localdev
 			{% endif %}
 		</p>
 	{% else %}
 		<h1>Request a Design Consultation with the PRISM Cleanroom Staff</h1>
 		<p>
-<<<<<<< HEAD
-			We're continually working to improve the Cleanroom experience for everyone. By having a design consultation with the Cleanroom staff, you can take advantage of their experience to do your reseach more efficiently and effectively.<br>
-			Please give a brief description of your project and your availability to meet with staff. Upon submitting this form, you will recieve a Powerpoint template for the design consultation.
-		</p>
-=======
 			Use this form if you would like to meet with Cleanroom Staff to discuss your project.
 			We are available to assist with device and architectural design and process
 			integration and optimization, depending on your needs.
@@ -38,7 +29,6 @@
 		<p> We will review your request and respond to you within one week.
 			You will separately receive an email with a template for the types of information
 			we will find useful in assessing your device or process needs.</p>
->>>>>>> localdev
 		<form class="form" id="consultation_form" action="{% url 'consultation' %}" method="post">
 			{% csrf_token %}
 			<div class="form-group">

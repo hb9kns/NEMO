@@ -36,11 +36,7 @@ def get_billing_data(start, end):
 						billable_days += days
 					else:
 						billable_days += days + 1
-<<<<<<< HEAD
-			user_billing = {'username': user.username, 'last_name': user.last_name, 'first_name': user.first_name, 'email': user.email, 'type': user.type, 'billable_days': billable_days}
-=======
 			user_billing = {'username': user.username, 'last_name': user.last_name, 'first_name': user.first_name, 'email': user.email, 'type': user.type.name, 'billable_days': billable_days}
->>>>>>> localdev
 			billing_result.append(user_billing)
 	except:
 		pass
@@ -55,11 +51,7 @@ def billing(request):
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 		dictionary['start'] = start
 		dictionary['end'] = end
-<<<<<<< HEAD
-		dictionary['billing_result'] = get_billing_data(request)
-=======
 		dictionary['billing_result'] = get_billing_data(start, end)
->>>>>>> localdev
 	except:
 		pass
 	return render(request, 'billing.html', dictionary)
@@ -71,11 +63,7 @@ def billingcsv(request):
 	try:
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 		fn = "billing_" + start.strftime("%Y%m%d") + "_" + end.strftime("%Y%m%d") + ".csv"
-<<<<<<< HEAD
-		billing_result = get_billing_data(request)
-=======
 		billing_result = get_billing_data(start, end)
->>>>>>> localdev
 		response = HttpResponse(content_type='text/csv')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
 		fields = ['username', 'last_name', 'first_name', 'email', 'type', 'billable_days']

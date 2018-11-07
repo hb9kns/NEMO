@@ -8,11 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-<<<<<<< HEAD
-from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
-=======
 from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, stockroom, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
->>>>>>> localdev
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
