@@ -8,7 +8,11 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
+<<<<<<< HEAD
 from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
+=======
+from NEMO.views import abuse, accounts_and_projects, alerts, api, authentication, area_access, calendar, configuration_agenda, consumables, stockroom, contact_staff, email, feedback, get_projects, history, landing, jumbotron, kiosk, maintenance, mobile, nanofab_usage, qualifications, remote_work, resources, safety, sidebar, customization, staff_charges, status_dashboard, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
+>>>>>>> localdev
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -24,6 +28,7 @@ router.register(r'usage_events', api.UsageEventViewSet)
 router.register(r'area_access_records', api.AreaAccessRecordViewSet)
 router.register(r'tasks', api.TaskViewSet)
 router.register(r'scheduled_outages', api.ScheduledOutageViewSet)
+router.register(r'interlocks', api.InterlockViewSet)
 
 urlpatterns = [
 	# Authentication & error pages:
@@ -144,6 +149,7 @@ urlpatterns = [
 
 	# Consumables:
 	url(r'^consumables/$', consumables.consumables, name='consumables'),
+	url(r'^stockroom/$', stockroom.stockroom, name='stockroom'),
 
 	# Training:
 	url(r'^training/$', training.training, name='training'),
@@ -214,6 +220,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		url(r'^email_reservation_reminders/$', calendar.email_reservation_reminders, name='email_reservation_reminders'),
 		url(r'^email_usage_reminders/$', calendar.email_usage_reminders, name='email_usage_reminders'),
 		url(r'^cancel_unused_reservations/$', calendar.cancel_unused_reservations, name='cancel_unused_reservations'),
+		url(r'^email_daily_passdown/$', calendar.email_daily_passdown, name='email_daily_passdown'),
 
 		# Abuse:
 		url(r'^abuse/$', abuse.abuse, name='abuse'),

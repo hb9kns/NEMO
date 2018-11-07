@@ -47,6 +47,15 @@
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="control-label col-md-2" for="daily_passdown_email_address">Daily Passdown</label>
+						<div class="col-md-3">
+							<input type="email" id="daily_passdown_email_address" name="daily_passdown_email_address" class="form-control" value="{{ daily_passdown_email_address }}" placeholder="information@example.org">
+						</div>
+						<div class="col-md-7 form-control-static light-grey">
+							The email address to which the daily passdown is sent.
+						</div>
+					</div>
+					<div class="form-group">
 						<div class="col-md-3">
 							<input type="submit" value="Save email addresses" class="btn btn-success">
 						</div>
@@ -401,6 +410,26 @@
 					</div>
 					<div class="form-group">
 						<input type="submit" value="Upload new task email" class="btn btn-success">
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<h3>Daily Passdown email</h3>
+				<p>
+					This email is sent daily to update on the status of the lab
+				</p>
+				<ul>
+					<li><b>Passdown</b> - A large dictionary containing many passdown categories</li>
+				</ul>
+				<form method="POST" action="{% url 'customize' 'daily_passdown_email' %}" enctype="multipart/form-data">
+					{% csrf_token %}
+					<div class="form-group">
+						<input type="file" name="daily_passdown_email">
+					</div>
+					<div class="form-group">
+						<input type="submit" value="Upload daily passdown email" class="btn btn-success">
 					</div>
 				</form>
 			</div>

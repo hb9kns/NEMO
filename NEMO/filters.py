@@ -1,7 +1,7 @@
 from django_filters import FilterSet, IsoDateTimeFilter, BooleanFilter
 from django_filters.widgets import BooleanWidget
 
-from NEMO.models import Reservation, UsageEvent, AreaAccessRecord
+from NEMO.models import Reservation, UsageEvent, AreaAccessRecord, User
 
 
 class ReservationFilter(FilterSet):
@@ -14,13 +14,21 @@ class ReservationFilter(FilterSet):
 		fields = []
 
 
+class UserFilter(FilterSet):
+	class Meta:
+		model = User
+		fields = {
+			'type': ['exact'],
+			'physical_access_levels': ['exact'],
+		}
+
 class UsageEventFilter(FilterSet):
 	start_gte = IsoDateTimeFilter('start', lookup_expr='gte')
 	start_lt = IsoDateTimeFilter('start', lookup_expr='lt')
 
 	class Meta:
 		model = UsageEvent
-		fields = []
+		fields = ['tool', 'user']
 
 
 class AreaAccessRecordFilter(FilterSet):
@@ -29,4 +37,4 @@ class AreaAccessRecordFilter(FilterSet):
 
 	class Meta:
 		model = AreaAccessRecord
-		fields = []
+		fields = ['area']

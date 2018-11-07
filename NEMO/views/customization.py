@@ -28,7 +28,8 @@ customizable_key_values = [
 	'feedback_email_address',
 	'user_office_email_address',
 	'safety_email_address',
-	'abuse_email_address'
+	'abuse_email_address',
+	'daily_passdown_email_address'
 ]
 
 customizable_content = [
@@ -48,6 +49,7 @@ customizable_content = [
 	'task_status_notification',
 	'unauthorized_tool_access_email',
 	'usage_reminder_email',
+	'daily_passdown_email',
 ]
 
 
@@ -64,7 +66,7 @@ def set_customization(name, value):
 	if name not in customizable_key_values:
 		raise Exception(f'Invalid customization: {value}')
 	if value:
-		if name in ['feedback_email_address', 'user_office_email_address', 'safety_email_address', 'abuse_email_address']:
+		if name in ['feedback_email_address', 'user_office_email_address', 'safety_email_address', 'abuse_email_address', 'daily_passdown_email_address']:
 			validate_email(value)
 		Customization.objects.update_or_create(name=name, defaults={'value': value})
 	else:
@@ -92,6 +94,7 @@ def customize(request, element):
 		set_customization('safety_email_address', request.POST.get('safety_email_address', ''))
 		set_customization('abuse_email_address', request.POST.get('abuse_email_address', ''))
 		set_customization('user_office_email_address', request.POST.get('user_office_email_address', ''))
+		set_customization('daily_passdown_email_address', request.POST.get('daily_passdown_email_address', ''))
 	else:
 		return HttpResponseBadRequest('Invalid customization')
 	return redirect('customization')

@@ -238,6 +238,7 @@ class Tool(models.Model):
 	maximum_future_reservation_time = models.PositiveIntegerField(null=True, blank=True, help_text="The maximum amount of time (in minutes) that a user may reserve from the current time onwards.")
 	missed_reservation_threshold = models.PositiveIntegerField(null=True, blank=True, help_text="The amount of time (in minutes) that a tool reservation may go unused before it is automatically marked as \"missed\" and hidden from the calendar. Usage can be from any user, regardless of who the reservation was originally created for. The cancellation process is triggered by a timed job on the web server.")
 	allow_delayed_logoff = models.BooleanField(default=False, help_text='Upon logging off users may enter a delay before another user may use the tool. Some tools require "spin-down" or cleaning time after use.')
+	reservation_required = models.BooleanField(default=False, help_text='Require that users have a current (within 15 minutes) reservation in order to use the tool')
 	post_usage_questions = models.TextField(null=True, blank=True, help_text="")
 
 	class Meta:
@@ -481,7 +482,7 @@ class ConfigurationHistory(models.Model):
 class Account(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	active = models.BooleanField(default=True, help_text="Users may only charge to an account if it is active. Deactivate the account to block future billable activity (such as tool usage and consumable check-outs) of all the projects that belong to it.")
-
+	manager_email = models.EmailField(blank=True, null=True, help_text="Email address of the account manager")
 	class Meta:
 		ordering = ['name']
 
@@ -568,6 +569,15 @@ class UsageEvent(CalendarDisplay):
 	def __str__(self):
 		return str(self.id)
 
+class ConsumableCategory(models.Model):
+	name = models.CharField(max_length=100)
+
+	class Meta:
+		ordering = ['name']
+		verbose_name_plural = 'Consumable categories'
+
+	def __str__(self):
+		return self.name
 
 class Consumable(models.Model):
 	name = models.CharField(max_length=100)
@@ -583,18 +593,6 @@ class Consumable(models.Model):
 	def __str__(self):
 		return self.name
 
-
-class ConsumableCategory(models.Model):
-	name = models.CharField(max_length=100)
-
-	class Meta:
-		ordering = ['name']
-		verbose_name_plural = 'Consumable categories'
-
-	def __str__(self):
-		return self.name
-
-
 class ConsumableWithdraw(models.Model):
 	customer = models.ForeignKey(User, related_name="consumable_user", help_text="The user who will use the consumable item.")
 	merchant = models.ForeignKey(User, related_name="consumable_merchant", help_text="The staff member that performed the withdraw.")
@@ -609,6 +607,44 @@ class ConsumableWithdraw(models.Model):
 	def __str__(self):
 		return str(self.id)
 
+class StockroomCategory(models.Model):
+	name = models.CharField(max_length=100)
+
+	class Meta:
+		ordering = ['name']
+		verbose_name_plural = 'Stockroom categories'
+
+	def __str__(self):
+		return self.name
+
+class StockroomItem(models.Model):
+	name = models.CharField(max_length=100)
+	category = models.ForeignKey('StockroomCategory', blank=True, null=True)
+	quantity = models.IntegerField(help_text="The number of items currently in stock.")
+	cost = models.DecimalField(decimal_places=2, max_digits=6, default=0.00, help_text="The cost of this item")
+	visible = models.BooleanField(default=True)
+	reminder_threshold = models.IntegerField(help_text="More of this item should be ordered when the quantity falls below this threshold.")
+	reminder_email = models.EmailField(help_text="An email will be sent to this address when the quantity of this item falls below the reminder threshold.")
+
+	class Meta:
+		ordering = ['name']
+
+	def __str__(self):
+		return self.name
+
+class StockroomWithdraw(models.Model):
+	customer = models.ForeignKey(User, related_name="stockroom_user", help_text="The user who will use the stockroom item.")
+	merchant = models.ForeignKey(User, related_name="stockroom_merchant", help_text="The staff member that performed the withdraw.")
+	stock = models.ForeignKey(StockroomItem)
+	quantity = models.PositiveIntegerField()
+	project = models.ForeignKey(Project, help_text="The withdraw will be billed to this project.")
+	date = models.DateTimeField(default=timezone.now, help_text="The date and time when the user withdrew the consumable.")
+
+	class Meta:
+		ordering = ['-date']
+
+	def __str__(self):
+		return str(self.id)
 
 class InterlockCard(models.Model):
 	server = models.CharField(max_length=100)

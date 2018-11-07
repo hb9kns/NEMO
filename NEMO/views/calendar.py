@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime
 from http import HTTPStatus
 from re import match
+from pandas import DataFrame, to_numeric
+from dateutil import relativedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,13 +15,13 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.decorators import disable_session_expiry_refresh
-from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, ScheduledOutage, ScheduledOutageCategory
-from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string
+from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, Account, ScheduledOutage, ScheduledOutageCategory, Task, StockroomItem, Consumable, SafetyIssue
+from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string, get_month_timeframe
 from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.policy import check_policy_to_save_reservation, check_policy_to_cancel_reservation, check_policy_to_create_outage
+from NEMO.views.billing import get_billing_data
 from NEMO.widgets.tool_tree import ToolTree
-
 
 @login_required
 @require_GET
@@ -606,6 +608,96 @@ def email_usage_reminders(request):
 
 	return HttpResponse()
 
+@login_required
+@permission_required('NEMO.trigger_timed_services', raise_exception=True)
+@require_GET
+def email_daily_passdown(request):
+	# Make list of all events that belong in the daily passdown email"
+	#New shutdowns, New problems, Overnight access, Access and usage in the last day, Upcoming reservations, Upcoming configuration requests,
+	#Low stock items, Ongoing issues, Safety reports, lab usage numbers
+	passdown = {}
+	now = timezone.now()
+	yesterday = now - timedelta(hours = 24)
+	tomorrow = now + timedelta(hours = 24)
+	#Daily information
+	passdown['new_shutdowns'] = Task.objects.filter(creation_time__gt=yesterday, force_shutdown=True)
+	passdown['new_problems'] =  Task.objects.filter(creation_time__gt=yesterday, force_shutdown=False)
+	passdown['area_accesses'] = AreaAccessRecord.objects.filter(start__gt=yesterday)
+	passdown['tool_enables'] = UsageEvent.objects.filter(start__gt=yesterday)
+	overnight_access = AreaAccessRecord.objects.filter(start__gt=now - timedelta(hours = 12), start__lte=now)
+	overnight_usage=[]
+	for access in overnight_access:
+		if access.end == None:
+			end = now
+		else:
+			end = access.end
+		usage = UsageEvent.objects.filter(start__gt=access.start, start__lte=end, user=access.customer)
+		tools = Tool.objects.filter(id__in=usage.values_list('tool', flat=True))
+		overnight_usage.append({'user':access.customer, 'area':access.area, 'start':access.start, 'end':access.end, 'tools':tools})
+	passdown['overnight_usage'] = overnight_usage
+	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow)
+	tools = Tool.objects.exclude(configuration__isnull=True).exclude(configuration__exclude_from_configuration_agenda=True).values_list('id', flat=True)
+	reservations = Reservation.objects.filter(start__gt=now, start__lt=tomorrow, tool__id__in=tools, self_configuration=False, cancelled=False, missed=False, shortened=False).exclude(additional_information='').order_by('start')
+	passdown['configuration_requests'] = Tool.objects.filter(id__in=reservations.values_list('tool', flat=True))
+	stock = StockroomItem.objects.all()
+	low_stock = []
+	low_consumable = []
+	for i in stock:
+		if i.quantity <= i.reminder_threshold:
+			low_stock.append(i)
+	consumable = Consumable.objects.all()
+	for i in consumable:
+		if i.quantity <= i.reminder_threshold:
+			low_consumable.append(i)
+	passdown['low_stock'] = low_stock
+	passdown['low_consumable'] = low_consumable
+
+
+	#Ongoing issues
+	passdown['all_shutdowns'] = Task.objects.filter(force_shutdown=True, cancelled=False, resolved=False)
+	passdown['all_problems'] = Task.objects.filter(force_shutdown=False, cancelled=False, resolved=False)
+	passdown['safety_issues'] = SafetyIssue.objects.filter(resolved=False)
+
+	# Statistics
+	u = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now).exclude(customer__is_staff=True)
+	areadf = DataFrame.from_records(u.values('start', 'area__name', 'customer'))
+	startdate = [x.date() for x in areadf.loc[:,('start')]]
+	areadf['start_date'] = startdate
+	areacount = dict(areadf.groupby(['start_date', 'area__name']).nunique()['customer'].unstack().sum().astype(int))
+	area_unique_count = []
+	for i in range(0,len(areacount)):
+		area_unique_count.append({'area':list(areacount.keys())[i], 'entrances':list(areacount.values())[i]})
+	passdown['area_access_stats'] = area_unique_count
+	#startmonth, endmonth = get_month_timeframe((now.date()+relativedelta.relativedelta(months=-1)).strftime('%m/%d/%Y'))
+	billingstart, billingend = get_month_timeframe((now.date()+relativedelta.relativedelta(months=-1)).strftime('%m/%d/%Y'))
+	#billing_summary = get_billing_data(billingstart, billingend)
+	billingdf = DataFrame(get_billing_data(billingstart, billingend))
+	billingnumeric = to_numeric(billingdf['billable_days'], errors='coerce')
+	billingdf['billable_days'] = billingnumeric
+	billing_dict = dict(billingdf.groupby('type').sum()['billable_days'])
+	billing_summary = []
+	for i in range(0,len(billing_dict)):
+		billing_summary.append({'type':list(billing_dict.keys())[i], 'billable_days':list(billing_dict.values())[i]})
+	passdown['billing_summary'] = billing_summary
+
+	# main_cr_usage=len(cr)
+	# usage_data['main_cr'] = main_cr_usage
+	# pack = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area=8, customer.is_staff=False)
+	# pack_usage = len(pack)
+	# usage_data['packaging'] = pack_usage
+	# soft = AreaAccessRecord.objects.filter(start__gt=now-timedelta(days=90),start__lt=now, area__id__exact=3, customer.is_staff=False)
+	# smp_usage = len(soft)
+	# usage_data['smp'] = smp_usage
+
+	user_office_email = get_customization('user_office_email_address')
+	passdown_email = get_customization('daily_passdown_email_address')
+
+	message = get_media_file_contents('daily_passdown_email.html')
+	if message:
+		subject = "PRISM Cleanroom Daily Passdown"
+		rendered_message = Template(message).render(Context({'passdown': passdown}))
+		send_mail(subject, '', user_office_email, [passdown_email], html_message=rendered_message)
+	return HttpResponse()
 
 @login_required
 @require_GET
