@@ -635,7 +635,7 @@ def email_daily_passdown(request):
 		tools = Tool.objects.filter(id__in=usage.values_list('tool', flat=True))
 		overnight_usage.append({'user':access.customer, 'area':access.area, 'start':access.start, 'end':access.end, 'tools':tools})
 	passdown['overnight_usage'] = overnight_usage
-	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow)
+	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow, cancelled=False, missed=False, shortened=False).order_by('start')
 	tools = Tool.objects.exclude(configuration__isnull=True).exclude(configuration__exclude_from_configuration_agenda=True).values_list('id', flat=True)
 	reservations = Reservation.objects.filter(start__gt=now, start__lt=tomorrow, tool__id__in=tools, self_configuration=False, cancelled=False, missed=False, shortened=False).exclude(additional_information='').order_by('start')
 	passdown['configuration_requests'] = Tool.objects.filter(id__in=reservations.values_list('tool', flat=True))
