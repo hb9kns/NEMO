@@ -170,7 +170,7 @@ def task_resolution_form(request, task_id):
 
 def set_task_status(request, task, status_name, user):
 
-	if not user.is_staff:
+	if not user.is_staff and status_name:
 		raise ValueError("Only staff can set task status")
 
 		#If no status is given, assign to default status. This will make sure all tasks have a proper Task History
