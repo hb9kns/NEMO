@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from NEMO.filters import ReservationFilter, UsageEventFilter, AreaAccessRecordFilter, UserFilter
-from NEMO.models import User, Project, Account, Reservation, UsageEvent, AreaAccessRecord, Task, ScheduledOutage, Tool, Interlock
-from NEMO.serializers import UserSerializer, ProjectSerializer, AccountSerializer, ReservationSerializer, UsageEventSerializer, AreaAccessRecordSerializer, TaskSerializer, ScheduledOutageSerializer, ToolSerializer, InterlockSerializer
+from NEMO.models import User, Project, Account, Reservation, UsageEvent, AreaAccessRecord, Task, ScheduledOutage, Tool, Interlock, StockroomWithdraw
+from NEMO.serializers import UserSerializer, ProjectSerializer, AccountSerializer, ReservationSerializer, UsageEventSerializer, AreaAccessRecordSerializer, TaskSerializer, ScheduledOutageSerializer, ToolSerializer, InterlockSerializer, StockroomWithdrawSerializer
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -56,3 +56,7 @@ class ScheduledOutageViewSet(ReadOnlyModelViewSet):
 class InterlockViewSet(ReadOnlyModelViewSet):
 	queryset = Interlock.objects.all()
 	serializer_class = InterlockSerializer
+
+class StockroomWithdrawViewSet(ReadOnlyModelViewSet):
+	queryset = StockroomWithdraw.objects.all()
+	serializer_class = StockroomWithdrawSerializer

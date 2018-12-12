@@ -38,6 +38,8 @@
 						<th>Email</th>
 						<th>Type</th>
 						<th>Billable Days</th>
+						<th>Stockroom Charges</th>
+						<th>Staff Charges</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -49,6 +51,8 @@
 							<td>{{ x.email }}</td>
 							<td>{{ x.type }}</td>
 							<td>{{ x.billable_days }}</td>
+							<td>{{ x.stockroom_bill }}</td>
+							<td>{{ x.staff_charge_bill }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>
