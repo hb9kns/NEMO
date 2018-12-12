@@ -385,8 +385,45 @@ function scheduled_outage()
 
 function refresh_calendar_and_sidebar()
 {
-	$("#calendar").fullCalendar('refetchEvents');
 	refresh_sidebar_icons();
+	var event_type = get_event_type();
+	if(event_type === 'reservations' || event_type === 'nanofab usage')
+	{
+		var item = get_selected_item();
+		if(item !== 'personal_schedule')
+		{
+			if(item)
+			{
+				var tool_id_sel = item;
+				{% for tool in tool_summary %}
+					var tid = {{ tool.id }}
+					if(tid === item)
+					{
+						{% if tool.operational == False %}
+							$(".fc-view").css("background-color","#ffa0a0");
+						{% elif tool.in_use %}
+							$(".fc-view").css("background-color","#d2e7ff");
+						{% else %}
+							$(".fc-view").css("background-color","#ffffff");
+						{% endif %}
+					}
+				{% endfor %}
+			}
+			else
+			{
+				$(".fc-view").css("background-color","#ffffff");
+			}
+		}
+		else
+		{
+			$(".fc-view").css("background-color","#ffffff");
+		}
+	}
+	else
+	{
+		$(".fc-view").css("background-color","#ffffff");
+	}
+	$("#calendar").fullCalendar('refetchEvents');
 }
 
 function change_calendar_event_type(calling_element)
@@ -475,6 +512,13 @@ function on_load()
 		$("#user_search").autocomplete('users', get_specific_user_activity, {{ users|json_search_base }});
 	{% endif %}
 	$('[data-toggle~="tooltip"]').tooltip({ container: 'body' });
+	refresh_calendar_and_sidebar()
+	var daybtn = document.getElementsByClassName("fc-agendaDay-button")[0];
+	daybtn.addEventListener('click', function(){refresh_calendar_and_sidebar();});
+	var weekbtn = document.getElementsByClassName("fc-agendaWeek-button")[0];
+	weekbtn.addEventListener('click', function(){refresh_calendar_and_sidebar();});
+	var monthbtn = document.getElementsByClassName("fc-month-button")[0];
+	monthbtn.addEventListener('click', function(){refresh_calendar_and_sidebar();});
 }
 
 $(on_load);

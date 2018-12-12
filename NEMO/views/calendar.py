@@ -21,6 +21,7 @@ from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.policy import check_policy_to_save_reservation, check_policy_to_cancel_reservation, check_policy_to_create_outage
 from NEMO.views.billing import get_billing_data
+from NEMO.views.status_dashboard import create_tool_summary
 from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
@@ -36,10 +37,12 @@ def calendar(request, tool_id=None):
 
 	tools = Tool.objects.filter(visible=True).order_by('category', 'name')
 	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools})
+	tool_summary = create_tool_summary(request)
 	dictionary = {
 		'rendered_tool_tree_html': rendered_tool_tree_html,
 		'tools': tools,
 		'auto_select_tool': tool_id,
+		'tool_summary': tool_summary,
 	}
 	if request.user.is_staff:
 		dictionary['users'] = User.objects.all()
@@ -79,6 +82,7 @@ def event_feed(request):
 def reservation_event_feed(request, start, end):
 	events = Reservation.objects.filter(cancelled=False, missed=False, shortened=False)
 	outages = None
+
 	# Exclude events for which the following is true:
 	# The event starts and ends before the time-window, and...
 	# The event starts and ends after the time-window.
