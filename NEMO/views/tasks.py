@@ -1,14 +1,16 @@
+from smtplib import SMTPException
+
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import Template, Context
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
 
 from NEMO.forms import TaskForm, nice_errors
-from NEMO.models import Task, UsageEvent, Interlock, TaskCategory, Reservation, SafetyIssue, TaskStatus, TaskHistory
+from NEMO.models import Task, UsageEvent, Interlock, TaskCategory, Reservation, SafetyIssue, TaskStatus, TaskHistory, User
 from NEMO.utilities import bootstrap_primary_color, format_datetime
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.safety import send_safety_email_notification
@@ -79,20 +81,32 @@ def send_new_task_emails(request, task):
 		recipients = tuple([r for r in [task.tool.primary_owner.email, task.tool.secondary_owner.email, task.tool.notification_email_address] if r])
 		send_mail(subject, '', request.user.email, recipients, html_message=message)
 
-	# Send an email to any user (excluding staff) with a future reservation on the tool:
+	# Send an email to all users (excluding staff) qualified on the tool:
 	user_office_email = get_customization('user_office_email_address')
 	message = get_media_file_contents('new_task_email.html')
 	if user_office_email and message:
-		upcoming_reservations = Reservation.objects.filter(start__gt=timezone.now(), cancelled=False, tool=task.tool, user__is_staff=False)
-		for reservation in upcoming_reservations:
-			if not task.tool.operational:
-				subject = reservation.tool.name + " reservation problem"
-				rendered_message = Template(message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('danger'), 'fatal_error': True}))
-			else:
-				subject = reservation.tool.name + " reservation warning"
-				rendered_message = Template(message).render(Context({'reservation': reservation, 'template_color': bootstrap_primary_color('warning'), 'fatal_error': False}))
-			reservation.user.email_user(subject, rendered_message, user_office_email)
-
+		users = User.objects.filter(qualifications__id=task.tool.id, is_staff=False)
+		dictionary = {
+			'template_color': bootstrap_primary_color('danger') if task.force_shutdown else bootstrap_primary_color('warning'),
+			'user': request.user,
+			'task': task,
+			'tool': task.tool,
+			'tool_control_absolute_url': request.build_absolute_uri(task.tool.get_absolute_url()),
+			'labmember': True
+		}
+		subject = task.tool.name + (' shutdown' if task.force_shutdown else ' problem')
+		users = [x.email for x in users]
+		rendered_message = Template(message).render(Context(dictionary))
+		try:
+			email = EmailMultiAlternatives(subject, from_email=user_office_email, bcc=set(users))
+			email.attach_alternative(rendered_message, 'text/html')
+			email.send()
+		except SMTPException as e:
+			dictionary = {
+				'title': 'Email not sent',
+				'heading': 'There was a problem sending your email',
+				'content': 'NEMO was unable to send the email through the email server. The error message that NEMO received is: ' + str(e),
+			}
 
 @login_required
 @require_POST
