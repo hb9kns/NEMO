@@ -6,11 +6,13 @@ from django.shortcuts import render, get_object_or_404
 from django.template import Template, Context
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_GET
+from django.utils import timezone
 
 from NEMO.forms import SafetyIssueCreationForm, SafetyIssueUpdateForm
-from NEMO.models import SafetyIssue
+from NEMO.models import SafetyIssue, Alert
 from NEMO.views.customization import get_media_file_contents, get_customization
-
+from NEMO.views.alerts import send_alert_emails
+from NEMO.utilities import format_datetime
 
 @login_required
 @require_http_methods(['GET', 'POST'])
@@ -24,6 +26,18 @@ def safety(request):
 				'title': 'Concern received',
 				'heading': 'Your safety concern was sent to NanoFab staff and will be addressed promptly',
 			}
+			if form.cleaned_data['post_alert']:
+				now = timezone.now()
+				alert_title = "Alert: Cleanroom may not be safe for entry"
+				alert_preface = f'On {format_datetime(now)} {issue.reporter.get_full_name()} reported the following issue:\n'
+				alert_contents = (alert_preface + issue.concern)
+				safety_alert = Alert(title=alert_title, contents=alert_contents, creator=issue.reporter, debut_time=now)
+				safety_alert.save()
+				send_alert_emails(safety_alert)
+				dictionary = {
+					'title': 'Concern received',
+					'heading': 'Your safety concern was sent to NanoFab staff and will be addressed promptly. An alert has been posted, and all labmembers have been emailed.',
+				}
 			return render(request, 'acknowledgement.html', dictionary)
 	tickets = SafetyIssue.objects.filter(resolved=False).order_by('-creation_time')
 	if not request.user.is_staff:

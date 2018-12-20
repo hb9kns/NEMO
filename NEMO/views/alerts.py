@@ -4,10 +4,13 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template import Template, Context
 
 from NEMO.forms import AlertForm
-from NEMO.models import Alert
-
+from NEMO.models import Alert, User
+from NEMO.utilities import bootstrap_primary_color, format_datetime
+from NEMO.views.customization import get_customization, get_media_file_contents
 
 @staff_member_required(login_url=None)
 @require_http_methods(['GET', 'POST'])
@@ -54,3 +57,25 @@ def delete_alert(request, alert_id):
 
 def delete_expired_alerts():
 	Alert.objects.filter(expiration_time__lt=timezone.now()).delete()
+
+def send_alert_emails(alert):
+	user_office_email = get_customization('user_office_email_address')
+	generic_email = get_media_file_contents('generic_email.html')
+	if user_office_email and generic_email:
+		users = User.objects.filter(is_active=True).exclude(is_staff=True)
+		subject = alert.title
+		title = "Cleanroom Alert"
+		color = bootstrap_primary_color('danger')
+		greeting = 'Labmembers,'
+		message = alert.contents
+		dictionary = {
+			'title': title,
+			'greeting': greeting,
+			'contents': message,
+			'template_color': color,
+		}
+		msg = Template(generic_email).render(Context(dictionary))
+		users = [x.email for x in users]
+		email = EmailMultiAlternatives(subject, from_email=user_office_email, to=[user_office_email], bcc=set(users))
+		email.attach_alternative(msg, 'text/html')
+		email.send()
