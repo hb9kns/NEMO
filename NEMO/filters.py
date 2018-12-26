@@ -38,3 +38,12 @@ class AreaAccessRecordFilter(FilterSet):
 	class Meta:
 		model = AreaAccessRecord
 		fields = ['area']
+
+
+class UserFilter(FilterSet):
+
+	class Meta:
+		model = User
+		fields = {
+			'date_joined': ['month', 'year'],
+		}

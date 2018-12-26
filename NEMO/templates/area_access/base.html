@@ -12,6 +12,10 @@
 	<link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.css" %}"/>
 	<link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap-theme.css" %}"/>
 
+	{# NEMO #}
+	<script type="text/javascript" src="{% static "nemo.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "nemo.css" %}"/>
+
 	<!--suppress CssUnusedSymbol -->
 	<style>
 		.btn-extra-large
@@ -26,32 +30,51 @@
 	<div id="default_content">
 		{% block default_content %}
 		{% endblock %}
+		<div id="occupancy"></div>
 	</div>
 	<div id="error" style="display: none"><h1>There was a problem communicating with the web server. Please visit the user office for assistance.</h1></div>
 	<div id="status" style="display: none"></div>
 	<div><h1 style="color:lightgrey" id="badge_number"></h1></div>
 	<script type="text/javascript">
-		$(window).keypress(on_keypress);
-		var badge_number = "";
-		var timeout_handle = null;
+		$(window).keypress(on_keypress).keydown(on_keydown);
+		let record_badge_number = false;
+		let badge_number = "";
+		let timeout_handle = null;
+		let occupancy = new URLSearchParams(window.location.search).get('occupancy');
+
+		if(occupancy)
+		{
+			fetch_occupancy();
+			setInterval(fetch_occupancy, 30000);
+		}
+
+		{# Note that keydown and keyup provide a code indicating which key is pressed, while keypress indicates which character was entered. For example, a lowercase "a" will be reported as 65 by keydown and keyup, but as 97 by keypress. An uppercase "A" is reported as 65 by all events. Because of this distinction, when catching special keystrokes such as F2, .keydown() or .keyup() is a better choice. #}
+
 		function on_keypress(event)
 		{
-			if(event.which == 13) // Submit the badge number when 'Enter' is pressed.
-			{
-				clear_timeout();
-				{% block action %}{% endblock %}
-				$("#badge_number").html(badge_number + ", sent");
-				badge_number = "";
-			}
-			else
+			if(record_badge_number)
 			{
 				badge_number += String.fromCharCode(event.which);
 				$("#badge_number").html(badge_number);
 			}
 		}
+		function on_keydown(event)
+		{
+			if(event.which === 113) {# The F2 key activates badge number recording #}
+			{
+				record_badge_number = !record_badge_number;
+				if(!record_badge_number)
+				{
+					clear_timeout();
+					{% block action %}{% endblock %}
+					$("#badge_number").html(badge_number + ", sent");
+					badge_number = "";
+				}
+			}
+		}
 		function load_complete(response, status, xml_http_request)
 		{
-			if(status == "error")
+			if(status === "error")
 			{
 				$("#default_content").hide();
 				$("#status").hide();
@@ -67,6 +90,7 @@
 		}
 		function revert_to_default_content()
 		{
+			fetch_occupancy();
 			clear_timeout();
 			$("#status").hide();
 			$("#error").hide();
@@ -81,7 +105,7 @@
 		}
 		function just_open_the_door(badge_number)
 		{
-			var data = {
+			let data = {
 				'door_id': {{ door.id }},
 				'badge_number': badge_number,
 				'csrfmiddlewaretoken': '{{ csrf_token }}'
@@ -92,7 +116,7 @@
 		}
 		function enter_area(badge_number, project_id)
 		{
-			var data = {
+			let data = {
 				'door_id': {{ door.id }},
 				'badge_number': badge_number,
 				'csrfmiddlewaretoken': '{{ csrf_token }}'
@@ -105,7 +129,7 @@
 		}
 		function exit_area(badge_number)
 		{
-			var data = {
+			let data = {
 				'door_id': {{ door.id }},
 				'badge_number': badge_number,
 				'csrfmiddlewaretoken': '{{ csrf_token }}'
@@ -113,6 +137,10 @@
 			$("#default_content").hide();
 			$("#error").hide();
 			$("#status").html("<h1>Logging you out of the {{ area|lower }}...</h1>").show().load('{% url 'logout_of_area' door.id %}', data, load_complete);
+		}
+		function fetch_occupancy()
+		{
+			ajax_get('{% url 'occupancy' %}', {'occupancy': occupancy}, function(response) { $("#occupancy").html(response); });
 		}
 	</script>
 </body>

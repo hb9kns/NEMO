@@ -1,4 +1,5 @@
 from smtplib import SMTPException
+from textwrap import dedent
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -7,7 +8,7 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import Template, Context
 from django.utils import timezone
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.forms import TaskForm, nice_errors
 from NEMO.models import Task, UsageEvent, Interlock, TaskCategory, Reservation, SafetyIssue, TaskStatus, TaskHistory, User
@@ -78,7 +79,7 @@ def send_new_task_emails(request, task):
 		# Send an email to the appropriate NanoFab staff that a new task has been created:
 		subject = ('SAFETY HAZARD: ' if task.safety_hazard else '') + task.tool.name + (' shutdown' if task.force_shutdown else ' problem')
 		message = Template(message).render(Context(dictionary))
-		recipients = tuple([r for r in [task.tool.primary_owner.email, task.tool.secondary_owner.email, task.tool.notification_email_address] if r])
+		recipients = tuple([r for r in [task.tool.primary_owner.email, *task.tool.backup_owners.all().values_list('email', flat=True), task.tool.notification_email_address] if r])
 		send_mail(subject, '', request.user.email, recipients, html_message=message)
 
 	# Send an email to all users (excluding staff) qualified on the tool:
@@ -134,6 +135,36 @@ def cancel(request, task_id):
 	return redirect('tool_control')
 
 
+def micromanage(task, url):
+	# If there's no micromanager present, let the techs do their job and leave them alone...
+	if not hasattr(settings, 'MICROMANAGER'):
+		return
+
+	# Otherwise, let the micromanagement begin...
+	task.refresh_from_db()
+	if task.resolved:
+		subject = f'{task.tool} task resolved'
+	else:
+		subject = f'{task.tool} task updated'
+	message = f"""
+A task for the {task.tool} was just modified by {task.last_updated_by}.
+
+The latest update is at the bottom of the description. The entirety of the task status follows:
+
+Task problem description:
+{task.problem_description}
+
+Task progress description:
+{task.progress_description}
+
+Task resolution description:
+{task.resolution_description}
+
+Visit {url} to view the tool control page for the task.
+"""
+	send_mail(subject, message, settings.SERVER_EMAIL, settings.MICROMANAGER)
+
+
 @staff_member_required(login_url=None)
 @require_POST
 def update(request, task_id):
@@ -150,6 +181,10 @@ def update(request, task_id):
 	form.save()
 	set_task_status(request, task, request.POST.get('status'), request.user)
 	determine_tool_status(task.tool)
+	try:
+		micromanage(task, request.build_absolute_uri(task.tool.get_absolute_url()))
+	except:
+		pass
 	if next_page == 'maintenance':
 		return redirect('maintenance')
 	else:
@@ -213,5 +248,12 @@ def set_task_status(request, task, status_name, user):
 	# Send an email to the appropriate NanoFab staff that a new task has been created:
 	subject = f'{task.tool} task notification'
 	message = Template(message).render(Context(dictionary))
-	recipients = filter(None, [status.notify_primary_tool_owner, status.notify_secondary_tool_owner, status.notify_tool_notification_email, status.custom_notification_email_address])
+	recipients = [
+		task.tool.primary_tool_owner.email if status.notify_primary_tool_owner else None,
+		task.tool.notification_email_address if status.notify_tool_notification_email else None,
+		status.custom_notification_email_address
+	]
+	if status.notify_backup_tool_owners:
+		recipients += task.tool.backup_tool_owners.values_list('email')
+	recipients = filter(None, recipients)
 	send_mail(subject, '', user.email, recipients, html_message=message)

@@ -1,5 +1,8 @@
 from re import search
+from urllib.parse import urljoin
 
+import requests
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
@@ -79,3 +82,22 @@ def qualify(authorizer, user, tool):
 	entry.child_content_object = user
 	entry.action = entry.Action.ADDED
 	entry.save()
+
+	if tool.grant_physical_access_level_upon_qualification:
+		if tool.grant_physical_access_level_upon_qualification not in user.physical_access_levels.all():
+			user.physical_access_levels.add(tool.grant_physical_access_level_upon_qualification)
+			entry = MembershipHistory()
+			entry.authorizer = authorizer
+			entry.parent_content_object = tool.grant_physical_access_level_upon_qualification
+			entry.child_content_object = user
+			entry.action = entry.Action.ADDED
+			entry.save()
+
+	if settings.IDENTITY_SERVICE['available']:
+		if tool.grant_badge_reader_access_upon_qualification:
+			parameters = {
+				'username': user.username,
+				'domain': user.domain,
+				'requested_area': tool.grant_badge_reader_access_upon_qualification,
+			}
+			requests.put(urljoin(settings.IDENTITY_SERVICE['url'], '/add/'), data=parameters, timeout=3)

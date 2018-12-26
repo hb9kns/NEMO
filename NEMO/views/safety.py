@@ -2,8 +2,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.template import Template, Context
+from django.shortcuts import get_object_or_404, render
+from django.template import Context, Template
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_GET
 from django.utils import timezone
@@ -12,11 +12,13 @@ from NEMO.forms import SafetyIssueCreationForm, SafetyIssueUpdateForm
 from NEMO.models import SafetyIssue, Alert
 from NEMO.views.customization import get_media_file_contents, get_customization
 from NEMO.views.alerts import send_alert_emails
+from NEMO.views.notifications import create_safety_notification, delete_safety_notification, get_notifications
 from NEMO.utilities import format_datetime
 
 @login_required
 @require_http_methods(['GET', 'POST'])
 def safety(request):
+	dictionary = {}
 	if request.method == 'POST':
 		form = SafetyIssueCreationForm(request.user, data=request.POST)
 		if form.is_valid():
@@ -42,8 +44,10 @@ def safety(request):
 	tickets = SafetyIssue.objects.filter(resolved=False).order_by('-creation_time')
 	if not request.user.is_staff:
 		tickets = tickets.filter(visible=True)
-	safety_introduction = get_media_file_contents('safety_introduction.html')
-	return render(request, 'safety/safety.html', {'tickets': tickets, 'safety_introduction': safety_introduction})
+	dictionary['tickets'] = tickets
+	dictionary['safety_introduction'] = get_media_file_contents('safety_introduction.html')
+	dictionary['notifications'] = get_notifications(request.user, SafetyIssue)
+	return render(request, 'safety/safety.html', dictionary)
 
 
 def send_safety_email_notification(request, issue):
@@ -77,7 +81,9 @@ def update_safety_issue(request, ticket_id):
 		ticket = get_object_or_404(SafetyIssue, id=ticket_id)
 		form = SafetyIssueUpdateForm(request.user, data=request.POST, instance=ticket)
 		if form.is_valid():
-			form.save()
+			issue = form.save()
+			if issue.resolved:
+				delete_safety_notification(issue)
 			return HttpResponseRedirect(reverse('safety'))
 	dictionary = {
 		'ticket': get_object_or_404(SafetyIssue, id=ticket_id)

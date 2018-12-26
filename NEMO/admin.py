@@ -4,8 +4,8 @@ from django.contrib.admin import register
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Permission
 
-from NEMO.actions import lock_selected_interlocks, unlock_selected_interlocks
-from NEMO.models import Tool, UsageEvent, Reservation, Project, Account, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, StockroomCategory, InterlockCard, Interlock, Task, MembershipHistory, ActivityHistory, Configuration, TaskCategory, Comment, ConfigurationHistory, Resource, User, TrainingSession, StaffCharge, AreaAccessRecord, ConsumableCategory, ResourceCategory, Door, PhysicalAccessLevel, PhysicalAccessLog, SafetyIssue, Area, Alert, UserType, ContactInformationCategory, ContactInformation, LandingPageChoice, Customization, ScheduledOutage, TaskHistory, TaskStatus, ScheduledOutageCategory
+from NEMO.actions import lock_selected_interlocks, synchronize_with_tool_usage, unlock_selected_interlocks
+from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, ContactInformation, ContactInformationCategory, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserType
 
 admin.site.site_header = "NEMO"
 admin.site.site_title = "NEMO"
@@ -114,6 +114,15 @@ class ToolAdminForm(forms.ModelForm):
 		)
 	)
 
+	backup_owners = forms.ModelMultipleChoiceField(
+		queryset=User.objects.all(),
+		required=False,
+		widget=FilteredSelectMultiple(
+			verbose_name='Users',
+			is_stacked=False
+		)
+	)
+
 	required_resources = forms.ModelMultipleChoiceField(
 		queryset=Resource.objects.all(),
 		required=False,
@@ -148,8 +157,8 @@ class ToolAdmin(admin.ModelAdmin):
 	fieldsets = (
 		(None, {'fields': ('name', 'category', 'qualified_users', 'post_usage_questions'),}),
 		('Current state', {'fields': ('visible', 'operational'),}),
-		('Contact information', {'fields': ('primary_owner', 'secondary_owner', 'notification_email_address', 'location', 'phone_number'),}),
-		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'interlock', 'allow_delayed_logoff', 'reservation_required'),}),
+		('Contact information', {'fields': ('primary_owner', 'backup_owners', 'notification_email_address', 'location', 'phone_number'),}),
+		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'grant_physical_access_level_upon_qualification', 'grant_badge_reader_access_upon_qualification', 'interlock', 'allow_delayed_logoff'),}),
 		('Dependencies', {'fields': ('required_resources', 'nonrequired_resources'),}),
 	)
 
@@ -321,7 +330,7 @@ class InterlockCardAdmin(admin.ModelAdmin):
 @register(Interlock)
 class InterlockAdmin(admin.ModelAdmin):
 	list_display = ('id', 'card', 'channel', 'state', 'tool', 'door')
-	actions = [lock_selected_interlocks, unlock_selected_interlocks]
+	actions = [lock_selected_interlocks, unlock_selected_interlocks, synchronize_with_tool_usage]
 	readonly_fields = ['state', 'most_recent_reply']
 
 
@@ -339,7 +348,7 @@ class TaskCategoryAdmin(admin.ModelAdmin):
 
 @register(TaskStatus)
 class TaskStatusAdmin(admin.ModelAdmin):
-	list_display = ('name', 'notify_primary_tool_owner', 'notify_secondary_tool_owner', 'notify_tool_notification_email', 'custom_notification_email_address')
+	list_display = ('name', 'notify_primary_tool_owner', 'notify_backup_tool_owners', 'notify_tool_notification_email', 'custom_notification_email_address')
 
 
 @register(TaskHistory)
@@ -463,6 +472,17 @@ class ScheduledOutageCategoryAdmin(admin.ModelAdmin):
 @register(ScheduledOutage)
 class ScheduledOutageAdmin(admin.ModelAdmin):
 	list_display = ('id', 'tool', 'resource', 'creator', 'title', 'start', 'end')
+
+
+@register(News)
+class NewsAdmin(admin.ModelAdmin):
+	list_display = ('id', 'created', 'last_updated', 'archived', 'title')
+	list_filter = ('archived',)
+
+
+@register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+	list_display = ('id', 'user', 'expiration', 'content_type', 'object_id')
 
 
 admin.site.register(ResourceCategory)

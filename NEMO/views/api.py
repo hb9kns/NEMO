@@ -10,6 +10,7 @@ class UserViewSet(ReadOnlyModelViewSet):
 	serializer_class = UserSerializer
 	filter_class = UserFilter
 
+
 class ProjectViewSet(ReadOnlyModelViewSet):
 	queryset = Project.objects.all()
 	serializer_class = ProjectSerializer
