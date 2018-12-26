@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from NEMO.models import User, Project, Account, Reservation, AreaAccessRecord, UsageEvent, Task, TaskHistory, ScheduledOutage, Tool, Interlock
+from NEMO.models import User, Project, Account, Reservation, AreaAccessRecord, UsageEvent, Task, TaskHistory, ScheduledOutage, Tool, Interlock, StockroomWithdraw
 
 
 class UserSerializer(ModelSerializer):
@@ -67,4 +67,9 @@ class ScheduledOutageSerializer(ModelSerializer):
 class InterlockSerializer(ModelSerializer):
 	class Meta:
 		model = Interlock
+		fields = '__all__'
+
+class StockroomWithdrawSerializer(ModelSerializer):
+	class Meta:
+		model = StockroomWithdraw
 		fields = '__all__'

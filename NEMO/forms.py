@@ -106,6 +106,7 @@ class CommentForm(ModelForm):
 
 class SafetyIssueCreationForm(ModelForm):
 	report_anonymously = BooleanField(required=False, initial=False)
+	post_alert = BooleanField(required=False, initial=False)
 
 	class Meta:
 		model = SafetyIssue
@@ -123,7 +124,9 @@ class SafetyIssueCreationForm(ModelForm):
 
 	def save(self, commit=True):
 		instance = super(SafetyIssueCreationForm, self).save(commit=False)
-		if not self.cleaned_data['report_anonymously']:
+		if  self.cleaned_data['post_alert']:
+			self.instance.reporter = self.user
+		elif not self.cleaned_data['report_anonymously']:
 			self.instance.reporter = self.user
 		if commit:
 			instance.save()
@@ -272,7 +275,7 @@ class EmailBroadcastForm(Form):
 	contents = CharField(required=False)
 	copy_me = BooleanField(initial=True)
 
-	audience = ChoiceField([('tool', 'tool'), ('project', 'project'), ('account', 'account')])
+	audience = ChoiceField([('tool', 'tool'), ('project', 'project'), ('account', 'account'), ('all', 'all')])
 	selection = IntegerField()
 	only_active_users = BooleanField(initial=True)
 

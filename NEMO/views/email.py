@@ -74,6 +74,9 @@ def email_broadcast(request, audience=''):
 		dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
 	elif audience == 'account':
 		dictionary['search_base'] = Account.objects.filter(active=True)
+	elif audience == 'all':
+		dictionary['search_base'] = 'all'
+		dictionary['all'] = True
 	dictionary['audience'] = audience
 	return render(request, 'email/email_broadcast.html', dictionary)
 
@@ -90,6 +93,8 @@ def compose_email(request):
 				users = User.objects.filter(projects__id=selection).distinct()
 			elif audience == 'account':
 				users = User.objects.filter(projects__account__id=selection).distinct()
+			elif audience == 'all':
+				users = User.objects.all()
 			else:
 				dictionary = {'error': 'You specified an invalid audience'}
 				return render(request, 'email/email_broadcast.html', dictionary)
@@ -143,6 +148,8 @@ def send_broadcast_email(request):
 			users = User.objects.filter(projects__id=selection)
 		elif audience == 'account':
 			users = User.objects.filter(projects__account__id=selection)
+		elif audience == 'all':
+			users = User.objects.all()
 		if active_choice:
 			users.filter(is_active=True)
 	except:

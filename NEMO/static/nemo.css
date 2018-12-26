@@ -134,6 +134,11 @@ label
 	color: lightgrey;
 }
 
+.red
+{
+	color: red;
+}
+
 .hover-black:hover
 {
 	color: black;

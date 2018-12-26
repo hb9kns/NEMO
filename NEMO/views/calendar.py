@@ -21,6 +21,7 @@ from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.policy import check_policy_to_save_reservation, check_policy_to_cancel_reservation, check_policy_to_create_outage
 from NEMO.views.billing import get_billing_data
+from NEMO.views.status_dashboard import create_tool_summary
 from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
@@ -36,10 +37,12 @@ def calendar(request, tool_id=None):
 
 	tools = Tool.objects.filter(visible=True).order_by('category', 'name')
 	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools})
+	tool_summary = create_tool_summary(request)
 	dictionary = {
 		'rendered_tool_tree_html': rendered_tool_tree_html,
 		'tools': tools,
 		'auto_select_tool': tool_id,
+		'tool_summary': tool_summary,
 	}
 	if request.user.is_staff:
 		dictionary['users'] = User.objects.all()
@@ -79,6 +82,7 @@ def event_feed(request):
 def reservation_event_feed(request, start, end):
 	events = Reservation.objects.filter(cancelled=False, missed=False, shortened=False)
 	outages = None
+
 	# Exclude events for which the following is true:
 	# The event starts and ends before the time-window, and...
 	# The event starts and ends after the time-window.
@@ -635,7 +639,7 @@ def email_daily_passdown(request):
 		tools = Tool.objects.filter(id__in=usage.values_list('tool', flat=True))
 		overnight_usage.append({'user':access.customer, 'area':access.area, 'start':access.start, 'end':access.end, 'tools':tools})
 	passdown['overnight_usage'] = overnight_usage
-	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow)
+	passdown['upcoming_reservations'] = Reservation.objects.filter(start__gt=now, start__lte=tomorrow, cancelled=False, missed=False, shortened=False).order_by('start')
 	tools = Tool.objects.exclude(configuration__isnull=True).exclude(configuration__exclude_from_configuration_agenda=True).values_list('id', flat=True)
 	reservations = Reservation.objects.filter(start__gt=now, start__lt=tomorrow, tool__id__in=tools, self_configuration=False, cancelled=False, missed=False, shortened=False).exclude(additional_information='').order_by('start')
 	passdown['configuration_requests'] = Tool.objects.filter(id__in=reservations.values_list('tool', flat=True))
