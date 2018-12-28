@@ -20,6 +20,7 @@ class UserFilter(FilterSet):
 		fields = {
 			'type': ['exact'],
 			'physical_access_levels': ['exact'],
+			'date_joined': ['month', 'year'],
 		}
 
 class UsageEventFilter(FilterSet):
@@ -38,12 +39,3 @@ class AreaAccessRecordFilter(FilterSet):
 	class Meta:
 		model = AreaAccessRecord
 		fields = ['area']
-
-
-class UserFilter(FilterSet):
-
-	class Meta:
-		model = User
-		fields = {
-			'date_joined': ['month', 'year'],
-		}
