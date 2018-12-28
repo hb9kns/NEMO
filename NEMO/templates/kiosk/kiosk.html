@@ -55,8 +55,12 @@
 	{
 		if(record_badge_number)
 		{
-			badge_number += String.fromCharCode(event.which);
-			$("#badge_number").html(badge_number);
+			if(event.which >= 48)
+			{
+				badge_number += String.fromCharCode(event.which);
+				console.log(badge_number)
+				$("#badge_number").html(badge_number);
+			}
 		}
 	}
 	function on_keydown(event)

@@ -41,7 +41,7 @@
 		let badge_number = "";
 		let timeout_handle = null;
 		let occupancy = new URLSearchParams(window.location.search).get('occupancy');
-
+		
 		if(occupancy)
 		{
 			fetch_occupancy();
@@ -54,8 +54,11 @@
 		{
 			if(record_badge_number)
 			{
-				badge_number += String.fromCharCode(event.which);
-				$("#badge_number").html(badge_number);
+				if(event.which >= 48)
+				{
+					badge_number += String.fromCharCode(event.which);
+					$("#badge_number").html(badge_number);
+				}
 			}
 		}
 		function on_keydown(event)
