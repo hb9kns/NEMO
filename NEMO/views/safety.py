@@ -24,6 +24,7 @@ def safety(request):
 		if form.is_valid():
 			issue = form.save()
 			send_safety_email_notification(request, issue)
+			create_safety_notification(issue)
 			dictionary = {
 				'title': 'Concern received',
 				'heading': 'Your safety concern was sent to NanoFab staff and will be addressed promptly',

@@ -9,7 +9,7 @@ from django.views.decorators.http import require_GET
 from NEMO.models import Alert, LandingPageChoice, Reservation, Resource, UsageEvent
 from NEMO.views.alerts import delete_expired_alerts
 from NEMO.views.area_access import able_to_self_log_in_to_area
-from NEMO.views.notifications import delete_expired_notifications, get_notificaiton_counts
+from NEMO.views.notifications import delete_expired_notifications, get_notification_counts
 
 
 @login_required
@@ -34,7 +34,7 @@ def landing(request):
 		'upcoming_reservations': Reservation.objects.filter(user=request.user.id, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False).exclude(tool_id__in=tools_in_use, start__lte=fifteen_minutes_from_now).order_by('start')[:3],
 		'disabled_resources': Resource.objects.filter(available=False),
 		'landing_page_choices': landing_page_choices,
-		'notification_counts': get_notificaiton_counts(request.user),
+		'notification_counts': get_notification_counts(request.user),
 		'self_log_in': able_to_self_log_in_to_area(request.user),
 	}
 	return render(request, 'landing.html', dictionary)
