@@ -66,6 +66,8 @@ class UserManager(BaseUserManager):
 
 class UserType(models.Model):
 	name = models.CharField(max_length=50, unique=True)
+	daily_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+	staff_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
 	def __str__(self):
 		return self.name

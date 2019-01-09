@@ -35,6 +35,7 @@ setup(
 		'pymodbus3==1.0.0',
 		'numpy==1.15.3',
 		'pandas==0.23.4',
+		'XlsxWriter==1.1.2',
 	],
 	entry_points={
 		'console_scripts': ['nemo=NEMO.provisioning:entry_point'],

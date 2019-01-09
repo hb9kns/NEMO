@@ -1,4 +1,6 @@
-import csv
+from xlsxwriter.workbook import Workbook
+from xlsxwriter.utility import xl_rowcol_to_cell, xl_range
+from decimal import *
 
 from datetime import timedelta, date
 from time import sleep
@@ -18,14 +20,15 @@ from NEMO.models import User, AreaAccessRecord, Account, Project, StockroomWithd
 #@require_GET
 def get_billing_data(start, end):
 	billing_result = []
-	daily_rate = {1:0,2:135,3:0,4:220,5:0,6:45,7:0,8:0}
-	staff_charge_rate = {'Internal Academic':80,'External Academic':130,'Industrial':480,'Undergraduate':80}
+	#daily_rate = {'Internal - Full':135, 'Internal - Unlimited':0, 'Internal - SMP':67.5, 'Internal - Packaging':67.5, 'External Academic':220,'Industrial':0,'Undergraduate':45}
 
-	users = User.objects.all().exclude(type=1).exclude(type=3).exclude(type=7).exclude(type=8)
+	#staff_charge_rate = {'Internal - Full':80, 'Internal - Unlimited':80, 'Internal - SMP':80, 'Internal - Packaging':80, 'External Academic':130,'Industrial':480,'Undergraduate':80}
+
+	users = User.objects.all().exclude(type=1).exclude(type=3).exclude(type=7).exclude(type=8).order_by('type', 'last_name')
 	for user in users:
 		billable_days = 0
 		try:
-			user_access = AreaAccessRecord.objects.filter(customer=user, end__gte=start, end__lt=end, staff_charge=None).order_by('start')
+			user_access = AreaAccessRecord.objects.filter(customer=user, end__gte=start, end__lt=end, staff_charge=None).exclude(project__id=6).order_by('start')
 			for index, access_event in enumerate(user_access):
 				start_date = timezone.localtime(access_event.start).date()
 				end_date = timezone.localtime(access_event.end).date()
@@ -53,10 +56,25 @@ def get_billing_data(start, end):
 			staff_charge = StaffCharge.objects.filter(customer=user, end__gte=start, end__lt=end, validated=True)
 			for charge in staff_charge:
 				chargetime = charge.end-charge.start
-				staff_charge_bill += chargetime.total_seconds()/3600*staff_charge_rate[user.type.name]
+				staff_charge_bill += round(Decimal(chargetime.total_seconds()/3600)*user.type.staff_rate,2)
 		except:
 			pass
-		user_billing = {'username': user.username, 'last_name': user.last_name, 'first_name': user.first_name, 'email': user.email, 'type': user.type.name, 'billable_days': billable_days, 'stockroom_bill': stockroom_bill, 'staff_charge_bill': round(staff_charge_bill,2)}
+		name = user.last_name + ", " + user.first_name
+		usage_bill=0
+		try:
+			principal_inv = user.active_projects().exclude(id=6).values_list('account__name', flat=True)[0]
+		except:
+			principal_inv = "unknown"
+		if user.type.name == 'Internal - Unlimited':
+			usage_bill = 1125
+		elif user.type.name == 'Internal - Full' or user.type.name == 'Internal - Packaging' or user.type.name == 'Internal - SMP':
+			if billable_days > 10:
+				usage_bill = 10*user.type.daily_rate+(billable_days-10)*45
+			else:
+				usage_bill = billable_days*user.type.daily_rate
+		else:
+			usage_bill = billable_days*user.type.daily_rate
+		user_billing = {'username': user.username, 'name': name, 'email': user.email, 'PI': principal_inv, 'user_type': user.type.name, 'billable_days': billable_days, 'rate':user.type.daily_rate, 'usage_bill': usage_bill, 'stockroom_bill': stockroom_bill, 'staff_charge_bill': staff_charge_bill, 'total_bill': usage_bill+staff_charge_bill+stockroom_bill}
 		billing_result.append(user_billing)
 
 	return billing_result
@@ -78,18 +96,44 @@ def billing(request):
 
 @staff_member_required(login_url=None)
 @require_GET
-def billingcsv(request):
+def billingxls(request):
+	dictionary = {}
 	try:
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
-		fn = "billing_" + start.strftime("%Y%m%d") + "_" + end.strftime("%Y%m%d") + ".csv"
+		fn = "billing_" + start.strftime("%Y%m%d") + "_" + end.strftime("%Y%m%d") + ".xlsx"
 		billing_result = get_billing_data(start, end)
-		response = HttpResponse(content_type='text/csv')
+		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
-		fields = ['username', 'last_name', 'first_name', 'email', 'type', 'billable_days', 'stockroom_bill', 'staff_charge_bill']
-		writer = csv.DictWriter(response, fields)
-		writer.writeheader()
+		book = Workbook(response, {'in_memory': True})
+		sheet = book.add_worksheet('billing')
+		bold = book.add_format()
+		bold.set_bold()
+		money=book.add_format()
+		money.set_num_format('$0.00')
+		redgreen = book.add_format()
+		redgreen.set_num_format('[Green]General;[Red]-General;General')
+		rgmoney = book.add_format()
+		rgmoney.set_num_format('[Green]$0.00;[Red]-$0.00;$0.00')
+		fields = ['Username', 'Name', 'Email', 'PI', 'Type', 'Billable Days', 'Adjustments', 'Rate', 'Usage Bill', 'Stockroom Bill', 'Staff Charge Bill', 'Final Adjustments', 'Total Bill']
+		sheet.write_row('A1', fields, bold)
+		iter = 1
 		for r in billing_result:
-			writer.writerow(r)
+			days_cell = xl_rowcol_to_cell(iter,5)
+			adj_cell = xl_rowcol_to_cell(iter,7)
+			if r['user_type'] == 'Internal - Unlimited':
+				usage_eq = 1125
+			elif r['user_type'] == 'Internal - Full'or r['user_type'] == 'Internal - Packaging' or r['user_type'] == 'Internal - SMP':
+				usage_eq = f'=min({xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)},10)*{xl_rowcol_to_cell(iter,7)}+max(-10+{xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)},0)*45'
+			else:
+				usage_eq = f'=({xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)})*{xl_rowcol_to_cell(iter,7)}'
+			total_eq = f'=sum({xl_range(iter, 8, iter, 11)})'
+			row = [r['username'], r['name'], r['email'], r['PI'], r['user_type'], r['billable_days'], "", r['rate'], usage_eq, r['stockroom_bill'], r['staff_charge_bill'], "", total_eq]
+			sheet.write_row(iter,0,row)
+			iter +=1
+		sheet.set_column('H:M', None, money)
+		sheet.set_column('G:G', None, redgreen)
+		sheet.set_column('L:L', None, rgmoney)
+		book.close()
+		return response
 	except:
-		pass
-	return response
+		return render(request, 'billing.html', dictionary)

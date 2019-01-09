@@ -224,7 +224,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 
 		#billing
 		url(r'^billing/$', billing.billing, name='billing'),
-		url(r'^billingcsv/$', billing.billingcsv, name='billingcsv'),
+		url(r'^billingxls/$', billing.billingxls, name='billingxls'),
 
 		# General area occupancy table, for use with Kiosk and Area Access tablets
 		url(r'^occupancy/$', status_dashboard.occupancy, name='occupancy'),

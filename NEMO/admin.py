@@ -387,7 +387,7 @@ class MembershipHistoryAdmin(admin.ModelAdmin):
 
 @register(UserType)
 class UserTypeAdmin(admin.ModelAdmin):
-	list_display = ('name',)
+	list_display = ('name', 'daily_rate', 'staff_rate')
 
 
 @register(User)
