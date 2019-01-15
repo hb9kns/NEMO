@@ -678,7 +678,7 @@ def email_daily_passdown(request):
 	billingdf = DataFrame(get_billing_data(billingstart, billingend))
 	billingnumeric = to_numeric(billingdf['billable_days'], errors='coerce')
 	billingdf['billable_days'] = billingnumeric
-	billing_dict = dict(billingdf.groupby('type').sum()['billable_days'])
+	billing_dict = dict(billingdf.groupby('user_type').sum()['billable_days'])
 	billing_summary = []
 	for i in range(0,len(billing_dict)):
 		billing_summary.append({'type':list(billing_dict.keys())[i], 'billable_days':list(billing_dict.values())[i]})
