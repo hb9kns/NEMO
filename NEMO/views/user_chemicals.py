@@ -1,0 +1,138 @@
+from datetime import timedelta
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, redirect
+from django.template import Context, Template
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods, require_GET
+from django.utils import timezone
+
+from NEMO.forms import ChemicalRequestForm, ChemicalRequestApprovalForm, UserChemicalForm, UserChemicalUpdateForm
+from NEMO.models import ChemicalRequest, User, UserChemical
+from NEMO.views.customization import get_media_file_contents, get_customization
+from NEMO.utilities import format_datetime
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def chemical_request(request):
+	dictionary = {}
+	if request.method == 'POST':
+		form = ChemicalRequestForm(request.user, data=request.POST)
+		if form.is_valid():
+			issue = form.save()
+			dictionary = {
+				'title': 'Request received',
+				'heading': 'Your request has been received and will be evaluated by the staff',
+			}
+		else:
+			dictionary = {
+				'title': 'Chemical request failed',
+				'heading': 'Invalid form data',
+				'content': str(form.errors),
+			}
+		return render(request, 'acknowledgement.html', dictionary)
+	return render(request, 'user_chemicals/chemical_request.html', dictionary)
+
+@staff_member_required(login_url=None)
+@require_GET
+def view_requests(request, sort_by=''):
+	dictionary = {}
+	all_requests = ChemicalRequest.objects.all()
+	if sort_by in ['requester', 'date', 'chemical_name', 'approved']:
+		all_requests = all_requests.order_by(sort_by)
+	else:
+		all_requests = all_requests.order_by('date')
+	dictionary['all_requests'] = all_requests
+	pending_requests = all_requests.filter(approved=0)
+	dictionary['pending_requests'] = pending_requests
+	return render(request, 'user_chemicals/view_requests.html', dictionary)
+
+@staff_member_required(login_url=None)
+@require_http_methods(['GET', 'POST'])
+def request_details(request, request_id):
+	chem_req = get_object_or_404(ChemicalRequest, id=request_id)
+
+	dictionary = {
+		'chemical_request': chem_req,
+	}
+
+	return render(request, 'user_chemicals/request_details.html', dictionary)
+
+@staff_member_required(login_url=None)
+@require_http_methods(['GET', 'POST'])
+def update_request(request, request_id):
+	chemical_request = get_object_or_404(ChemicalRequest, id=request_id)
+	form = ChemicalRequestApprovalForm(request.user, data=request.POST, instance=chemical_request)
+	if not form.is_valid():
+		dictionary = {
+			'title': 'Chemical request update failed',
+			'heading': 'Invalid form data',
+			'content': str(form.errors),
+		}
+		return render(request, 'acknowledgement.html', dictionary)
+	form.save()
+	return redirect('view_requests')
+
+@staff_member_required(login_url=None)
+@require_GET
+def user_chemicals(request, sort_by=''):
+	dictionary = {}
+	user_chemicals = UserChemical.objects.all()
+	if sort_by in ['owner', 'chemical_name', 'in_date', 'expiration', 'location', 'label_id']:
+		user_chemicals = user_chemicals.order_by(sort_by)
+	else:
+		user_chemicals = user_chemicals.order_by('location')
+	dictionary['user_chemicals'] = user_chemicals
+	return render(request, 'user_chemicals/user_chemicals.html', dictionary)
+
+@staff_member_required(login_url=None)
+@require_http_methods(['GET', 'POST'])
+def add_user_chemical(request, chem_req=''):
+	dictionary={
+		'one_year_from_now': timezone.now() + timedelta(days=365)
+	}
+	users = User.objects.filter(is_active=True)
+	dictionary['users'] = users
+	if chem_req:
+		chemical_request = get_object_or_404(ChemicalRequest, id=chem_req)
+		dictionary['chemical_request'] = chemical_request
+	if request.method == 'POST':
+		form = UserChemicalForm(data=request.POST)
+		if not form.is_valid():
+			dictionary = {
+				'title': 'Chemical request update failed',
+				'heading': 'Invalid form data',
+				'content': str(form.errors),
+			}
+			return render(request, 'acknowledgement.html', dictionary)
+		user_chem = form.save()
+		chem_req =  request.POST.get('chem_request')
+		if chem_req:
+			chemical_request = get_object_or_404(ChemicalRequest, id=chem_req)
+			user_chem.request = chemical_request
+			user_chem.save()
+		return HttpResponseRedirect(reverse('user_chemicals'))
+	return render(request, 'user_chemicals/add_user_chemical.html', dictionary)
+
+@staff_member_required(login_url=None)
+@require_http_methods(['GET', 'POST'])
+def update_user_chemical(request):
+	if request.method == 'POST':
+		chemical_request = get_object_or_404(UserChemical, id=chem_id)
+		form = UserChemicalUpdateForm(request.user, data=request.POST, instance=chemical_request)
+		if not form.is_valid():
+			dictionary = {
+				'title': 'Chemical request update failed',
+				'heading': 'Invalid form data',
+				'content': str(form.errors),
+			}
+			return render(request, 'acknowledgement.html', dictionary)
+		chemical_request = form.save()
+		return HttpResponseRedirect(reverse('user_chemicals'))
+	dictionary = {
+		'chemical_request': get_object_or_404(UserChemical, id=chemical_id)
+	}
+	return render(request, 'user_chemicals/update_user_chemical.html', dictionary)

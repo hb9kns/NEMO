@@ -1,0 +1,61 @@
+{% load humanize %}
+<h2>Chemical Request: {{ chemical_request.chemical_name }}</h2>
+
+Requested by {{ chemical_request.requester }} on {{ chemical_request.date|date:"Y-m-d" }} ({{ chemical_request.date|naturaltime }}).<br>
+{% if chemical_request.approver %}
+	Approver: {{ chemical_request.approver }}<br>
+{% endif %}
+Approval Status: {{ chemical_request.get_approved_display }}
+<h2>Hazards</h2>
+<a href="{{ chemical_request.sds_link }}" target="_blank">SDS for {{ chemical_request.chemical_name }}</a><br><br>
+{% if chemical_request.flammable %}Flammable<br>{% endif %}
+{% if chemical_request.corrosive %}Corrosive<br>{% endif %}
+{% if chemical_request.reactive %}Reactive<br>{% endif %}
+{% if chemical_request.temperature_sensitive %}Temperature Sensitive<br>{% endif %}
+
+<br><strong>Stability Concerns</strong><br>
+{{ chemical_request.stability|linebreaksbr }}<br>
+<strong>Incompatibilities</strong><br>
+{{ chemical_request.incompatibilities|linebreaksbr }}<br>
+<strong>Health Hazards</strong><br>
+{{ chemical_request.health_hazards|linebreaksbr }}<br>
+<strong>Exposure Routes</strong><br>
+{{ chemical_request.exposure_routes|linebreaksbr }}<br>
+<strong>Exposure Controls</strong><br>
+{{ chemical_request.exposure_controls|linebreaksbr }}<br>
+
+<h2>Procedure</h2>
+{{ chemical_request.procedure|linebreaksbr }}<br>
+
+<h2>Chemical Waste</h2>
+Hazardous waste will {% if not chemical_request.hazardous_waste %}not{% endif %} be generated<br>
+<strong>Waste Disposal Procedure</strong><br>
+{{ chemical_request.waste_disposal|linebreaksbr }}<br><br>
+
+
+<form class="form-horizontal" action="{% url 'update_request' chemical_request.id %}" method="post">
+	{% csrf_token %}
+
+	<div class="form-group">
+		<label for="approved" class="control-label col-lg-3">Approval Status</label>
+		<div class="col-lg-3">
+			<select id="approved" name="approved" class="form-control">
+				{% for status in chemical_request.Approval.Choices %}
+					<option value="{{ status.0 }}" {% if chemical_request.approved == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+				{% endfor %}
+			</select>
+		</div>
+	</div>
+  <p><strong> Approval Comments </strong></p>
+	<div class="form-group">
+		<div class="col-lg-6">
+			<textarea name="approval_comments" class="form-control" rows="3" placeholder="Enter any comments about this request here.">{% if chemical_request.approval_comments %}{{ chemical_request.approval_comments }}{% endif %}</textarea>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<div class="col-lg-12">
+			<input type="submit" class="btn btn-success" value="Change Approval Status">
+		</div>
+	</div>
+</form>

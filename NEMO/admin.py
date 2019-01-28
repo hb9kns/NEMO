@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Permission
 
 from NEMO.actions import lock_selected_interlocks, synchronize_with_tool_usage, unlock_selected_interlocks
-from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, ContactInformation, ContactInformationCategory, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserType
+from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, ChemicalRequest, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, ContactInformation, ContactInformationCategory, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserChemical, UserType
 
 admin.site.site_header = "NEMO"
 admin.site.site_title = "NEMO"
@@ -484,6 +484,13 @@ class NewsAdmin(admin.ModelAdmin):
 class NotificationAdmin(admin.ModelAdmin):
 	list_display = ('id', 'user', 'expiration', 'content_type', 'object_id')
 
+@register(ChemicalRequest)
+class ChemicalRequestAdmin(admin.ModelAdmin):
+	list_display = ('id', 'requester', 'date', 'chemical_name', 'approved')
+
+@register(UserChemical)
+class UserChemicalAdmin(admin.ModelAdmin):
+	list_display = ('owner', 'label_id', 'chemical_name', 'expiration')
 
 admin.site.register(ResourceCategory)
 admin.site.register(Area)

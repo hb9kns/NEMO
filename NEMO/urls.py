@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, forgot_password, billing, consultation
+from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -158,6 +158,18 @@ urlpatterns = [
 	url(r'^safety/resolved$', safety.resolved_safety_issues, name='resolved_safety_issues'),
 	url(r'^safety/update/(?P<ticket_id>\d+)/$', safety.update_safety_issue, name='update_safety_issue'),
 
+	#Chemical Requests and Inventory
+	url(r'^chemical_request/$', user_chemicals.chemical_request, name='chemical_request'),
+	url(r'^chemical_request/view/(?P<sort_by>requester|date|approved|chemical_name)/$', user_chemicals.view_requests, name='view_requests'),
+	url(r'^chemical_request/view/$', user_chemicals.view_requests, name='view_requests'),
+	url(r'^chemical_request/details/(?P<request_id>\d+)/$', user_chemicals.request_details, name='request_details'),
+	url(r'^chemical_request/approval/(?P<request_id>\d+)/$', user_chemicals.update_request, name='update_request'),
+	url(r'^user_chemicals/(?P<sort_by>owner|chemical_name|in_date|expiration|location|label_id)/$', user_chemicals.user_chemicals, name='user_chemicals'),
+	url(r'^user_chemicals/$', user_chemicals.user_chemicals, name='user_chemicals'),
+	url(r'^user_chemicals/add$', user_chemicals.add_user_chemical, name='add_user_chemical'),
+	url(r'^user_chemicals/add/(?P<chem_req>\d+)/$', user_chemicals.add_user_chemical, name='add_user_chemical'),
+	url(r'^user_chemicals/update/(?P<chem_id>\d+)/$', user_chemicals.update_user_chemical, name='update_user_chemical'),
+
 	# Mobile:
 	url(r'^choose_tool/then/(?P<next_page>view_calendar|tool_control)/$', mobile.choose_tool, name='choose_tool'),
 	url(r'^new_reservation/(?P<tool_id>\d+)/$', mobile.new_reservation, name='new_reservation'),
@@ -276,9 +288,9 @@ if settings.DEBUG:
 	try:
 		# Django debug toolbar
 		import debug_toolbar
-		urlpatterns += [
+		urlpatterns = [
 			url(r'^__debug__/', include(debug_toolbar.urls)),
-		]
+		] + urlpatterns
 	except ImportError:
 		pass
 	urlpatterns += staticfiles_urlpatterns()

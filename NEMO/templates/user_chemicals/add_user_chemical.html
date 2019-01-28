@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load custom_tags_and_filters %}
+{% block title %}Add User Chemical{% endblock %}
+{% block extrahead %}
+	{% load static %}
+	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}"/>
+{% endblock %}
+{% block content %}
+	<h1>Add User Chemical to Inventory</h1>
+
+  <p>
+    Use this form to maintain inventory of user owned chemicals currently in the cleanroom. Complete the form after the chemical is approved, labeled,
+    and has been brought into the lab. You may associate a chemical with a request to bring it into the lab by using the link for that chemical on the chemical requests page here: <a href="{% url 'view_requests' %}">View Chemical Requests</a>
+  </p>
+
+	<h3>Chemical Information</h3>
+	<form action="{% url 'add_user_chemical' %}" method="post">
+		{% csrf_token %}
+
+    <div class="form-group">
+      <label for="owner_search">Chemical Owner</label>
+      <div>
+        {% if chemical_request %}
+          <input type="text" class="form-control" style="max-width:250px; display:none" id="owner_search" placeholder="Search for a labmember">
+          <input type="button" id="chosen_owner" class="btn btn-default" onclick="clear_selected_owner()" value="{{ chemical_request.requester }}">
+          <input type="hidden" id="owner" name="owner" value="{{ chemical_request.requester.id }}">
+        {% else %}
+          <input type="text" class="form-control" style="max-width: 250px" id="owner_search" placeholder="Search for a labmember">
+          <input type="button" id="chosen_owner" class="btn btn-default" style="display:none" onclick="clear_selected_owner()">
+          <input type="hidden" id="owner" name="owner">
+        {% endif %}
+      </div><br>
+      <label for="label_id">Label ID #</label>
+      <div><input type="text" name="label_id" class="form-control" style="max-width: 250px" label="Label ID" placeholder="Label ID" required></div><br>
+      <label for="chemical_name">Full Name of Chemical</label>
+  		<div><input type="text" name="chemical_name" class="form-control" style="max-width: 500px" placeholder="Full name of chemical" {% if chemical_request %}value= "{{ chemical_request.chemical_name }}"{% endif %} required></div><br>
+      <label for="sds_link">Link to SDS</label>
+  		<div><input type="url" name="sds_link" class="form-control" style="max-width: 500px" placeholder="SDS Link (starting with http)" {% if chemical_request %}value= "{{ chemical_request.sds_link }}"{% endif %}></div><br>
+      <input type="hidden" name="chem_request" {% if chemical_request %}value="{{ chemical_request.id }}"{% else %}value=""{% endif %}>
+      <label for="location">Location</label>
+      <div><input type="text" name="location" class="form-control" style="max-width: 500px" placeholder="Location" required></div><br>
+      <div class="row"
+        <div class="form-group">
+    			<label for="in_date" class="col-sm-2 control-label">Date of Entrance</label>
+    			<div class="col-sm-3">
+    				<input id="in_date" type="text" name="in_date" class="form-control" required>
+    			</div>
+    			<label for="expiration" class="col-sm-1 control-label">Expiration</label>
+    			<div class="col-sm-3">
+    				<input id="expiration" type="text" name="expiration" class="form-control" required>
+    			</div>
+          <div class="control-label col-sm-2" style="text-align:left">
+            <a href="javascript:void(0)" onclick="$('#expiration').val('{{ one_year_from_now|date }}')">One year from now</a>
+          </div>
+    		</div>
+      </div>
+		<input type="submit" value="Add to Inventory" class="btn btn-success">
+	</form>
+
+  <script type="text/javascript">
+
+    function clear_selected_owner()
+    {
+      $("#chosen_owner").val('').hide();
+      $("#owner_search").typeahead('val', '').show().focus();
+      $("#owner").val('');
+    }
+
+    function fetch_user(jquery_event, search_selection, dataset_name)
+    {
+      $('#owner_search').hide();
+      $('#chosen_owner').val(search_selection.name).show();
+      $('#owner').val(search_selection.id);
+    }
+
+    function on_load()
+    {
+      $('#owner_search').autocomplete('users', fetch_user, {{ users|json_search_base }}).focus();
+    }
+
+    var timepicker_properties =
+    {
+      format: 'MM/DD/YYYY'
+    };
+    $('#in_date').datetimepicker(timepicker_properties);
+    $('#expiration').datetimepicker(timepicker_properties);
+    $(on_load);
+
+  </script>
+
+
+{% endblock %}

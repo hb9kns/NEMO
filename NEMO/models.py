@@ -1299,3 +1299,58 @@ class News(models.Model):
 	class Meta:
 		ordering = ['-last_updated']
 		verbose_name_plural = 'News'
+
+class ChemicalRequest(models.Model):
+	class Approval(object):
+		PENDING = 0
+		APPROVED = 1
+		DENIED = 2
+		Choices = (
+			(PENDING, 'Pending'),
+			(APPROVED, 'Approved'),
+			(DENIED, 'Denied')
+		)
+	requester = models.ForeignKey(User, blank=True, null=True, related_name="chemical_requester")
+	approver = models.ForeignKey(User, blank=True, null=True, related_name="chemical_approver")
+	date = models.DateTimeField(auto_now_add=True)
+	chemical_name = models.CharField(max_length=200)
+	cas = models.CharField(max_length=100)
+	container = models.CharField(max_length=100)
+	sds_link = models.URLField(max_length=200)
+	flammable = models.BooleanField()
+	corrosive = models.BooleanField()
+	reactive = models.BooleanField()
+	temp_sensitive = models.BooleanField()
+	stability = models.CharField(max_length=500)
+	incompatibilities = models.CharField(max_length=500)
+	health_hazards = models.CharField(max_length=500)
+	exposure_routes = models.CharField(max_length=500)
+	exposure_controls = models.CharField(max_length=500)
+	procedure = models.TextField()
+	hazardous_waste = models.BooleanField()
+	waste_disposal = models.TextField()
+	approved = models.IntegerField(choices=Approval.Choices, default=Approval.PENDING)
+	approval_comments = models.TextField(blank=True, null=True)
+
+	class Meta:
+		ordering = ['-date']
+		verbose_name_plural = "Chemical Requests"
+
+	def __str__(self):
+		return str(self.id)
+
+class UserChemical(models.Model):
+	owner = models.ForeignKey(User)
+	label_id = models.PositiveIntegerField(unique=True)
+	chemical_name = models.CharField(max_length=200)
+	sds_link = models.URLField(max_length=200, blank=True, null=True)
+	request = models.ForeignKey(ChemicalRequest, blank=True, null=True)
+	in_date = models.DateField()
+	expiration = models.DateField()
+	location = models.CharField(max_length=100)
+
+	class Meta:
+		ordering = ['-expiration']
+
+	def __str__(self):
+		return str(self.label_id)

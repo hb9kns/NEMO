@@ -5,7 +5,7 @@ from django.forms import BaseForm, BooleanField, CharField, ChoiceField, DateFie
 from django.forms.utils import ErrorDict
 from django.utils import timezone
 
-from NEMO.models import Account, Alert, Comment, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User
+from NEMO.models import Account, Alert, ChemicalRequest, Comment, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User, UserChemical
 from NEMO.utilities import bootstrap_primary_color, format_datetime
 
 
@@ -298,6 +298,57 @@ class ScheduledOutageForm(ModelForm):
 		model = ScheduledOutage
 		fields = ['details', 'start', 'end', 'resource', 'category']
 
+class ChemicalRequestForm(ModelForm):
+
+	class Meta:
+		model = ChemicalRequest
+		fields = ['requester', 'chemical_name', 'cas', 'container', 'sds_link', 'flammable', 'corrosive', 'reactive', 'temp_sensitive', 'stability', 'incompatibilities', 'health_hazards', 'exposure_routes', 'exposure_controls', 'procedure', 'hazardous_waste', 'waste_disposal']
+
+	def __init__(self, user, *args, **kwargs):
+		super(ChemicalRequestForm, self).__init__(*args, **kwargs)
+		self.user = user
+
+	def save(self, commit=True):
+		instance = super(ChemicalRequestForm, self).save(commit=False)
+		self.instance.requester = self.user
+		if commit:
+			instance.save()
+		return super(ChemicalRequestForm, self).save(commit=commit)
+
+class ChemicalRequestApprovalForm(ModelForm):
+
+	class Meta:
+		model = ChemicalRequest
+		fields = ['approved', 'approval_comments']
+
+	def __init__(self, user, *args, **kwargs):
+		super(ChemicalRequestApprovalForm, self).__init__(*args, **kwargs)
+		self.user = user
+
+	def save(self, commit=True):
+		instance = super(ChemicalRequestApprovalForm, self).save(commit=False)
+		instance.approver = self.user
+		return super(ChemicalRequestApprovalForm, self).save(commit=commit)
+
+class UserChemicalForm(ModelForm):
+
+	class Meta:
+		model = UserChemical
+		fields = ['owner', 'label_id', 'in_date', 'expiration', 'chemical_name', 'sds_link', 'location']
+
+	def clean_in_date(self):
+		in_date = self.cleaned_data['in_date']
+		return timezone.make_aware(datetime(year=in_date.year, month=in_date.month, day=in_date.day), timezone.get_current_timezone())
+
+	def clean_expiration(self):
+		expiration = self.cleaned_data['expiration']
+		return timezone.make_aware(datetime(year=expiration.year, month=expiration.month, day=expiration.day), timezone.get_current_timezone())
+
+class UserChemicalUpdateForm(ModelForm):
+
+	class Meta:
+		model = UserChemical
+		fields = ['owner', 'label_id', 'expiration', 'location']
 
 def nice_errors(form, non_field_msg='General form errors'):
 	result = ErrorDict()

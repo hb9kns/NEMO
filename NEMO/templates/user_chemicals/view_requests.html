@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block extrahead %}
+	{% load static %}
+	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
+{% endblock %}
+{% block title %}Chemical Requests{% endblock %}
+{% block body %}
+
+	<div class="container-fluid">
+		<h1 class="pull-left" style="margin-right:20px; margin-top:0; margin-bottom:0">View Chemical Requests</h1>
+		<ul class="nav nav-pills" id="tabs">
+			<li class="active"><a href="#pending">Pending</a></li>
+			<li><a href="#all">All</a></li>
+		</ul>
+	</div>
+
+	<div class="tab-content">
+		<div id="pending" class="tab-pane active">
+			<div class="split-screen-left-panel">
+				<table id="pending_requests" class="table table-hover">
+					<thead><tr>
+						<th><a href="{% url 'view_requests' sort_by='requester' %}">Requester</a></th>
+						<th><a href="{% url 'view_requests' sort_by='date' %}">Date</a></th>
+						<th><a href="{% url 'view_requests' sort_by='chemical_name' %}">Chemical Name</a></th>
+						<th><a href="{% url 'view_requests' sort_by='approved' %}">Approval Status</a></th>
+					</tr></thead>
+					{% for rq in pending_requests %}
+						<tr onclick="pending_request_details(this, '{% url 'request_details' rq.id %}')" data-request-id="{{ rq.id }}">
+							<td>{{ rq.requester }}</td>
+							<td>{{ rq.date }}</td>
+							<td>{{ rq.chemical_name }}</td>
+							<td>{{ rq.get_approved_display }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+			<div id="pending_request_details" class="split-screen-right-panel"></div>
+		</div>
+
+		<div id="all" class="tab-pane">
+			<div class="split-screen-left-panel">
+				<table id="all_requests" class="table table-hover">
+					<thead><tr>
+            <th><a href="{% url 'view_requests' sort_by='requester' %}">Requester</a></th>
+						<th><a href="{% url 'view_requests' sort_by='date' %}">Date</a></th>
+						<th><a href="{% url 'view_requests' sort_by='chemical_name' %}">Chemical Name</a></th>
+						<th><a href="{% url 'view_requests' sort_by='approved' %}">Approval Status</a></th>
+						<th>Add to Inventory</th>
+					</tr></thead>
+					{% for rq in all_requests %}
+						<tr onclick="all_request_details(this, '{% url 'request_details' rq.id %}')">
+              <td>{{ rq.requester }}</td>
+							<td>{{ rq.date }}</td>
+							<td>{{ rq.chemical_name }}</td>
+							<td>{{ rq.get_approved_display }}</td>
+							<td>{% if rq.get_approved_display == "Approved" %}<a href="{% url 'add_user_chemical' chem_req=rq.id %}">Add to Inventory</a>{% else %}Cannot Add{% endif %}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+			<div id="all_request_details" class="split-screen-right-panel"></div>
+		</div>
+	</div>
+
+	<script>
+
+	function pending_request_details(row, url)
+	{
+		$("#pending_requests tr").removeClass('active');
+		$(row).addClass('active');
+		$("#pending_request_details").html("Loading request details...").load(url, undefined, on_pending_request_details_failure);
+		save_active_request();
+	}
+
+	function all_request_details(row, url)
+	{
+		$("#all_requests tr").removeClass('active');
+		$(row).addClass('active');
+		$("#all_request_details").html("Loading request details...").load(url, undefined, on_all_request_details_failure);
+	}
+
+	function on_pending_request_details_failure(response, status, xml_header_request)
+	{
+		if(status == "error")
+		{
+			var message = "Unable to load request details.";
+			if (xml_header_request.responseText)
+				message += " " + xml_header_request.responseText;
+			$("#pending_request_details").html(message)
+		}
+	}
+
+	function on_all_request_details_failure(response, status, xml_header_request)
+	{
+		if(status == "error")
+		{
+			var message = "Unable to load request details.";
+			if (xml_header_request.responseText)
+				message += " " + xml_header_request.responseText;
+			$("#all_request_details").html(message)
+		}
+	}
+
+
+
+
+	function reload_request_page(response, status, xml_http_request)
+	{
+		save_active_request();
+		location.reload(true);
+	}
+
+	function save_active_request()
+	{
+		var active_row = $("#pending_requests tr.active");
+		localStorage['Request page, active request'] = active_row.data('request-id');
+	}
+
+	function on_load()
+	{
+		$("#tabs a").click(switch_tab);
+		var active_row = localStorage['Request page, active request'];
+		if(active_row)
+		{
+			var row = $("#pending_requests tr[data-request-id='" + active_row + "']");
+			row.click();
+		}
+	}
+
+	$(on_load);
+
+	</script>
+{% endblock %}
