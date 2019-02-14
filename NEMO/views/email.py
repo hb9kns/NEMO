@@ -157,7 +157,7 @@ def send_broadcast_email(request):
 		elif audience == 'all':
 			users = User.objects.all()
 		if active_choice:
-			users.filter(is_active=True)
+			users = users.filter(is_active=True)
 	except:
 		dictionary = {'error': 'Your email was not sent. There was a problem finding the users to send the email to.'}
 		return render(request, 'email/compose_email.html', dictionary)
