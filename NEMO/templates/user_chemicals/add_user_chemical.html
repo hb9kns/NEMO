@@ -39,7 +39,24 @@
   		<div><input type="url" name="sds_link" class="form-control" style="max-width: 500px" placeholder="SDS Link (starting with http)" {% if chemical_request %}value= "{{ chemical_request.sds_link }}"{% endif %}></div><br>
       <input type="hidden" name="chem_request" {% if chemical_request %}value="{{ chemical_request.id }}"{% else %}value=""{% endif %}>
       <label for="location">Location</label>
-      <div><input type="text" name="location" class="form-control" style="max-width: 500px" placeholder="Location" required></div><br>
+      <div>
+				<select name="location" class="form-control" style="max-width: 500px" required>
+					<option value="" disabled selected> -- Select Location -- </option>
+					<option value = "Nano2 Bay -Caustic Cabinet">Nano2 Bay - Caustic Cabinet</option>
+					<option value = "Nano2 Bay - Flammables Fridge">Nano2 Bay - Flammables Fridge</option>
+					<option value = "Nano2 Bay - Solvent Cabinet">Nano2 Bay - Solvent Cabinet</option>
+					<option value = "Photo Bay - Caustic Cabinet">Photo Bay - Caustic Cabinet</option>
+					<option value = "Photo Bay - Solvent Cabinet">Photo Bay - Solvent Cabinet</option>
+					<option value = "SMP - Flammables Fridge">SMP - Flammables Fridge</option>
+					<option value = "SMP - No Flammables Fridge">SMP - No Flammables Fridge</option>
+					<option value = "SMP-Acid/Corrosive Blue Cabinet (chase area)">SMP-Acid/Corrosive Blue Cabinet (chase area)</option>
+					<option value = "Wet Bay - Acid Cabinet">Wet Bay - Acid Cabinet</option>
+					<option value = "Wet Bay - Caustic Cabinet">Wet Bay - Caustic Cabinet</option>
+					<option value = "Wet Bay - Flammables Fridge">Wet Bay - Flammables Fridge</option>
+					<option value = "Wet Bay - Solvent Cabinet">Wet Bay - Solvent Cabinet</option>
+					<option value = "Other">Other</option>
+				</select>
+			</div><br>
       <div class="row"
         <div class="form-group">
     			<label for="in_date" class="col-sm-2 control-label">Date of Entrance</label>
