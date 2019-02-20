@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Directory{% endblock %}
+{% block content %}
+	<h1>Labmember Directory	</h1>
+	<p>
+		This page contains a list of all active labmembers. You may email a labmember by clicking on that person's name. Labmembers whose names appear
+    in green have 24 hour access to the PRISM Cleanroom and can serve as a buddy.
+	</p>
+
+  <div class="col-lg-8" style="margin-top:30px">
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>Labmember</th>
+						<th>PI/Organization</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for person in people %}
+						<tr>
+							<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.24hr %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a></td>
+							<td>{{ person.group }}</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+	</div>
+{% endblock %}
