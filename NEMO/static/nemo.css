@@ -253,3 +253,9 @@ Twitter Typeahead autocomplete dropdown menu isn't chopped off. */
 	color: #fff;
 	background-color: #0097cf;
 }
+
+.equal {
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: wrap;
+}

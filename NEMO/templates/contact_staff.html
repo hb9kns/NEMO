@@ -4,7 +4,7 @@
 	<h1>Contact information</h1>
 	{% for category in categories %}
 		<h3>{{ category }}</h3>
-		<div class="row">
+		<div class="row equal">
 			{% for person in people %}
 				{% if person.category == category %}
 					<div class="col-md-3">
