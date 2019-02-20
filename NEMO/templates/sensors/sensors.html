@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Sensors{% endblock %}
+{% block content %}
+
+
+
+<body style="padding:10px 30px">
+<div class="container-fluid" style="background:transparent">
+	<div class="row" id="content" style="background:transparent"></div>
+</div>
+
+
+<script>
+	function on_load()
+	{
+		$("#content").load("{% url 'read_sensors' %}");
+		setInterval(refresh_sensors, 10000);
+	}
+
+	function refresh_sensors()
+  {
+    $("#content").load("{% url 'read_sensors' %}");
+  }
+
+	$(on_load);
+
+</script>
+</body>
+{% endblock %}

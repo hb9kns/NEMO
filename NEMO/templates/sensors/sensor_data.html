@@ -1,0 +1,19 @@
+  {# Panel is used to make table borders rounded. #}
+  <div class="panel panel-default">
+    <table class="table table-bordered table-condensed">
+      <thead>
+      <tr>
+        <th>Sensor Name</th>
+        <th>Reading</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for sensor in sensor_data %}
+        <tr>
+          <td>{{ sensor.sensor_name }}</td>
+          <td>{{ sensor.sensor_reading }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>

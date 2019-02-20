@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
+from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -180,6 +180,7 @@ urlpatterns = [
 
 	# Contact staff:
 	url(r'^contact_staff/$', contact_staff.contact_staff, name='contact_staff'),
+	url(r'^directory/$', directory.directory, name='directory'),
 
 	# Area access:
 	url(r'^change_project/$', area_access.change_project, name='change_project'),
@@ -204,6 +205,10 @@ urlpatterns = [
 	url(r'^news/update/(?P<story_id>\d+)/$', news.news_update_form, name='news_update_form'),
 	url(r'^news/publish/$', news.publish, name='publish_new_news'),
 	url(r'^news/publish/(?P<story_id>\d+)/$', news.publish, name='publish_news_update'),
+
+	# Sensors:
+	url(r'^sensors/$', sensors.sensors, name='sensors'),
+	url(r'^read_sensors/$', sensors.read_sensors, name='read_sensors'),
 
 	# Media
 	url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}, name='media'),

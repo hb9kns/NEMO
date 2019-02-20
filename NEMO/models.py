@@ -1354,3 +1354,31 @@ class UserChemical(models.Model):
 
 	def __str__(self):
 		return str(self.label_id)
+
+
+class Sensor(models.Model):
+	class SensorType(object):
+		DIGITAL = 1
+		ANALOG = 2
+		Choices = (
+			(DIGITAL, 'Digital'),
+			(ANALOG, 'Analog')
+		)
+	address = models.ForeignKey('InterlockCard', blank=True, null=True, on_delete=models.SET_NULL, help_text="Interlock Card (IP Address) associated with this sensor")
+	channel = models.PositiveIntegerField(blank=True, null=True, help_text="Channel on Interlock Card connecting to sensor (starting with 0)")
+	name = models.CharField(max_length=100, help_text="Name of Sensor")
+	sensor_type = models.IntegerField(choices=SensorType.Choices, default=SensorType.DIGITAL)
+	conversion_factor = models.FloatField(default=1.0, help_text="Conversion factor to output response in desired units. Default is 1")
+	email = models.EmailField(blank=True, null=True, verbose_name='email address', help_text="Email address to alert when sensor has a certain reading")
+	high_alert_value = models.FloatField(blank=True, null=True, help_text="Threshold value for sending alert (for analog sensors)")
+	low_alert_value = models.FloatField(blank=True, null=True, help_text="Threshold value for sending alert (for analog sensors)")
+	digital_sensor_alert = models.BooleanField(default=False, help_text="Turn alerts on or off for digital sensor")
+	digital_alert_value = models.BooleanField(default=True, help_text="Choose to alert when the sensor reads true or false")
+	last_value = models.CharField(max_length=100, blank=True, null=True)
+
+	class Meta:
+		ordering = ['address', 'name']
+		unique_together = ('address',  'channel', 'sensor_type')
+
+	def __str__(self):
+		return str(self.id)
