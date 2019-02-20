@@ -16,9 +16,9 @@ from NEMO.forms import nice_errors, CommentForm
 from NEMO.models import Comment, Configuration, ConfigurationHistory, Project, Reservation, StaffCharge, Task, TaskCategory, TaskStatus, Tool, UsageEvent, User
 from NEMO.utilities import quiet_int, extract_times
 from NEMO.views.policy import check_policy_to_enable_tool, check_policy_to_disable_tool
+from NEMO.views.customization import get_customization
 from NEMO.widgets.dynamic_form import DynamicForm
 from NEMO.widgets.tool_tree import ToolTree
-
 
 @login_required
 @require_GET
@@ -45,7 +45,10 @@ def tool_control(request, tool_id=None):
 def tool_status(request, tool_id):
 	""" Gets the current status of the tool (that is, whether it is currently in use or not). """
 	tool = get_object_or_404(Tool, id=tool_id, visible=True)
-
+	exclude=get_customization('exclude_from_usage')
+	projects_to_exclude = []
+	if exclude:
+		projects_to_exclude = [int(s) for s in exclude.split() if s.isdigit()]
 	dictionary = {
 		'tool': tool,
 		'task_categories': TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT),
@@ -53,6 +56,7 @@ def tool_status(request, tool_id):
 		'mobile': request.device == 'mobile',
 		'task_statuses': TaskStatus.objects.exclude(name="default"),
 		'post_usage_questions': DynamicForm(tool.post_usage_questions).render(),
+		'active_projects_filtered': request.user.active_projects().exclude(id__in=projects_to_exclude)
 	}
 
 	try:

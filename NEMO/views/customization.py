@@ -31,6 +31,8 @@ customizable_key_values = [
 	'safety_email_address',
 	'abuse_email_address',
 	'daily_passdown_email_address',
+	'exclude_from_billing',
+	'exclude_from_usage',
 	'self_log_in',
 ]
 
@@ -97,6 +99,9 @@ def customize(request, element):
 		set_customization('abuse_email_address', request.POST.get('abuse_email_address', ''))
 		set_customization('user_office_email_address', request.POST.get('user_office_email_address', ''))
 		set_customization('daily_passdown_email_address', request.POST.get('daily_passdown_email_address', ''))
+	elif element == 'project_exclusions':
+		set_customization('exclude_from_billing', request.POST.get('exclude_from_billing', ''))
+		set_customization('exclude_from_usage', request.POST.get('exclude_from_usage', ''))
 	elif element == 'application_settings':
 		set_customization('self_log_in', request.POST.get('self_log_in', ''))
 	else:

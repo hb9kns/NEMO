@@ -66,6 +66,38 @@
 
 		<div class="panel panel-default">
 			<div class="panel-body">
+				<h3>Projects to Exclude</h3>
+				<form method="POST" action="{% url 'customize' 'project_exclusions' %}" class="form-horizontal">
+					{% csrf_token %}
+					<div class="form-group">
+						<label class="control-label col-md-2" for="exclude_from_billing">Exclude from Billing</label>
+						<div class="col-md-3">
+							<input type="text" id="exclude_from_billing" name="exclude_from_billing" class="form-control" value="{{ exclude_from_billing }}">
+						</div>
+						<div class="col-md-7 form-control-static light-grey">
+							List project id numbers to exclude from billing, separated by spaces
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-2" for="exclude_from_usage">Exclude from Usage</label>
+						<div class="col-md-3">
+							<input type="text" id="exclude_from_usage" name="exclude_from_usage" class="form-control" value="{{ exclude_from_usage }}">
+						</div>
+						<div class="col-md-7 form-control-static light-grey">
+							List project id numbers to exclude from usage separated by spaces (you will not be able to make reservations or enable tools with these projects)
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-3">
+							<input type="submit" value="Save exclusions" class="btn btn-success">
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-body">
 				<h3>Application settings</h3>
 				<form method="POST" action="{% url 'customize' 'application_settings' %}" class="form-horizontal">
 					{% csrf_token %}

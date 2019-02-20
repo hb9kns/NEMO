@@ -224,7 +224,11 @@ def create_reservation(request):
 
 	# If the user only has one project then associate it with the reservation.
 	# Otherwise, present a dialog box for the user to choose which project to associate.
-	active_projects = user.active_projects()
+	exclude=get_customization('exclude_from_usage')
+	projects_to_exclude=[]
+	if exclude:
+		projects_to_exclude = [int(s) for s in exclude.split() if s.isdigit()]
+	active_projects = user.active_projects().exclude(id__in=projects_to_exclude)
 	if len(active_projects) == 1:
 		new_reservation.project = active_projects[0]
 	else:
