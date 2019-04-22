@@ -400,7 +400,7 @@ class UserAdmin(admin.ModelAdmin):
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
 	search_fields = ('first_name', 'last_name', 'username', 'email')
-	list_display = ('first_name', 'last_name', 'username', 'email', 'badge_number', 'is_active', 'domain', 'is_staff', 'is_technician', 'is_superuser', 'date_joined', 'last_login')
+	list_display = ('first_name', 'last_name', 'username', 'email', 'badge_number', 'is_active', 'is_staff', 'is_superuser', 'access_expiration', 'date_joined', 'last_login')
 	list_filter = ('is_active', 'domain', 'is_staff', 'is_technician', 'is_superuser', 'date_joined', 'last_login')
 
 	def save_model(self, request, obj, form, change):
