@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import Context, Template
@@ -23,6 +23,7 @@ def chemical_request(request):
 		form = ChemicalRequestForm(request.user, data=request.POST)
 		if form.is_valid():
 			issue = form.save()
+			send_new_chemical_request_email(issue)
 			dictionary = {
 				'title': 'Request received',
 				'heading': 'Your request has been received and will be evaluated by the staff',
@@ -61,6 +62,21 @@ def request_details(request, request_id):
 
 	return render(request, 'user_chemicals/request_details.html', dictionary)
 
+def send_new_chemical_request_email(chemical_request):
+	try:
+		safety_email = get_customization('safety_email_address')
+		user_office_email = get_customization('user_office_email_address')
+		sender = user_office_email
+		requester = chemical_request.requester.get_full_name()
+		recipient_list = [safety_email]
+		subject = f'New Material Request from {requester}'
+		body = f'{requester} has submitted a request to bring the following material into the cleanroom: {chemical_request.chemical_name}. <br><br>Please review this request and respond through NEMO.'
+		email = EmailMultiAlternatives(subject, from_email=sender, to=recipient_list)
+		email.attach_alternative(body, 'text/html')
+		email.send()
+	except:
+		pass
+
 @staff_member_required(login_url=None)
 @require_http_methods(['GET', 'POST'])
 def update_request(request, request_id):
@@ -73,8 +89,30 @@ def update_request(request, request_id):
 			'content': str(form.errors),
 		}
 		return render(request, 'acknowledgement.html', dictionary)
-	form.save()
+	chem_req = form.save()
+	send_chemical_request_email_update(chem_req)
 	return redirect('view_requests')
+
+def send_chemical_request_email_update(chemical_request):
+	try:
+		safety_email = get_customization('safety_email_address')
+		user_office_email = get_customization('user_office_email_address')
+		sender = user_office_email
+		recipient_list = [safety_email, chemical_request.requester.email]
+		subject = f'Update to your Material Request for {chemical_request.chemical_name}'
+		body = f'''{chemical_request.requester.get_short_name()},<br><br>
+		{chemical_request.approver.get_full_name()} has responded to your material request for
+		{chemical_request.chemical_name} with the following comments:<br><br>
+		{chemical_request.approval_comments}<br>
+		The current status of your request is {chemical_request.get_approved_display()}.<br>
+		Please reply to this email if you have any questions.<br><br>
+		Best,<br>
+		PRISM Cleanroom Staff'''
+		email = EmailMultiAlternatives(subject, from_email=sender, to=recipient_list)
+		email.attach_alternative(body, 'text/html')
+		email.send()
+	except:
+		pass
 
 @staff_member_required(login_url=None)
 @require_GET
@@ -116,6 +154,7 @@ def add_user_chemical(request, chem_req=''):
 			user_chem.save()
 		return HttpResponseRedirect(reverse('user_chemicals'))
 	return render(request, 'user_chemicals/add_user_chemical.html', dictionary)
+
 
 @staff_member_required(login_url=None)
 @require_http_methods(['GET', 'POST'])
