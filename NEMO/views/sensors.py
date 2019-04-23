@@ -23,26 +23,28 @@ def read_sensors(request):
             client.connect()
             if sensor.sensor_type == Sensor.SensorType.DIGITAL:
                 reply = client.read_discrete_inputs(sensor.channel,1,unit=1)
-                sensor.last_value = str(reply.bits[0])
-                sensor.save()
                 sensor_reading = reply.bits[0]
                 sensor_response = {'sensor_name': sensor.name, 'sensor_reading':sensor_reading}
-                if sensor.digital_sensor_alert and sensor.email:
+                if sensor.digital_sensor_alert and sensor.email and str(sensor_reading) != sensor.last_value:
                     if sensor.digital_alert_value and sensor_reading:
                         send_sensor_alert_email(sensor, str(sensor_reading))
+                        #send_sensor_alert_email()
                     elif not sensor.digital_alert_value and not sensor_reading:
                         send_sensor_alert_email(sensor, str(sensor_reading))
+                        #send_sensor_alert_email()
             else:
                 reply = client.read_input_registers(sensor.channel,1,unit=1)
                 sensor_reading = round(reply.registers[0]*sensor.conversion_factor,2)
-                sensor.last_value = str(sensor_reading)
-                sensor.save()
                 if sensor.high_alert_value and sensor.email:
-                    if sensor_reading > sensor.high_alert_value:
+                    if sensor_reading > sensor.high_alert_value and float(sensor.last_value) <= sensor.high_alert_value:
                         send_sensor_alert_email(sensor, str(sensor_reading))
+                        #send_sensor_alert_email()
                 if sensor.low_alert_value and sensor.email:
-                    if sensor_reading < sensor.low_alert_value:
+                    if sensor_reading < sensor.low_alert_value and float(sensor.last_value) >= sensor.low_alert_value:
                         send_sensor_alert_email(sensor, str(sensor_reading))
+                        #send_sensor_alert_email()
+            sensor.last_value = str(sensor_reading)
+            sensor.save()
             client.close()
         except:
             sensor_reading = "Could Not Connect"
@@ -60,18 +62,13 @@ def send_sensor_alert_email(sensor, value):
     try:
         user_office_email = get_customization('user_office_email_address')
         recipient = sensor.email
-        validate_email(recipient)
         recipient_list = [recipient]
         sender = user_office_email
         subject = f'Sensor Alert for {sensor.name}'
-        body = f"The following sensor has recorded a value past it's alert threshold: {sensor.name} with value {value}"
-        try:
-            email = EmailMultiAlternatives(subject, from_email=sender, to=recipient_list)
-            email.attach_alternative(body, 'text/html')
-            email.send()
-        except SMTPException as error:
-            error_message = 'NEMO was unable to send the email through the email server. The error message that NEMO received is: ' + str(error)
-            logger.exception(error_message)
+        body = f'The following sensor has recorded a value past its alert threshold: {sensor.name} with value {value}'
+        email = EmailMultiAlternatives(subject, from_email=sender, to=recipient_list)
+        email.attach_alternative(body, 'text/html')
+        email.send()
     except:
         pass
 #
