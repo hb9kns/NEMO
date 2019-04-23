@@ -59,7 +59,7 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 
 	# Staff may only charge staff time for one user at a time.
 	if staff_charge and operator.charging_staff_time():
-		return HttpResponseBadRequest('You are already charging staff time. You must end the current staff charge before you being another.')
+		return HttpResponseBadRequest('You are already charging staff time. You must end the current staff charge before you begin another.')
 
 	# Staff may not bill staff time to the themselves.
 	if staff_charge and operator == user:
@@ -71,7 +71,7 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 
 	# The tool operator must not have a lock on usage
 	if operator.training_required:
-		return HttpResponseBadRequest("You are blocked from using all tools in the NanoFab. Please complete the NanoFab rules tutorial in order to use tools.")
+		return HttpResponseBadRequest("You are blocked from using all tools in the facility. Please complete the rules tutorial in order to use tools.")
 
 	# Users may only use a tool when delayed logoff is not in effect. Staff are exempt from this rule.
 	if tool.delayed_logoff_in_progress() and not operator.is_staff:
@@ -81,26 +81,41 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 	if tool.scheduled_outage_in_progress() and not operator.is_staff:
 		return HttpResponseBadRequest("A scheduled outage is in effect. You must wait for the outage to end before you can use the tool.")
 
+	#Refuses all tool logins if user is logged in using an excluded project (i.e. one reserved for buddy system or observation)
+	if not operator.is_staff:
+		projects_to_exclude = []
+		exclude=get_customization('exclude_from_usage')
+		if exclude:
+			projects_to_exclude = [int(s) for s in exclude.split() if s.isdigit()]
+		try:
+			if tool.requires_area_access:
+				current_access = AreaAccessRecord.objects.filter(area=tool.requires_area_access, customer=operator, staff_charge=None, end=None)
+				if current_access[0].project.id in projects_to_exclude:
+					return HttpResponseBadRequest("You may not use tools while logged in with this project.")
+		except:
+			return HttpResponseBadRequest("There was a problem enabling this tool. Please see staff.")
+
 	#Refuses login on tools that require reservations if there is no reservation
 	if tool.reservation_required and not operator.is_staff:
 		td=timedelta(minutes=15)
-		try:
-			current_reservation = Reservation.objects.get(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
-			# Resize the user's reservation to the current time. This is necessary because otherwise, if they log in and log out before the official start of their reservation, it will not be shortened
-			new_reservation = deepcopy(current_reservation)
-			new_reservation.id = None
-			new_reservation.pk = None
-			now=timezone.now()
-			new_reservation.start=now
-			new_reservation.save()
-			current_reservation.cancelled = True
-			current_reservation.cancellation_time = now
-			current_reservation.cancelled_by = user
-			current_reservation.descendant = new_reservation
-			current_reservation.save()
-		except Reservation.DoesNotExist:
+		if not Reservation.objects.filter(start__lt=timezone.now()+td, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool).exists():
 			return HttpResponseBadRequest("A reservation is required to enable this tool.")
-
+		# try:
+		# 	current_reservation = Reservation.objects.filter(start__lt=timezone.now()+td, start__gt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
+		# 	# Resize the user's reservation to the current time. This is necessary because otherwise, if they log in and log out before the official start of their reservation, it will not be shortened
+		# 	new_reservation = deepcopy(current_reservation)
+		# 	new_reservation.id = None
+		# 	new_reservation.pk = None
+		# 	now=timezone.now()
+		# 	new_reservation.start=now
+		# 	new_reservation.save()
+		# 	current_reservation.cancelled = True
+		# 	current_reservation.cancellation_time = now
+		# 	current_reservation.cancelled_by = user
+		# 	current_reservation.descendant = new_reservation
+		# 	current_reservation.save()
+		# except:
+		# 	pass
 	return HttpResponse()
 
 
@@ -190,7 +205,7 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 	# Staff may break this rule.
 	# An explicit policy override allows this rule to be broken.
 	if user.training_required:
-		policy_problems.append("You are blocked from making reservations for all tools in the NanoFab. Please complete the NanoFab rules tutorial in order to create new reservations.")
+		policy_problems.append("You are blocked from making reservations for all tools in the facility. Please complete the rules tutorial in order to create new reservations.")
 
 	# Users may only change their own reservations.
 	# Staff may break this rule.
