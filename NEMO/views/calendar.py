@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.decorators import disable_session_expiry_refresh
-from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, Account, ScheduledOutage, ScheduledOutageCategory, Task, StockroomItem, Consumable, SafetyIssue
+from NEMO.models import Tool, Reservation, Configuration, UsageEvent, AreaAccessRecord, StaffCharge, User, Project, Account, ScheduledOutage, ScheduledOutageCategory, Task, StockroomItem, Consumable, SafetyIssue, ChemicalRequest
 from NEMO.utilities import bootstrap_primary_color, extract_times, extract_dates, format_datetime, parse_parameter_string, get_month_timeframe
 from NEMO.views.constants import ADDITIONAL_INFORMATION_MAXIMUM_LENGTH
 from NEMO.views.customization import get_customization, get_media_file_contents
@@ -660,6 +660,8 @@ def email_daily_passdown(request):
 	passdown['low_stock'] = low_stock
 	passdown['low_consumable'] = low_consumable
 
+	#Pending Material Requests
+	passdown['material_requests'] = ChemicalRequest.objects.filter(approved=0)
 
 	#Ongoing issues
 	passdown['all_shutdowns'] = Task.objects.filter(force_shutdown=True, cancelled=False, resolved=False)
