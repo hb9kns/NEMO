@@ -34,6 +34,7 @@ customizable_key_values = [
 	'exclude_from_billing',
 	'exclude_from_usage',
 	'self_log_in',
+	'facility_name',
 ]
 
 customizable_content = [
@@ -104,6 +105,7 @@ def customize(request, element):
 		set_customization('exclude_from_usage', request.POST.get('exclude_from_usage', ''))
 	elif element == 'application_settings':
 		set_customization('self_log_in', request.POST.get('self_log_in', ''))
+		set_customization('facility_name', request.POST.get('facility_name', ''))
 	else:
 		return HttpResponseBadRequest('Invalid customization')
 	return redirect('customization')

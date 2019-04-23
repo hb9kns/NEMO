@@ -47,6 +47,6 @@ def consultation(request):
 	dictionary = {
 		'title': 'Design Consultation Request',
 		'heading': 'Request Sent!',
-		'content': 'Your design consultation request has been sent to the PRISM Cleanroom staff. We will follow up with you as soon as we can.',
+		'content': 'Your design consultation request has been sent to the staff. We will follow up with you as soon as we can.',
 	}
 	return render(request, 'acknowledgement.html', dictionary)

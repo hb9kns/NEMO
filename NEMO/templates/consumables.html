@@ -12,7 +12,7 @@
 		<div class="alert alert-success">{{ success }}</div>
 	{% endif %}
 	<h1>Withdraw consumables</h1>
-	<p>Use this form to charge users for consumable items & supplies.</p>
+	<p>Use this form to track stocking of consumable items & supplies.</p>
 	<form action="{% url 'consumables' %}" class="form-horizontal" method="post">
 		{% csrf_token %}
 
@@ -93,7 +93,7 @@
 			{% endif %}
 		</div>
 
-		<input type="submit" class="btn btn-default" value="Make withdraw">
+		<input type="submit" class="btn btn-default" value="Make withdrawal">
 	</form>
 
 	<script type="text/javascript">

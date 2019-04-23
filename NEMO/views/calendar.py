@@ -69,7 +69,7 @@ def event_feed(request):
 
 	if event_type == 'reservations':
 		return reservation_event_feed(request, start, end)
-	elif event_type == 'nanofab usage':
+	elif event_type == 'usage':
 		return usage_event_feed(request, start, end)
 	# Only staff may request a specific user's history...
 	elif event_type == 'specific user' and request.user.is_staff:
@@ -519,6 +519,9 @@ def email_reservation_reminders(request):
 	# Exit early if the reservation reminder email template has not been customized for the organization yet.
 	good_message = get_media_file_contents('reservation_reminder_email.html')
 	problem_message = get_media_file_contents('reservation_warning_email.html')
+	facility_name = get_customization('facility_name')
+	if facility_name == '':
+		facility_name = "Facility"
 	if not good_message or not problem_message:
 		return HttpResponseNotFound('The reservation reminder email template has not been customized for your organization yet. Please visit the NEMO customizable_key_values page to upload a template, then reservation reminder email notifications can be sent.')
 
@@ -553,13 +556,13 @@ def email_reservation_reminders(request):
 				}
 	user_office_email = get_customization('user_office_email_address')
 	if good_message:
-		subject = "Upcoming PRISM Cleanroom Reservations"
+		subject = f"Upcoming {facility_name} Reservations"
 		for user in goodAggregate.values():
 			rendered_message = Template(good_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('success')}))
 			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
 
 	if problem_message:
-		subject = "Problem With Upcoming PRISM Cleanroom Reservations"
+		subject = f"Problem With Upcoming {facility_name} Reservations"
 		for user in problemAggregate.values():
 			rendered_message = Template(problem_message).render(Context({'user': user, 'template_color': bootstrap_primary_color('danger')}))
 			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
@@ -574,7 +577,9 @@ def email_usage_reminders(request):
 	projects_to_exclude = request.GET.getlist("projects_to_exclude[]")
 	busy_users = AreaAccessRecord.objects.filter(end=None, staff_charge=None).exclude(project__id__in=projects_to_exclude)
 	busy_tools = UsageEvent.objects.filter(end=None).exclude(project__id__in=projects_to_exclude)
-
+	facility_name = get_customization('facility_name')
+	if facility_name == '':
+		facility_name = "Facility"
 	# Make lists of all the things a user is logged in to.
 	# We don't want to send 3 separate emails if a user is logged into three things.
 	# Just send one email for all the things!
@@ -601,7 +606,7 @@ def email_usage_reminders(request):
 
 	message = get_media_file_contents('usage_reminder_email.html')
 	if message:
-		subject = "PRISM Cleanroom usage"
+		subject = f"{facility_name} usage"
 		for user in aggregate.values():
 			rendered_message = Template(message).render(Context({'user': user}))
 			send_mail(subject, '', user_office_email, [user['email']], html_message=rendered_message)
@@ -623,6 +628,9 @@ def email_daily_passdown(request):
 	# Make list of all events that belong in the daily passdown email"
 	#New shutdowns, New problems, Overnight access, Access and usage in the last day, Upcoming reservations, Upcoming configuration requests,
 	#Low stock items, Ongoing issues, Safety reports, lab usage numbers
+	facility_name = get_customization('facility_name')
+	if facility_name == '':
+		facility_name = "Facility"
 	passdown = {}
 	now = timezone.now()
 	yesterday = now - timedelta(hours = 24)
@@ -704,7 +712,7 @@ def email_daily_passdown(request):
 
 	message = get_media_file_contents('daily_passdown_email.html')
 	if message:
-		subject = "PRISM Cleanroom Daily Passdown"
+		subject = f"{facility_name} Daily Passdown"
 		rendered_message = Template(message).render(Context({'passdown': passdown}))
 		send_mail(subject, '', user_office_email, [passdown_email], html_message=rendered_message)
 	return HttpResponse()

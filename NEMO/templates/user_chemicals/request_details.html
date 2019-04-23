@@ -1,5 +1,5 @@
 {% load humanize %}
-<h2>Chemical Request: {{ chemical_request.chemical_name }}</h2>
+<h2>Material Request: {{ chemical_request.chemical_name }}</h2>
 
 Requested by {{ chemical_request.requester }} on {{ chemical_request.date|date:"Y-m-d" }} ({{ chemical_request.date|naturaltime }}).<br>
 {% if chemical_request.approver %}

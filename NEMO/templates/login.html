@@ -23,13 +23,13 @@
 			top.location = self.location;
 	</script>
 
-	<title>NEMO - PRISM Cleanroom Nanofabrication Equipment Management and Operations website</title>
+	<title>NEMO - {{ facility_name }} Equipment Management and Operations website</title>
 	<link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.css" %}"/>
 	<link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap-theme.css" %}"/>
 </head>
 <body>
 	<div class="container">
-		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><h1>Welcome to the PRISM Cleanroom Equipment Management &amp; Operations website</h1></div>
+		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><h1>Welcome to the {{ facility_name }} Equipment Management &amp; Operations website</h1></div>
 
 		<form method="post" class="form-horizontal" autocomplete="off" id="login_form">
 			{% csrf_token %}

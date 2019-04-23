@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Chemical Requests{% endblock %}
+{% block title %}New Material Requests{% endblock %}
 {% block content %}
-	<h1>Chemical Requests</h1>
-  {% if user.is_staff %}<p><a href="{% url 'view_requests' %}" class="btn btn-success">View Chemical Requests</a></p>{% endif %}
+	<h1>Material Requests</h1>
+  {% if user.is_staff %}<p><a href="{% url 'view_requests' %}" class="btn btn-success">View Material Requests</a></p>{% endif %}
   <p>
-  Use this form to request to bring new materials into the cleanroom. This is necessary to make sure that there is an
-  adequate plan to minimize contamination and safety risks. Staff will review your request and may ask for mor details.
+  Use this form to request to bring new materials into the {{ facility_name }}. This is necessary to make sure that there is an
+  adequate plan to minimize contamination and safety risks. Staff will review your request and may ask for more details.
   If your material is permitted, they will work with you on storage, waste disposal, and allowed processes.
 
   </p>
 
-	<h3>Request permission to bring a new material into the cleanroom</h3>
+	<h3>Request permission to bring a new material into the {{ facility_name }}</h3>
 	<form action="{% url 'chemical_request' %}" method="post">
 		{% csrf_token %}
 		<label for="chemical_name">Chemical Name:</label><br>

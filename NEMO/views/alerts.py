@@ -60,11 +60,14 @@ def delete_expired_alerts():
 
 def send_alert_emails(alert):
 	user_office_email = get_customization('user_office_email_address')
+	facility_name = get_customization('facility_name')
+	if facility_name == '':
+		facility_name = "Facility"
 	generic_email = get_media_file_contents('generic_email.html')
 	if user_office_email and generic_email:
 		users = User.objects.filter(is_active=True).exclude(is_staff=True)
 		subject = alert.title
-		title = "Cleanroom Alert"
+		title = f"{facility_name} Alert"
 		color = bootstrap_primary_color('danger')
 		greeting = 'Labmembers,'
 		message = alert.contents
