@@ -9,6 +9,6 @@ django-admin migrate
 
 # Collect static files
 django-admin collectstatic --no-input --clear
-cp -a /usr/local/lib/python3.6/site-packages/NEMO/migrations/. /nemo/migrations/copy
+cp -a /usr/local/lib/python3.6/site-packages/NEMO/migrations/. /nemo/migrations/
 # Run NEMO
 gunicorn --bind 0.0.0.0:8000 NEMO.wsgi:application
