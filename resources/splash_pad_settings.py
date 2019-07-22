@@ -101,3 +101,7 @@ IDENTITY_SERVICE = {
 	'url': 'https://identity.example.org/',
 	'domains': [],
 }
+
+ALLOWED_HOSTS = [
+ 'phd-test-first.ethz.ch',
+]
