@@ -507,8 +507,8 @@
 		"pk": 8,
 		"fields": {
 			"image": "library.png",
-			"name": "Google",
-			"url": "https://www.google.com/",
+			"name": "FIRST-Lab",
+			"url": "https://first.phys.ethz.ch/",
 			"display_priority": 8,
 			"open_in_new_tab": true,
 			"secure_referral": true,

@@ -105,4 +105,5 @@ IDENTITY_SERVICE = {
 ALLOWED_HOSTS = [
  'phd-test-first.ethz.ch',
  'nemo.first.ethz.ch',
+ '127.0.0.1',
 ]
