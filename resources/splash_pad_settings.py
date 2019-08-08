@@ -1,5 +1,5 @@
 DEBUG = True
-FIXTURE_DIRS = ['/nemo/']
+FIXTURE_DIRS = ['/nemodemo/']
 AUTH_USER_MODEL = 'NEMO.User'
 WSGI_APPLICATION = 'NEMO.wsgi.application'
 ROOT_URLCONF = 'NEMO.urls'
@@ -71,7 +71,7 @@ REST_FRAMEWORK = {
 	'PAGE_SIZE': 1000,
 }
 
-SERVER_EMAIL = 'NEMO Server Administrator <nemo.admin@example.org>'
+SERVER_EMAIL = 'NEMO Server Administrator <nemodemo.admin@example.org>'
 
 ADMINS = [
 	('System administrator', 'sysadmin@example.org'),
@@ -83,12 +83,12 @@ TIME_ZONE = 'America/New_York'
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': '/nemo/sqlite.db',
+		'NAME': '/nemodemo/sqlite.db',
 	}
 }
 
 STATIC_URL = '/static/'
-MEDIA_ROOT = '/nemo/media/'
+MEDIA_ROOT = '/nemodemo/media/'
 MEDIA_URL = '/media/'
 
 SECRET_KEY = 'abc123'
@@ -104,4 +104,5 @@ IDENTITY_SERVICE = {
 
 ALLOWED_HOSTS = [
  'phd-test-first.ethz.ch',
+ 'nemo.first.ethz.ch',
 ]
