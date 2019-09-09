@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 	'NEMO',
 	'rest_framework',
 	'django_filters',
-	'pymodbus3',
+	'pymodbus',
 ]
 
 MIDDLEWARE = [

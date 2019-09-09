@@ -4,7 +4,7 @@ import struct
 import pytz
 from datetime import timedelta
 from logging import getLogger
-from pymodbus3.client.sync import ModbusTcpClient
+from pymodbus.client.sync import ModbusTcpClient
 
 from django.conf import settings
 from django.contrib import auth
