@@ -1,8 +1,11 @@
-.idea/
 __pycache__/
 venv/
 settings.py
 logs/
 media/
-static/
-sqlite.db
+fonts/
+img/
+*.bmp
+*.ico
+*.jpg
+*.png
