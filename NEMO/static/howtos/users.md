@@ -1,4 +1,4 @@
-# NEMO/FIRST-Lab, Users
+# NEMO/FIRST-Lab, Short Manual for Users
 
 Laboratory and user management for [FIRST-Lab]( https://first.phys.ethz.ch)
 is done on an instance of [NEMO]( https://github.com/hb9kns/NEMO ),

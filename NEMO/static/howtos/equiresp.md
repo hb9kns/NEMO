@@ -1,4 +1,4 @@
-# NEMO/FIRST-Lab, Equipment Responsibles
+# NEMO/FIRST-Lab, Short Manual for Equipment Responsibles
 
 Equipment responsibles have some additional permissions in [NEMO][nemo]:
 after login, the toolbar at the top will display an additional
@@ -58,8 +58,8 @@ to add (qualify) themselves for any equipment ...
 This selection switches view to an internal Django page, the system
 running NEMO. The only selection available to equipment responsibles is
 the `Tools/Change` page, which allows to fully modify any tool (equipment);
-therefore, be **even more careful when using this view** as you can
-do much more damage to the database (although recoverable with some work)
+therefore, be **even more careful when using this view** as you could
+change or remove much more data (although recoverable with some work)
 than with the `Tool Qualification` page alone.
 
 *Equipment responsibles should use this view only after additional
@@ -74,4 +74,4 @@ on `LOG OUT` there.
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-1-11/Y.Bonetti*
+*2020-1-13/Y.Bonetti*
