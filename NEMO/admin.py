@@ -7,7 +7,7 @@ from django.contrib.auth.models import Permission
 from NEMO.actions import lock_selected_interlocks, synchronize_with_tool_usage, unlock_selected_interlocks
 from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, ChemicalRequest, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, ContactInformation, ContactInformationCategory, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, Sensor, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserChemical, UserType
 
-admin.site.site_header = "NEMO"
+admin.site.site_header = "NEMO/FIRST-Lab"
 admin.site.site_title = "NEMO"
 admin.site.index_title = "Detailed administration"
 
@@ -394,14 +394,14 @@ class UserTypeAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
 	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
-		('Personal information', {'fields': ('first_name', 'last_name', 'username', 'email', 'badge_number', 'type', 'domain')}),
+		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'badge_number', 'type', 'remarks')}),
 		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
-		('Important dates', {'fields': ('date_joined', 'last_login', 'access_expiration')}),
+		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
-	search_fields = ('first_name', 'last_name', 'username', 'email')
-	list_display = ('first_name', 'last_name', 'username', 'email', 'badge_number', 'is_active', 'is_staff', 'is_superuser', 'access_expiration', 'date_joined', 'last_login')
-	list_filter = ('is_active', 'domain', 'is_staff', 'is_technician', 'is_superuser', 'date_joined', 'last_login')
+	search_fields = ('last_name', 'first_name', 'username', 'email')
+	list_display = ('last_name', 'first_name', 'username', 'email', 'badge_number', 'is_active', 'is_staff', 'is_superuser', 'access_expiration', 'mentor_trained', 'date_joined', 'last_login')
+	list_filter = ('is_active', 'domain', 'is_staff', 'is_technician', 'is_superuser', 'date_joined', 'mentor_trained', 'last_login')
 
 	def save_model(self, request, obj, form, change):
 		""" Audit project membership and qualifications when a user is saved. """
