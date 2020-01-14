@@ -102,10 +102,12 @@ class User(models.Model):
 	# Important dates
 	date_joined = models.DateTimeField(default=timezone.now)
 	last_login = models.DateTimeField(null=True, blank=True)
+	mentor_trained = models.DateTimeField(null=True, blank=True)
 
 	# NanoFab information:
 	qualifications = models.ManyToManyField('Tool', blank=True, help_text='Select the tools that the user is qualified to use.')
 	projects = models.ManyToManyField('Project', blank=True, help_text='Select the projects that this user is currently working on.')
+	remarks = models.TextField(blank=True, help_text="for internal staff use")
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
@@ -172,7 +174,7 @@ class User(models.Model):
 		send_mail(subject=subject, message='', from_email=from_email, recipient_list=[self.email], html_message=message)
 
 	def get_full_name(self):
-		return self.first_name + ' ' + self.last_name + ' (' + self.username + ')'
+		return self.last_name + ' ' + self.first_name + ' (' + self.username + ')'
 
 	def get_short_name(self):
 		return self.first_name
@@ -209,7 +211,7 @@ class User(models.Model):
 			return None
 
 	class Meta:
-		ordering = ['first_name']
+		ordering = ['last_name']
 		permissions = (
 			("trigger_timed_services", "Can trigger timed services"),
 			("use_billing_api", "Can use billing API"),
@@ -1199,7 +1201,7 @@ class LandingPageChoice(models.Model):
 	hide_from_mobile_devices = models.BooleanField(default=False, help_text="Hides this choice when the landing page is viewed from a mobile device")
 	hide_from_desktop_computers = models.BooleanField(default=False, help_text="Hides this choice when the landing page is viewed from a desktop computer")
 	hide_from_users = models.BooleanField(default=False, help_text="Hides this choice from normal users. When checked, only staff, technicians, and super-users can see the choice")
-	notifications = models.CharField(max_length=25, blank=True, null=True, choices=Notification.Types.Choices, help_text="Displays a the number of new notifications for the user. For example, if the user has two unread news notifications then the number '2' would appear for the news icon on the landing page.")
+	notifications = models.CharField(max_length=25, blank=True, null=True, choices=Notification.Types.Choices, help_text="Displays the number of new notifications for the user. For example, if the user has two unread news notifications then the number '2' would appear for the news icon on the landing page.")
 
 	class Meta:
 		ordering = ['display_priority']
