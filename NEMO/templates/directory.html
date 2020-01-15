@@ -3,8 +3,8 @@
 {% block content %}
 	<h1>Labmember Directory	</h1>
 	<p>
-		This page contains a list of all active labmembers. You may email a labmember by clicking on that person's name. Labmembers whose names appear
-    in green have 24 hour access to the {{ facility_name }} and can serve as a buddy.
+		This page contains a list of all active labmembers. You may email a labmember by clicking on that person's name.
+		Names of staff and equipment responsibles are in green.
 	</p>
 
   <div class="col-lg-8" style="margin-top:30px">
@@ -18,7 +18,7 @@
 				<tbody>
 					{% for person in people %}
 						<tr>
-							<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.24hr %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a></td>
+							<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.special %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a></td>
 							<td>{{ person.group }}</td>
 						</tr>
 					{% endfor %}

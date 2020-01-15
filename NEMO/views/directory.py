@@ -7,7 +7,8 @@ from NEMO.views.customization import get_customization
 
 @login_required
 def directory(request):
-	user_exclude = [1,3,7,8]
+# exclude user types Test and Contact
+	user_exclude = [2,7]
 	projects_to_exclude = []
 	exclude=get_customization('exclude_from_billing')
 	if exclude:
@@ -19,8 +20,10 @@ def directory(request):
 			group = user.active_projects().exclude(id__in=projects_to_exclude).values_list('account__name', flat=True)[0]
 		except:
 			group = "unknown"
-		access =  user.physical_access_levels.filter(id=1).exists()
-		user_info = {'user':user, 'group':group, '24hr':access }
+#		access =  user.physical_access_levels.filter(id=1).exists()
+# staff/equiresp status is more useful
+		access =  user.is_staff
+		user_info = {'user':user, 'group':group, 'special':access }
 		people.append(user_info)
 	dictionary = {
 		'people': people
