@@ -6,7 +6,7 @@ after login, the toolbar at the top will display an additional
 *Please keep in mind all activity is logged by the system; if in doubt, ask*
 the [NEMO responsible][nemoresp] before doing anything you don't understand.
 
-## Alerts
+## Alerts (inactive)
 
 Alerts are messages displayed at NEMO's main page after login.
 In general, they are issued by FTT members, but there might be
@@ -56,6 +56,10 @@ tool (equipment), or the `Disqualify users` at the right to remove them.
 
 Please note: it is technically well possible for equipment responsibles
 to add (qualify) themselves for any equipment ...
+
+## User directory
+
+This page displays a list of all active users and their affiliations (group).
 
 ## Detailed Administration
 
