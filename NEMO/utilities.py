@@ -55,7 +55,7 @@ def parse_parameter_string(parameter_dictionary, parameter_key, maximum_length=3
 		return default_return
 
 
-def month_list(since=datetime(year=2013, month=11, day=1)):
+def month_list(since=datetime(year=2020, month=1, day=1)):
 	month_count = (timezone.now().year - since.year) * 12 + (timezone.now().month - since.month) + 1
 	result = list(rrule(MONTHLY, dtstart=since, count=month_count))
 	result = localize(result)

@@ -9996,10 +9996,10 @@ Calendar.defaults = {
 		right: 'today prev,next'
 	},
 	weekends: true,
-	weekNumbers: false,
+	weekNumbers: true,
 
 	weekNumberTitle: 'W',
-	weekNumberCalculation: 'local',
+	weekNumberCalculation: 'ISO',
 	
 	//editable: false,
 
