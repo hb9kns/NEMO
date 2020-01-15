@@ -83,6 +83,7 @@ class User(models.Model):
 	last_name = models.CharField(max_length=100)
 	email = models.EmailField(verbose_name='email address')
 	type = models.ForeignKey(UserType, null=True, on_delete=models.SET_NULL)
+	affiliation = models.ForeignKey('Account', null=True, blank=True, default='', help_text="account (group/company) the user is affiliated to")
 	domain = models.CharField(max_length=100, blank=True, help_text="The Active Directory domain that the account resides on")
 
 	# Physical access fields
@@ -102,7 +103,8 @@ class User(models.Model):
 	# Important dates
 	date_joined = models.DateTimeField(default=timezone.now)
 	last_login = models.DateTimeField(null=True, blank=True)
-	mentor_trained = models.DateTimeField(null=True, blank=True)
+	mentor_trained = models.DateField(null=True, blank=True)
+	fire_trained = models.DateField(null=True, blank=True)
 
 	# NanoFab information:
 	qualifications = models.ManyToManyField('Tool', blank=True, help_text='Select the tools that the user is qualified to use.')
@@ -489,7 +491,7 @@ class ConfigurationHistory(models.Model):
 class Account(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	active = models.BooleanField(default=True, help_text="Users may only charge to an account if it is active. Deactivate the account to block future billable activity (such as tool usage and consumable check-outs) of all the projects that belong to it.")
-	manager_email = models.EmailField(blank=True, null=True, help_text="Email address of the account manager")
+	manager = models.ForeignKey(User, null=True, blank=True, default='', related_name="account_manager", help_text="Account Manager, financially responsible")
 	class Meta:
 		ordering = ['name']
 
