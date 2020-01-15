@@ -2,11 +2,11 @@
 
 Laboratory and user management for [FIRST-Lab]( https://first.phys.ethz.ch)
 is done on an instance of [NEMO]( https://github.com/hb9kns/NEMO ),
-which is a web application based on Django/Python and SQL databases.
+a web application based on Django/Python and SQL databases.
 
 ## Login/Logout
 
-FIRST-Lab users can log in on the [main page][nemo]
+FIRST-Lab users can log in on [NEMO's main page][nemo]
 provided they have a [D-PHYS account]( https://account.phys.ethz.ch/ )
 from the Department of Physics, required not only for accessing NEMO,
 but also for transferring data to/from FIRST-Lab equipment.
@@ -96,4 +96,4 @@ report it as a problem, not just as a comment!
 [calendar]: https://nemo.first.ethz.ch/calendar/ "booking calendar"
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 
-*2020-1-14/Y.Bonetti*
+*2020-1-15/Y.Bonetti*

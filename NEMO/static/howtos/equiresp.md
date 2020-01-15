@@ -14,6 +14,10 @@ cases where it makes sense for equipment responsibles to alert
 all users logging in to NEMO.
 The `Alert` page should be self-explanatory.
 
+*Due to date/time entry issues, this is not yet working.*
+FIRST-Lab team members can use the `Alert` section in the
+"Detailed Administration" pull-down.
+
 ## Email (inactive)
 
 The `Email` page allows to send a message to all users, to those who are
@@ -74,4 +78,4 @@ on `LOG OUT` there.
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-1-13/Y.Bonetti*
+*2020-1-15/Y.Bonetti*

@@ -1,0 +1,15 @@
+/* FIRST-Lab style file // 2016-Sep,2019-May // Y.Bonetti */
+body {
+ font-family: Arial, Helvetica, sans-serif;
+ background-color: white;
+ color: black;
+}
+h1 {
+ color: #0069b4;
+}
+/* ol, ul { background-color: #eaecee; } */
+a {
+ color: #0058c5;
+ font-weight: bold;
+ text-decoration: none;
+}
