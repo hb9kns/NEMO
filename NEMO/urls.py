@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
+from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -178,8 +178,7 @@ urlpatterns = [
 	url(r'^view_calendar/(?P<tool_id>\d+)/$', mobile.view_calendar, name='view_calendar'),
 	url(r'^view_calendar/(?P<tool_id>\d+)/(?P<date>20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))/$', mobile.view_calendar, name='view_calendar'),
 
-	# Contact staff:
-	url(r'^contact_staff/$', contact_staff.contact_staff, name='contact_staff'),
+	# People:
 	url(r'^directory/$', directory.directory, name='directory'),
 
 	# Area access:

@@ -82,8 +82,10 @@ class User(models.Model):
 	first_name = models.CharField(max_length=100)
 	last_name = models.CharField(max_length=100)
 	email = models.EmailField(verbose_name='email address')
+	phone = models.CharField(max_length=100, null=True, blank=True, default='', verbose_name='phone number')
 	type = models.ForeignKey(UserType, null=True, on_delete=models.SET_NULL)
 	affiliation = models.ForeignKey('Account', null=True, blank=True, default='', help_text="account (group/company) the user is affiliated to")
+	address = models.TextField(blank=True, help_text="post address / contact information")
 	domain = models.CharField(max_length=100, blank=True, help_text="The Active Directory domain that the account resides on")
 
 	# Physical access fields
@@ -1145,36 +1147,6 @@ class Alert(models.Model):
 
 	def __str__(self):
 		return str(self.id)
-
-
-class ContactInformationCategory(models.Model):
-	name = models.CharField(max_length=200)
-	display_order = models.IntegerField(help_text="Contact information categories are sorted according to display order. The lowest value category is displayed first in the 'Contact information' page.")
-
-	class Meta:
-		verbose_name_plural = 'Contact information categories'
-		ordering = ['display_order', 'name']
-
-	def __str__(self):
-		return str(self.name)
-
-
-class ContactInformation(models.Model):
-	name = models.CharField(max_length=200)
-	image = models.ImageField(blank=True, help_text='Portraits are resized to 266 pixels high and 200 pixels wide. Crop portraits to these dimensions before uploading for optimal bandwidth usage')
-	category = models.ForeignKey(ContactInformationCategory)
-	email = models.EmailField(blank=True)
-	office_phone = models.CharField(max_length=40, blank=True)
-	office_location = models.CharField(max_length=200, blank=True)
-	mobile_phone = models.CharField(max_length=40, blank=True)
-	mobile_phone_is_sms_capable = models.BooleanField(default=True, verbose_name='Mobile phone is SMS capable', help_text="Is the mobile phone capable of receiving text messages? If so, a link will be displayed for users to click to send a text message to the recipient when viewing the 'Contact information' page.")
-
-	class Meta:
-		verbose_name_plural = 'Contact information'
-		ordering = ['name']
-
-	def __str__(self):
-		return str(self.name)
 
 
 class Notification(models.Model):
