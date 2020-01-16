@@ -90,10 +90,27 @@ or (depending on the tool -- ask the responsibles!) status of the
 equipment. But if something requires a (re)action by the responsibles,
 report it as a problem, not just as a comment!
 
+## Status dashboard
+
+[This page][dashboard] shows the status of all equipment, filtered by
+tools in use (i.e where somebody is currently billed for using it),
+idle or unavailable ones, or just those where the user is qualified for.
+
+---
+
+## Notes
+
+### Team members
+
+At the end of the tool list (enjoy the pun!), team member names are
+added. They might be used for announcing absence or other availability
+issues for the FIRST-Lab team. However, you cannot book or use them...
+
 ---
 
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main page"
 [calendar]: https://nemo.first.ethz.ch/calendar/ "booking calendar"
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
+[dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-1-15/Y.Bonetti*
+*2020-1-16/Y.Bonetti*
