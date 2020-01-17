@@ -506,6 +506,8 @@ class Project(models.Model):
 	application_identifier = models.CharField(max_length=100)
 	account = models.ForeignKey(Account, help_text="All charges for this project will be billed to the selected account.")
 	active = models.BooleanField(default=True, help_text="Users may only charge to a project if it is active. Deactivate the project to block billable activity (such as tool usage and consumable check-outs).")
+	project_contact = models.ForeignKey(User, null=True, blank=True, default='', help_text="for technical and budgetary discussions")
+	project_description = models.TextField(blank=True, help_text="project description, remarks")
 
 	class Meta:
 		ordering = ['name']
