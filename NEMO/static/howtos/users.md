@@ -1,7 +1,7 @@
 # NEMO/FIRST-Lab, Short Manual for Users
 
 Laboratory and user management for [FIRST-Lab]( https://first.phys.ethz.ch)
-is done on an instance of [NEMO]( https://github.com/hb9kns/NEMO ),
+is done on an instance of NEMO,
 a web application based on Django/Python and SQL databases.
 
 ## Login/Logout
@@ -108,9 +108,10 @@ issues for the FIRST-Lab team. However, you cannot book or use them...
 
 ---
 
+[nemorepo]: https://github.com/hb9kns/NEMO "NEMO Github repository"
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main page"
 [calendar]: https://nemo.first.ethz.ch/calendar/ "booking calendar"
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-1-16/Y.Bonetti*
+*2020-1-17/Y.Bonetti*
