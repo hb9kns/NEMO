@@ -85,6 +85,7 @@ class User(models.Model):
 	phone = models.CharField(max_length=100, null=True, blank=True, default='', verbose_name='phone number')
 	type = models.ForeignKey(UserType, null=True, on_delete=models.SET_NULL)
 	affiliation = models.ForeignKey('Account', null=True, blank=True, default='', help_text="account (group/company) the user is affiliated to")
+	mentor = models.ForeignKey('User', null=True, blank=True, default='')
 	address = models.TextField(blank=True, help_text="post address / contact information")
 	domain = models.CharField(max_length=100, blank=True, help_text="The Active Directory domain that the account resides on")
 
@@ -103,7 +104,7 @@ class User(models.Model):
 	user_permissions = models.ManyToManyField(Permission, blank=True, help_text='Specific permissions for this user.')
 
 	# Important dates
-	date_joined = models.DateTimeField(default=timezone.now)
+	date_joined = models.DateTimeField(default=timezone.now, help_text='introday in most cases')
 	last_login = models.DateTimeField(null=True, blank=True)
 	mentor_trained = models.DateField(null=True, blank=True)
 	fire_trained = models.DateField(null=True, blank=True)
@@ -227,7 +228,7 @@ class User(models.Model):
 
 
 class Tool(models.Model):
-	name = models.CharField(max_length=100, unique=True)
+	name = models.CharField(max_length=100, unique=True, help_text="Do NOT use slashes here!")
 	category = models.CharField(max_length=1000, help_text="Create sub-categories using slashes. For example \"Category 1/Sub-category 1\".")
 	visible = models.BooleanField(default=True, help_text="Specifies whether this tool is visible to users.")
 	operational = models.BooleanField(default=False, help_text="Marking the tool non-operational will prevent users from using the tool.")
