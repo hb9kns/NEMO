@@ -208,9 +208,9 @@ class ConfigurationHistoryAdmin(admin.ModelAdmin):
 
 @register(Account)
 class AccountAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'active', 'manager')
-	search_fields = ('name',)
-	list_filter = ('active',)
+	list_display = ('name', 'id', 'active', 'manager', 'department')
+	search_fields = ('name', 'department',)
+	list_filter = ('active', 'department',)
 
 	def save_model(self, request, obj, form, change):
 		""" Audit account and project active status. """

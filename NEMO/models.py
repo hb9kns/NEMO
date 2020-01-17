@@ -494,6 +494,7 @@ class Account(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	active = models.BooleanField(default=True, help_text="Users may only charge to an account if it is active. Deactivate the account to block future billable activity (such as tool usage and consumable check-outs) of all the projects that belong to it.")
 	manager = models.ForeignKey(User, null=True, blank=True, default='', related_name="account_manager", help_text="Account Manager, financially responsible")
+	department = models.CharField(max_length=50, null=True, blank=True, default='')
 	class Meta:
 		ordering = ['name']
 
