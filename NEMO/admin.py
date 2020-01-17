@@ -395,7 +395,8 @@ class UserAdmin(admin.ModelAdmin):
 	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
 		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'address', 'affiliation', 'badge_number', 'type', 'remarks')}),
-		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
+#		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
+		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
 		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
