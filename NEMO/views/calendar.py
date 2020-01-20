@@ -502,10 +502,9 @@ def cancel_outage(request, outage_id):
 		return render(request, 'mobile/cancellation_result.html', dictionary)
 
 
-@staff_member_required(login_url=None)
+@login_required
 @require_POST
 def set_reservation_title(request, reservation_id):
-	""" Cancel a reservation for a user. """
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
 	reservation.save()
