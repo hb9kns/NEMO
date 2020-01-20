@@ -6,6 +6,14 @@ after login, the toolbar at the top will display an additional
 *Please keep in mind all activity is logged by the system; if in doubt, ask*
 the [NEMO responsible][nemoresp] before doing anything you don't understand.
 
+## Special bookings
+
+There are additional projects available to equipment responsibles:
+
+- MAINTENANCE is to be used for work on equipment; if it is out of order,
+  please schedule an outage as well, which makes it clearly visible to users
+- TRAINING for, well, trainings...
+
 ## Alerts (inactive)
 
 Alerts are messages displayed at NEMO's main page after login.
