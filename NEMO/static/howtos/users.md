@@ -43,7 +43,9 @@ the displayed time unit can be selected.
 ### Booking a tool
 
 To book a tool the user is qualified for, first select `Reservations`
-in the left pane. Then in the right pane, select the correct calendar
+in the left pane, and click onto the *name* of the tool so that it gets
+a grey background (checkmark is not sufficient: this only *displays* the
+tool's reservations). In the right pane, select the correct calendar
 view and click where the booking should start (or end), keep clicked,
 drag to the end (or beginning) of the booking slot, and release.  If the
 user participates in several projects, one must then be selected for
@@ -114,4 +116,4 @@ issues for the FIRST-Lab team. However, you cannot book or use them...
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-1-17/Y.Bonetti*
+*2020-1-22/Y.Bonetti*
