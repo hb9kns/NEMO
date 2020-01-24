@@ -1218,7 +1218,7 @@ class ScheduledOutage(models.Model):
 	details = models.TextField(blank=True, help_text="A detailed description of why there is a scheduled outage, and what users can expect during the outage")
 	category = models.CharField(blank=True, max_length=200, help_text="A categorical reason for why this outage is scheduled. Useful for trend analytics.")
 	tool = models.ForeignKey(Tool, null=True)
-	resource = models.ForeignKey(Resource, null=True)
+	resource = models.ForeignKey(Resource, null=True, blank=True)
 
 	def __str__(self):
 		return str(self.title)
