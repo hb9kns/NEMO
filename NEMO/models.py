@@ -87,6 +87,7 @@ class User(models.Model):
 	affiliation = models.ForeignKey('Account', null=True, blank=True, default='', help_text="account (group/company) the user is affiliated to")
 	mentor = models.ForeignKey('User', null=True, blank=True, default='')
 	address = models.TextField(blank=True, help_text="post address / contact information")
+	position = models.CharField(max_length=100, null=True, blank=True, default='', help_text="semester/master/postdoc/..")
 	domain = models.CharField(max_length=100, blank=True, help_text="The Active Directory domain that the account resides on")
 
 	# Physical access fields

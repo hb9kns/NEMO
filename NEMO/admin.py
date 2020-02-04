@@ -394,15 +394,15 @@ class UserTypeAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
 	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
-		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'affiliation', 'badge_number', 'type', 'remarks')}),
+		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'badge_number', 'type', 'remarks')}),
 #		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
 		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
 		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
 	search_fields = ('last_name', 'first_name', 'username', 'email')
-	list_display = ('last_name', 'first_name', 'username', 'email', 'phone', 'affiliation', 'badge_number', 'is_active', 'is_staff', 'is_superuser', 'access_expiration', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login')
-	list_filter = ('is_active', 'groups', 'affiliation', 'is_staff', 'mentor_trained', 'fire_trained', 'is_technician', 'is_superuser', 'date_joined', 'last_login')
+	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login')
+	list_filter = ('is_active', 'groups', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'last_login')
 
 	def save_model(self, request, obj, form, change):
 		""" Audit project membership and qualifications when a user is saved. """
