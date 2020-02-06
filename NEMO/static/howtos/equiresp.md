@@ -10,11 +10,20 @@ the [NEMO responsible][nemoresp] before doing anything you don't understand.
 
 There are additional projects available to equipment responsibles:
 
-- MAINTENANCE is to be used for work on equipment; if it is out of order,
+- `_MAINTENANCE` is to be used for work on equipment; if it is out of order,
   please schedule an outage as well, which makes it clearly visible to users
-- TRAINING for, well, trainings...
+- `_TRAINING` for, well, trainings...
 
-## Alerts (inactive)
+Equipment responsibles will see an extra button "Schedule an outage"
+in the calendar pane, to mark a tool as being unavailable.
+These entries can be moved and modified like bookings, and
+in addition, they can be modified under "Detailed Administration"
+explained further down.
+
+## Administration
+
+<!--
+### Alerts (inactive)
 
 Alerts are messages displayed at NEMO's main page after login.
 In general, they are issued by FTT members, but there might be
@@ -25,20 +34,20 @@ The `Alert` page should be self-explanatory.
 *Due to date/time entry issues, this is not yet working.*
 FIRST-Lab team members can use the `Alert` section in the
 "Detailed Administration" pull-down.
+-->
 
-## Email (inactive)
+### Email
 
 The `Email` page allows to send a message to all users, to those who are
 qualified for a tool, work on a specific project, or bill to a specific
-account (currently unused in NEMO/FIRST-Lab). *However, the required forms
-have not yet been set up, and therefore cannot be used at this moment.*
+account (currently unused in NEMO/FIRST-Lab).
 
-## Maintenance (inactive)
+### Maintenance (inactive)
 
 The `Maintenance` page permits to display maintenance state of all tools.
 This is not yet used.
 
-## Tool Qualifications
+### Tool Qualifications
 
 The `Tool Qualifications` page allows to add or remove users *in batch*
 to/from the list of one or several tools (equipment).
@@ -65,15 +74,48 @@ tool (equipment), or the `Disqualify users` at the right to remove them.
 Please note: it is technically well possible for equipment responsibles
 to add (qualify) themselves for any equipment ...
 
-## User directory
+### User directory
 
 This page displays a list of all active users and their affiliations (group).
 
-## Detailed Administration
+### Reservation Abuse
+
+This page allows to display reservations cancelled by users, to check
+whether somebody is repeatedly blocking equipment for others without
+using it.
+
+The cancellation horizon allows to ignore all bookings cancelled *earlier*
+than this many hours before their start. (E.g if this is set to 3 hours,
+then no booking should be reported which has been cancelled any time
+earlier than 3 hours before the start time.)
+
+The selection parameters are still work in progress:
+
+- The "Cancellation penalty" field is not correctly displaying its value.
+(However, there is no need to modify it, therefore simply ignore it.)
+- There is a glitch in the code populating the dates: please click into
+the "Starting" and "Ending" fields and manually choose dates, before
+generating the report; otherwise, you will get an empty one.
+
+### Detailed Administration
 
 This selection switches view to an internal Django page, the system
-running NEMO. The only selection available to equipment responsibles is
-the `Tools/Change` page, which allows to fully modify any tool (equipment);
+running NEMO. Not all pages are available to equipment responsibles.
+It can be left by clicking on `VIEW SITE` at the top right;
+one may also completely log out from NEMO by clicking on `LOG OUT` there.
+
+#### Scheduled outages Add/Change
+
+This permits to change scheduled outages set in the Calendar view,
+e.g if start or end points should be set to a specific time not
+easily attainable in the Calendar view.
+
+It is also possible to add new entries; however, this is more tedious
+and error-prone than through the Calendar and therefore not recommended.
+
+#### Tools Change
+
+This allows to fully modify any tool (equipment);
 therefore, be **even more careful when using this view** as you could
 change or remove much more data (although recoverable with some work)
 than with the `Tool Qualification` page alone.
@@ -81,13 +123,9 @@ than with the `Tool Qualification` page alone.
 *Equipment responsibles should use this view only after additional
 instruction by FIRST-Lab staff, and it is currently not yet needed.*
 
-You can leave this internal view by clicking on `VIEW SITE` at the
-top right; you may also completely log out from NEMO by clicking
-on `LOG OUT` there.
-
 ---
 
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-1-15/Y.Bonetti*
+*2020-2-6/Y.Bonetti*

@@ -11,11 +11,15 @@ provided they have a [D-PHYS account]( https://account.phys.ethz.ch/ )
 from the Department of Physics, required not only for accessing NEMO,
 but also for transferring data to/from FIRST-Lab equipment.
 
-They are then presented with the main view, allowing access to the booking
+They are then presented with the landing page, allowing access to the booking
 calendar, tool handling (using/releasing tools counted for billing),
 and providing various possibilities for contacting staff and other users.
 
 For logging out from NEMO, click onto your username (in parentheses) at the top right.
+In case this is not present (on some mobile devices or specific browsers),
+please go to the landing page (e.g by clicking onto "NEMO" in the
+top left corner of any page), and then the "Logout" link at the bottom
+of the page (with a red-white NO-ENTRY symbol).
 
 ## Calendar for Booking
 
@@ -31,8 +35,9 @@ usage), and `Specific user` (information about another user's reservation
 and usage).
 
 In case of `Reservations` and `Usage` the list of tools can be expanded 
-or compressed with the buttons below the pull-down menu selector, and
-only those tools are displayed whose checkboxes are selected in the list.
+or compressed with the buttons below the pull-down menu selector.
+*Only those tools are displayed whose checkboxes are set* in the list,
+*plus* the one which is selected (coloured background) for booking.
 
 ### Calendar pane
 
@@ -116,4 +121,4 @@ issues for the FIRST-Lab team. However, you cannot book or use them...
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-1-22/Y.Bonetti*
+*2020-2-6/Y.Bonetti*
