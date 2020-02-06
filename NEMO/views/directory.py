@@ -19,7 +19,8 @@ def directory(request):
 #		access =  user.physical_access_levels.filter(id=1).exists()
 # staff/equiresp status is more useful
 		access =  user.is_staff
-		user_info = {'user':user, 'group':group, 'special':access }
+		introday = user.date_joined.date()
+		user_info = {'user':user, 'group':group, 'special':access, 'intro':introday }
 		people.append(user_info)
 	dictionary = {
 		'people': people
