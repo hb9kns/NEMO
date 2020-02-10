@@ -80,7 +80,7 @@ def email_broadcast(request, audience=''):
 		dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
 	elif audience == 'account':
 		dictionary['search_base'] = Account.objects.filter(active=True)
-	elif audience == 'all':
+	elif audience == 'all' or audience == 'equiresp' or audience == 'mentors' or audience == 'pjtresp' :
 		dictionary['search_base'] = 'all'
 		dictionary['all'] = True
 	dictionary['audience'] = audience
@@ -99,6 +99,10 @@ def compose_email(request):
 				users = User.objects.filter(projects__id=selection).distinct()
 			elif audience == 'account':
 				users = User.objects.filter(projects__account__id=selection).distinct()
+			elif audience == 'equiresp':
+				users = User.objects.filter(groups__name='Equipment Responsibles')
+			elif audience == 'mentors':
+				users = User.objects.filter(groups__name='Mentors')
 			elif audience == 'all':
 				users = User.objects.all()
 			else:
@@ -154,6 +158,10 @@ def send_broadcast_email(request):
 			users = User.objects.filter(projects__id=selection)
 		elif audience == 'account':
 			users = User.objects.filter(projects__account__id=selection)
+		elif audience == 'equiresp':
+			users = User.objects.filter(groups__name='Equipment Responsibles')
+		elif audience == 'mentors':
+			users = User.objects.filter(groups__name='Mentors')
 		elif audience == 'all':
 			users = User.objects.all()
 		if active_choice:

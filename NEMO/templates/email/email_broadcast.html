@@ -12,11 +12,14 @@
 
 	Compose an email to...
 	<ul>
-		<li><a href="{% url 'email_broadcast' 'tool' %}">labmembers who are qualified for a tool</a></li>
+		<li><a href="{% url 'email_broadcast' 'tool' %}">labmembers who are qualified for a specific tool</a></li>
 		{% if user.is_staff %}
+		<li><a href="{% url 'email_broadcast' 'all' %}">all labmembers</a></li>
 		<li><a href="{% url 'email_broadcast' 'project' %}">labmembers who are working on a project</a></li>
 		<li><a href="{% url 'email_broadcast' 'account' %}">labmembers who bill to an account</a></li>
-		<li><a href="{% url 'email_broadcast' 'all' %}">all labmembers</a></li>
+		<li><a href="{% url 'email_broadcast' 'equiresp' %}">all labmembers who are equipment responsibles</a></li>
+		<li><a href="{% url 'email_broadcast' 'mentors' %}">all labmembers who are mentors</a></li>
+		<li><a href="{% url 'email_broadcast' 'pjtresp' %}">all labmembers who are project responsibles // BROKEN</a></li>
 		{% endif %}
 	</ul>
 
