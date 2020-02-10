@@ -120,6 +120,12 @@ views, listed on the "Tool control" menu in the "Details and History" tab.
 (To save, right click or directly copy, depending on the browser and
 operating system.)
 
+### Server time at page generation
+
+The server time is displayed at the top right corner.  This is not
+updating, but reflects the time when the page displayed was generated
+on the server.
+
 ---
 
 [nemorepo]: https://github.com/hb9kns/NEMO "NEMO Github repository"
@@ -128,4 +134,4 @@ operating system.)
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-2-10/Y.Bonetti*
+*2020-02-10/Y.Bonetti*

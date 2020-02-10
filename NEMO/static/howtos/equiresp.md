@@ -38,9 +38,10 @@ FIRST-Lab team members can use the `Alert` section in the
 
 ### Email
 
-The `Email` page allows to send a message to all users, to those who are
+The `Email` page allows to send a message to all users, mentors,
+responsibles, or to those who are
 qualified for a tool, work on a specific project, or bill to a specific
-account (currently unused in NEMO/FIRST-Lab).
+account (yet unused in NEMO/FIRST-Lab).
 
 ### Maintenance (inactive)
 
@@ -128,4 +129,4 @@ instruction by FIRST-Lab staff, and it is currently not yet needed.*
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-2-6/Y.Bonetti*
+*2020-02-10/Y.Bonetti*
