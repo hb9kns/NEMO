@@ -258,6 +258,11 @@
 				{% endif %}
 				<p>The {{ tool.name }} is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
 				<p>You may dial the phone that is closest to the {{ tool.name }} at extension <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
+				<h5>Deep links for this tool:</h5>
+				<ul>
+				<li><a href="/calendar/{{ tool.id }}">Calendar</a></li>
+				<li><a href="/tool_control/{{ tool.id }}">Tool control</a></li>
+				</ul>
 			</div>
 		</div>
 			<div id="qualified_users_container" class="media">

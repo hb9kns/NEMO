@@ -113,6 +113,13 @@ At the end of the tool list (enjoy the pun!), team member names are
 added. They might be used for announcing absence or other availability
 issues for the FIRST-Lab team. However, you cannot book or use them...
 
+### Deep links (bookmarks) for specific tools
+
+You can create/save deeplinks for specific tools (equipment) and certain
+views, listed on the "Tool control" menu in the "Details and History" tab.
+(To save, right click or directly copy, depending on the browser and
+operating system.)
+
 ---
 
 [nemorepo]: https://github.com/hb9kns/NEMO "NEMO Github repository"
@@ -121,4 +128,4 @@ issues for the FIRST-Lab team. However, you cannot book or use them...
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-2-6/Y.Bonetti*
+*2020-2-10/Y.Bonetti*
