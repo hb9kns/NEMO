@@ -111,6 +111,7 @@
 						</script>
 					</li>
 				{% endif %}
+				<li class="hidden-sm"><p class="navbar-text"><small>({% now 'y-m-d,H:i' %})</small></p></li>
 				<li class="hidden-sm"><p class="navbar-text">Welcome, {{ user.first_name }} <a href="{% url 'logout' %}">({{ user.username }})</a></p></li>
 				{% if logout_allowed %}
 					<li><a href="{% url 'logout' %}">Logout</a></li>

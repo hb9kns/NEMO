@@ -149,7 +149,10 @@ def format_datetime(universal_time):
 		suffix = "th"
 	else:
 		suffix = ["st", "nd", "rd"][day % 10 - 1]
+	"""
 	return local_time.strftime("%A, %B ") + str(day) + suffix + local_time.strftime(", %Y @ ") + local_time.strftime("%I:%M %p").lstrip('0')
+	"""
+	return local_time.strftime("%A, %B ") + str(day) + suffix + local_time.strftime(", %Y @ ") + local_time.strftime("%H:%M")
 
 
 def localize(dt, tz=None):
