@@ -34,13 +34,19 @@ urlpatterns = [
 	url(r'^forgot_password/$', forgot_password.forgot_password, name='forgot_password'),
 	url(r'^forgot_password_process/$', forgot_password.forgot_password_process, name='forgot_password_process'),
 	url(r'^password_reset_token/(?P<token>[a-zA-Z0-9]+)/$', forgot_password.password_reset_token, name='password_reset_token'),
-
 	url(
 		r'^favicon.ico$',
 		RedirectView.as_view(
 			url=staticfiles_storage.url('favicon.ico'),
 			permanent=False),
 		name="favicon"
+	),
+	url(
+		r'^robots.txt$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('robots.txt'),
+			permanent=False),
+		name="robots"
 	),
 
 	# Root URL defaults to the calendar page on desktop systems, and the mobile homepage for mobile devices:
