@@ -3,6 +3,11 @@
 
 {% block title %}NEMO{% endblock %}
 {% block content %}
+	<div class="row">
+	 <div class="col-lg-12">
+	  <p style="text-align: right"><small><em>Server time: {% now 'l, Y-m-d, H:i' %}</em></small></p>
+	 </div>
+	</div>
 	{% if user.training_required %}
 		<div class="row">
 			<div class="col-lg-12">
