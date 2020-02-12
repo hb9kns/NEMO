@@ -94,9 +94,6 @@
 						</ul>
 					</li>
 				{% endif %}
-				{% if logout_allowed %}
-					<li class="visible-xs"><a href="{% url 'logout' %}">Logout</a></li>
-				{% endif %}
 			</ul>
 			<ul class="nav navbar-nav navbar-right hidden-xs">
 				{% if user.is_staff and user.charging_staff_time %}
