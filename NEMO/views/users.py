@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import requests
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -12,7 +13,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from NEMO.admin import record_local_many_to_many_changes, record_active_state
 from NEMO.forms import UserForm
-from NEMO.models import User, Project, Tool, PhysicalAccessLevel, Reservation, StaffCharge, UsageEvent, AreaAccessRecord, ActivityHistory
+from NEMO.models import User, Project, Account, Tool, PhysicalAccessLevel, Reservation, StaffCharge, UsageEvent, AreaAccessRecord, ActivityHistory
 
 
 @staff_member_required(login_url=None)
@@ -23,11 +24,14 @@ def users(request):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_user', raise_exception=True)
 @require_http_methods(['GET', 'POST'])
 def create_or_modify_user(request, user_id):
 	dictionary = {
 		'projects': Project.objects.filter(active=True, account__active=True),
 		'tools': Tool.objects.filter(visible=True),
+		'actusers': User.objects.filter(is_active=True),
+		'affiliations': Account.objects.filter(active=True),
 		'physical_access_levels': PhysicalAccessLevel.objects.all(),
 		'one_year_from_now': timezone.now() + timedelta(days=365),
 		'identity_service_available': settings.IDENTITY_SERVICE['available'],
