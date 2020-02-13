@@ -13,11 +13,13 @@
 			{{ form.non_field_errors }}
 		</div>
 	{% endif %}
+<!--
 	{% if warning %}
 		<div class="alert alert-warning">
 			{{ warning }}
 		</div>
 	{% endif %}
+-->
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="form-group">
@@ -76,6 +78,16 @@
 					{{ form.email.errors|striptags }}
 				</div>
 			{% endif %}
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="affiliation"><strong>Affiliation</strong></label>
+			<div class="col-sm-4">
+				<select id="affiliation" name="affiliation" class="form-control" required>
+					{% for a in affiliations %}
+						<option value="{{ a.id }}" {% if a.id == form.affiliation.value|to_int %}selected{% endif %}>{{ a.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="type"><strong>Type</strong></label>
@@ -138,6 +150,7 @@
 				</div>
 			</div>
 		{% endif %}
+<!--
 		<div class="form-group" style="margin-left:0">
 			{% if identity_service_domains|length == 1 %}
 				<div class="row">
@@ -158,6 +171,7 @@
 				</div>
 			{% endif %}
 		</div>
+-->
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="add_a_project">Projects</label>
 			<div class="col-sm-4">
@@ -180,6 +194,7 @@
 				This user is not qualified to use any tools.
 			</div>
 		</div>
+<!--
 		{% if physical_access_levels or externally_managed_access_levels %}
 			<div class="form-group">
 				<span class="control-label col-sm-2">Physical access levels</span>
@@ -215,6 +230,7 @@
 				</div>
 			</div>
 		{% endif %}
+-->
 		<div class="form-group">
 			<div class="col-sm-2">
 				<input type="submit" class="btn btn-success pull-right" value="{% if form.instance.id %}Save changes{% else %}Create user{% endif %}">
@@ -271,7 +287,7 @@
 		function on_load()
 		{
 			$('[data-toggle="tooltip"]').tooltip();
-			$("#access_expiration").datetimepicker({format: 'MM/DD/YYYY'});
+			$("#access_expiration").datetimepicker({format: 'YYYY-MM-DD'});
 			$('#add_a_project').autocomplete('projects', on_search_selection, {% json_search_base_with_extra_fields projects 'application_identifier' %});
 			$('#add_a_tool_qualification').autocomplete('tools', on_search_selection, {{ tools|json_search_base }});
 			{% if form.instance.id %} {# Only look for projects and qualifications if this is an existing user (and not a new user). #}
