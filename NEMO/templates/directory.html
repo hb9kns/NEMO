@@ -6,6 +6,9 @@
 		This page contains a list of all active labmembers. You may email a labmember by clicking on that person's name.
 		Names of staff and equipment responsibles are in <em style="color:green">green</em>.
 	</p>
+	<p>
+		<em>The condensed list of equipment responsibles only is repeated further down.</em>
+	</p>
 
   <div class="col-lg-8" style="margin-top:30px">
 			<table class="table table-bordered table-condensed">
@@ -26,6 +29,30 @@
 							<td>{{ person.group }}</td>
 							<td>{{ person.intro }}</td>
 						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+	</div>
+
+  <div class="col-lg-8" style="margin-top:30px">
+	<h2>Equipment Responsibles Directory</h2>
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>Labmember</th>
+						<th>Affiliation</th>
+						<th>Introday</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for person in people %}
+					{% if person.special %}
+					<tr>
+					<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:green;">{{ person.user.get_full_name }}</a></td>
+					<td>{{ person.group }}</td>
+					<td>{{ person.intro }}</td>
+					</tr>
+					{% endif %}
 					{% endfor %}
 				</tbody>
 			</table>
