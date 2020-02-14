@@ -80,11 +80,40 @@
 			{% endif %}
 		</div>
 		<div class="form-group">
+			<label class="control-label col-sm-2" for="position">Position (master/semester student, postdoc, ..)</label>
+			<div class="col-sm-4">
+				<input id="position" name="position" type="text" autocomplete="off" class="form-control" value="{{ form.position.value|default_if_none:"" }}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="phone">phone</label>
+			<div class="col-sm-4">
+				<input id="phone" name="phone" type="text" autocomplete="off" class="form-control" value="{{ form.phone.value|default_if_none:"" }}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="address">address</label>
+			<div class="col-sm-4">
+			<textarea id="address" name="address">{{ form.address.value|default_if_none:"" }}</textarea>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="control-label col-sm-2" for="affiliation"><strong>Affiliation</strong></label>
 			<div class="col-sm-4">
 				<select id="affiliation" name="affiliation" class="form-control" required>
 					{% for a in affiliations %}
 						<option value="{{ a.id }}" {% if a.id == form.affiliation.value|to_int %}selected{% endif %}>{{ a.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="mentor">Mentor</label>
+			<div class="col-sm-4">
+				<select id="mentor" name="mentor" class="form-control">
+						<option value="">-----------</option>
+					{% for u in actmentors %}
+						<option value="{{ u.id }}" {% if u.id == form.mentor.value|to_int %}selected{% endif %}>{{ u.last_name }}, {{ u.first_name }}</option>
 					{% endfor %}
 				</select>
 			</div>
@@ -116,7 +145,7 @@
 				<input id="access_expiration" name="access_expiration" type="text" autocomplete="off" class="form-control" value="{{ form.access_expiration.value|default_if_none:'' }}">
 			</div>
 			<div class="control-label col-sm-2" style="text-align:left">
-				<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ one_year_from_now|date }}')">One year from now</a>
+				<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ one_year_from_now|date }}')">One year</a>/<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ half_year_from_now|date }}')">Half a year</a> from now
 			</div>
 			{% if form.access_expiration.errors %}
 				<div class="col-sm-6 form-control-static danger-highlight">
@@ -214,6 +243,12 @@
 		<div class="form-group">
 			<div id="qualification-list" class="col-sm-offset-2 col-sm-4">
 				This user is not qualified to use any tools.
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="remarks">Remarks</label>
+			<div class="col-sm-4">
+			<textarea id="remarks" name="remarks">{{ form.remarks.value|default_if_none:"" }}</textarea>
 			</div>
 		</div>
 <!--
