@@ -48,6 +48,14 @@ urlpatterns = [
 			permanent=False),
 		name="robots"
 	),
+	url(
+		r'^month.php$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('howtos/changemarks.html'),
+			permanent=False),
+		name="changemarks"
+	),
+
 
 	# Root URL defaults to the calendar page on desktop systems, and the mobile homepage for mobile devices:
 	url(r'^$', landing.landing, name='landing'),
@@ -135,7 +143,7 @@ urlpatterns = [
 	url(r'^get_email_form_for_user/(?P<user_id>\d+)/$', email.get_email_form_for_user, name='get_email_form_for_user'),
 	url(r'^send_email/$', email.send_email, name='send_email'),
 	url(r'^email_broadcast/$', email.email_broadcast, name='email_broadcast'),
-	url(r'^email_broadcast/(?P<audience>tool|account|project|equiresp|mentors|pjtresp|all)/$', email.email_broadcast, name='email_broadcast'),
+	url(r'^email_broadcast/(?P<audience>tool|account|project|equiresp|pjtresp|all)/$', email.email_broadcast, name='email_broadcast'),
 	url(r'^compose_email/$', email.compose_email, name='compose_email'),
 	url(r'^send_broadcast_email/$', email.send_broadcast_email, name='send_broadcast_email'),
 
