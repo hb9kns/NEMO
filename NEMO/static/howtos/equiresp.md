@@ -38,10 +38,13 @@ FIRST-Lab team members can use the `Alert` section in the
 
 ### Email
 
-The `Email` page allows to send a message to all users, mentors,
+The `Email` page allows to send a message to all users,
 responsibles, or to those who are
 qualified for a tool, work on a specific project, or bill to a specific
 account (yet unused in NEMO/FIRST-Lab).
+
+Please note: Mentors belong to the project "_MENTOR" which
+can be selected to send a message to all of them.
 
 ### Maintenance (inactive)
 
@@ -79,6 +82,9 @@ to add (qualify) themselves for any equipment ...
 
 This page displays a list of all active users and their affiliations (group).
 
+In addition, equipment responsibles are marked in _green_ and
+listed a second time in an additional table at the end of the page.
+
 ### Reservation Abuse
 
 This page allows to display reservations cancelled by users, to check
@@ -114,6 +120,12 @@ easily attainable in the Calendar view.
 It is also possible to add new entries; however, this is more tedious
 and error-prone than through the Calendar and therefore not recommended.
 
+In this view, you can also manually enter begin and end times, which may
+be more practical than pulling the corresponding entrie across calendar
+panes. To make use of this, create an outage anywhere in the calendar,
+then switch to the detailed administration and edit/enter the correct
+dates/times.
+
 #### Tools Change
 
 This allows to fully modify any tool (equipment);
@@ -129,4 +141,4 @@ instruction by FIRST-Lab staff, and it is currently not yet needed.*
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-02-10/Y.Bonetti*
+*2020-02-14/Y.Bonetti*

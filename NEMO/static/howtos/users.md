@@ -103,6 +103,10 @@ report it as a problem, not just as a comment!
 tools in use (i.e where somebody is currently billed for using it),
 idle or unavailable ones, or just those where the user is qualified for.
 
+The tool names are links into the corresponding "Tool control" page.
+This allows to e.g select "my tools" for easy filtered access to booking
+and tool control.
+
 ---
 
 ## Notes
@@ -134,4 +138,4 @@ on the server.
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-02-10/Y.Bonetti*
+*2020-02-14/Y.Bonetti*
