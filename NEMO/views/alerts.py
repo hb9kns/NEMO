@@ -1,5 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -13,6 +13,7 @@ from NEMO.utilities import bootstrap_primary_color, format_datetime
 from NEMO.views.customization import get_customization, get_media_file_contents
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_alert', raise_exception=True)
 @require_http_methods(['GET', 'POST'])
 def alerts(request):
 	alert_id = request.GET.get('alert_id') or request.POST.get('alert_id')

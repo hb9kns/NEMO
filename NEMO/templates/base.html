@@ -75,7 +75,6 @@
 							{# The navigation_url tag will display the item if the URL name can be reversed. #}
 							{# This allows items to be easily removed from the public facing version of NEMO. #}
 						{#	{% navigation_url 'accounts_and_projects' 'Accounts and projects' %} #}
-						{#	{% navigation_url 'alerts' 'Alerts' %} #}
 						{#	{% navigation_url 'area_access' 'Area access' %} #}
 						{#	{% navigation_url 'configuration_agenda' 'Configuration agenda' %} #}
 						{#	{% navigation_url 'customization' 'Customization' %} #}
@@ -89,6 +88,7 @@
 						{#	{% navigation_url 'staff_charges' 'Staff charges' %} #}
 						{#	{% navigation_url 'consumables' 'Supplies' %} #}
 						{#	{% navigation_url 'training' 'Training' %} #}
+							{% navigation_url 'alerts' 'Alerts (core staff only)' %} 
 							{% navigation_url 'users' 'User administration (core staff only)' %}
 							{% navigation_url 'admin:index' 'Detailed administration' %}
 						</ul>
