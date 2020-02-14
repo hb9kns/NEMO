@@ -35,7 +35,7 @@
 						{% if current_usage_event.operator.id != current_usage_event.user.id %}
 							on behalf of {{ current_usage_event.user }}
 						{% endif %}
-						for the project named {{ current_usage_event.project.name }} since {{ current_usage_event.start|date:"l @ g:i A" }}.
+						for the project named {{ current_usage_event.project.name }} since {{ current_usage_event.start }}.
 					</h3>
 					<h4>
 						{% if current_usage_event.operator.id != user.id %}
@@ -46,7 +46,7 @@
 			</div>
 			{% if time_left %}
 				<div>
-					Your reservation for this tool will end at {{ time_left|date:"g:i A" }}. The remainder of your reservation will be relinquished when you stop using this tool.
+					Your reservation for this tool will end at {{ time_left }}. The remainder of your reservation will be relinquished when you stop using this tool.
 				</div>
 			{% endif %}
 		{% elif tool.delayed_logoff_in_progress %}
@@ -84,7 +84,7 @@
 			</div>
 		{% endif %}
 		{% if next_res %}
-			The next reservation is at {{ next_res.start|date:"g:i A"}} by <a href="{% url 'get_email_form_for_user' next_res.user.id %}"> {{ next_res.user }} </a>
+			The next reservation is at {{ next_res.start|date:"H:i" }} by <a href="{% url 'get_email_form_for_user' next_res.user.id %}"> {{ next_res.user }} </a>
 		{% endif %}
 		{# Display any unavailable required resources... #}
 		{% for r in tool.unavailable_required_resources %}
