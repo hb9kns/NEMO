@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
+from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, beacon, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -125,6 +125,9 @@ urlpatterns = [
 
 	# Utility functions:
 	url(r'^refresh_sidebar_icons/$', sidebar.refresh_sidebar_icons, name='refresh_sidebar_icons'),
+
+	# Beacon
+	url(r'^beacon/$', beacon.beacon, name='beacon'),
 
 	# NanoFab feedback
 	url(r'^feedback/$', feedback.feedback, name='feedback'),
