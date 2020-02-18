@@ -1,7 +1,7 @@
 <div class="row" style="background:transparent">
 	<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
 		{% if not nanofab_occupants %}
-			<h2>Nobody is in an access controlled<br>{{ facility_name }} area</h2>
+			<h6>.:.</h6>
 		{% else %}
 			{% regroup nanofab_occupants by area as area_occupants %}
 			<h2>Area occupancy</h2>
@@ -29,7 +29,7 @@
 								<td style="background:rgba(255, 255, 255, 0.7)">
 									<span {% if o.customer.is_staff %}class="success-highlight"{% endif %}>{{ o.customer.first_name }} {{ o.customer.last_name }}</span>
 								</td>
-								<td style="background:rgba(255, 255, 255, 0.7)">{{ o.start|date:"l @ g:i A" }}</td>
+								<td style="background:rgba(255, 255, 255, 0.7)">{{ o.start|date:"l @ H:i" }}</td>
 								<td style="background:rgba(255, 255, 255, 0.7); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ o.project }}</td>
 							</tr>
 						{% endfor %}
@@ -58,14 +58,14 @@
 						<tr style="background:transparent">
 							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.tool }}</td>
 							<td style="background:rgba(255, 255, 255, 0.7)"><span {% if u.operator.is_staff %}class="success-highlight"{% endif %}>{{ u.operator.first_name }} {{ u.operator.last_name }}{% if u.user != u.operator %} on behalf of {{ u.user.first_name }} {{ u.user.last_name }}{% endif %}</span></td>
-							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.start|date:"l @ g:i A" }}</td>
+							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.start|date:"l @ H:i" }}</td>
 						</tr>
 					{% endfor %}
 					</tbody>
 				</table>
 			</div>
 		{% else %}
-			<h2>No interlocked {{ facility_name }} tools are in use</h2>
+			<h6>No interlocked tools are in use.</h6>
 		{% endif %}
 	</div>
 	<div class="col-lg-4" style="text-align:center">
@@ -100,4 +100,5 @@
 			{% endfor %}
 		{% endif %}
 	</div>
+<center><p>Server time: {% now 'l Y-m-d H:i' %}</p></center>
 </div>
