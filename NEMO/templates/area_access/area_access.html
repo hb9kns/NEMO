@@ -17,12 +17,12 @@
 	<form id="view_records" action="{% url 'area_access' %}" class="form-inline" method="get">
 		<div class="form-group">
 			<div class="datetimepicker-container">
-				<input type="text" id="start" name="start" class="form-control" autocomplete="off" placeholder="start" value="{{ start|date:"m/d/Y" }}">
+				<input type="text" id="start" name="start" class="form-control" autocomplete="off" placeholder="start" value="{{ start|date:"Y-m-d" }}">
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="datetimepicker-container">
-				<input type="text" id="end" name="end" class="form-control" autocomplete="off" placeholder="end" value="{{ end|date:"m/d/Y" }}">
+				<input type="text" id="end" name="end" class="form-control" autocomplete="off" placeholder="end" value="{{ end|date:"Y-m-d" }}">
 			</div>
 		</div>
 		<div class="form-group">
@@ -64,7 +64,7 @@
 		{
 			var timepicker_properties =
 			{
-				format: 'MM/DD/YYYY'
+				format: 'YYYY-MM-DD'
 			};
 			$('#start').datetimepicker(timepicker_properties);
 			$('#end').datetimepicker(timepicker_properties);
