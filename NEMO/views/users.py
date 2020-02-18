@@ -30,7 +30,7 @@ def create_or_modify_user(request, user_id):
 	dictionary = {
 		'projects': Project.objects.filter(active=True, account__active=True),
 		'tools': Tool.objects.filter(visible=True),
-		'actmentors': User.objects.filter(is_active=True),
+		'actmentors': User.objects.filter(is_active=True, projects__name=settings.MENTOR_PROJECT_NAME).distinct(),
 		'affiliations': Account.objects.filter(active=True),
 		'physical_access_levels': PhysicalAccessLevel.objects.all(),
 		'one_year_from_now': timezone.now() + timedelta(days=365),
