@@ -260,6 +260,9 @@
 				{% endif %}
 				<p>The {{ tool.name }} is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
 				<p>You may dial the phone that is closest to the {{ tool.name }} at extension <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
+				{% if tool.external_link != Null and tool.external_link != '' %}
+				<p>Additional resources for this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
+				{% endif %}
 				<h5>Deep links for this tool:</h5>
 				<ul>
 				<li><a href="/calendar/{{ tool.id }}">Calendar</a></li>
