@@ -180,7 +180,8 @@ class User(models.Model):
 		send_mail(subject=subject, message='', from_email=from_email, recipient_list=[self.email], html_message=message)
 
 	def get_full_name(self):
-		return self.last_name + ' ' + self.first_name + ' (' + self.username + ')'
+		return self.last_name + ' ' + self.first_name
+#		return self.last_name + ' ' + self.first_name + ' (' + self.username + ')'
 
 	def get_short_name(self):
 		return self.first_name

@@ -49,7 +49,7 @@ urlpatterns = [
 		name="robots"
 	),
 	url(
-		r'^month.php$',
+		r'^([0-9A-Za-z]{1,}).php$',
 		RedirectView.as_view(
 			url=staticfiles_storage.url('howtos/changemarks.html'),
 			permanent=False),
