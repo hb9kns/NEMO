@@ -171,6 +171,11 @@ def send_broadcast_email(request):
 	if audience == 'tool':
 		t = Tool.objects.filter(id=selection)
 		subject = t[0].name + ': ' + form.cleaned_data['subject']
+	elif audience == 'equiresp':
+		subject = '[equiresp]: ' + form.cleaned_data['subject']
+	elif audience == 'project':
+		p = Project.objects.filter(id=selection)
+		subject = p[0].name + ': ' + form.cleaned_data['subject']
 	else:
 		subject = form.cleaned_data['subject']
 	users = [x.email for x in users]
