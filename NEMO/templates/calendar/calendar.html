@@ -311,14 +311,15 @@ function create_calendar()
 				"titleFormat": 'MMMM YYYY'
 			}
 		},
-		"firstDay": 1, {# Make Monday the first day of the week #}
-		"scrollTime": '07:00:00', {# The day starts at 7 AM #}
+		"firstDay": 1, {# of the week: 1=Monday #}
+		"scrollTime": '09:00:00', {# Start of day in day view #}
 		"defaultView": "agendaWeek",
 		"allDaySlot": false,
 		"allDayDefault": false,
 		"slotDuration": '00:15:00', {# 15 minutes each row #}
 		"slotLabelInterval": '1:00', {# One hour intervals for label #}
 		"editable": false,
+		"nowIndicator": true,
 		"selectable": true,
 		"selectHelper": true,
 		"select": create,
