@@ -6,7 +6,7 @@ from django.forms.utils import ErrorDict
 from django.utils import timezone
 
 from NEMO.models import Account, Alert, ChemicalRequest, Comment, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User, UserChemical
-from NEMO.utilities import bootstrap_primary_color, format_datetime
+from NEMO.utilities import format_datetime
 
 
 class UserForm(ModelForm):
@@ -269,7 +269,6 @@ class ReservationAbuseForm(Form):
 
 class EmailBroadcastForm(Form):
 	subject = CharField(required=False)
-	color = ChoiceField(choices=((bootstrap_primary_color('info'), 'info'), (bootstrap_primary_color('success'), 'success'), (bootstrap_primary_color('warning'), 'warning'), (bootstrap_primary_color('danger'), 'danger')))
 	title = CharField(required=False)
 	greeting = CharField(required=False)
 	contents = CharField(required=False)

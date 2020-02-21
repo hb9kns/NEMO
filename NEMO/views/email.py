@@ -124,7 +124,6 @@ def compose_email(request):
 			'title': 'TITLE',
 			'greeting': 'Greeting',
 			'contents': 'Contents',
-			'template_color': '#5bc0de',
 		}
 		dictionary['generic_email_sample'] = Template(generic_email_sample).render(Context(generic_email_context))
 	return render(request, 'email/compose_email.html', dictionary)
@@ -141,7 +140,6 @@ def send_broadcast_email(request):
 		'title': form.cleaned_data['title'],
 		'greeting': form.cleaned_data['greeting'],
 		'contents': form.cleaned_data['contents'],
-		'template_color': form.cleaned_data['color'],
 	}
 	content = get_media_file_contents('generic_email.html')
 	content = Template(content).render(Context(dictionary))
