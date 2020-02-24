@@ -395,6 +395,7 @@
 						<script>
 							var timepicker_properties =
 							{
+								format: "YYYY-MM-DD,HH:mm",
 								sideBySide: true
 							};
 							$('#estimated_resolution_time').datetimepicker(timepicker_properties);
@@ -866,8 +867,8 @@ init();
 
 <script>
 	$("#tabs").find("a").click(switch_tab);
-	$('#task_and_comment_start').datetimepicker({format: 'MM/DD/YYYY', 'widgetParent': '#task_and_comment_start_form_group'});
-	$('#task_and_comment_end').datetimepicker({format: 'MM/DD/YYYY', 'widgetParent': '#task_and_comment_end_form_group'});
+	$('#task_and_comment_start').datetimepicker({format: 'YYYY-MM-DD', 'widgetParent': '#task_and_comment_start_form_group'});
+	$('#task_and_comment_end').datetimepicker({format: 'YYYY-MM-DD', 'widgetParent': '#task_and_comment_end_form_group'});
 	$('#delayed_logoff_help').popover();
 
 	function update_stop_button()
