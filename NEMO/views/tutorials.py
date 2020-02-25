@@ -21,21 +21,26 @@ def nanofab_rules(request):
 			tutorial = Template(tutorial).render(RequestContext(request, dictionary))
 		return render(request, 'nanofab_rules.html', {'nanofab_rules_tutorial': tutorial})
 	elif request.method == 'POST':
-		summary = request.POST.get('making_reservations_summary', '').strip()[:3000]
+#		summary = request.POST.get('making_reservations_summary', '').strip()[:3000]
+#		dictionary = {
+#			'user': request.user,
+#			'making_reservations_rule_summary': summary,
+#		}
+#		abuse_email = get_customization('abuse_email_address')
+#		email_contents = get_media_file_contents('nanofab_rules_tutorial_email.html')
+#		if abuse_email and email_contents:
+#			message = Template(email_contents, dictionary).render(Context(dictionary))
+#			send_mail('NanoFab rules tutorial', '', abuse_email, [abuse_email], html_message=message)
+#		dictionary = {
+#			'title': 'NanoFab rules tutorial',
+#			'heading': 'Tutorial complete!',
+#			'content': 'Tool usage and reservation privileges have been enabled on your user account.',
+#		}
+#		request.user.training_required = False
+#		request.user.save()
 		dictionary = {
-			'user': request.user,
-			'making_reservations_rule_summary': summary,
+			'title': 'Tutorial',
+			'heading': 'Self-serving tutorial not available',
+			'content': 'You have to contact the team to get permission for working in NEMO',
 		}
-		abuse_email = get_customization('abuse_email_address')
-		email_contents = get_media_file_contents('nanofab_rules_tutorial_email.html')
-		if abuse_email and email_contents:
-			message = Template(email_contents, dictionary).render(Context(dictionary))
-			send_mail('NanoFab rules tutorial', '', abuse_email, [abuse_email], html_message=message)
-		dictionary = {
-			'title': 'NanoFab rules tutorial',
-			'heading': 'Tutorial complete!',
-			'content': 'Tool usage and reservation privileges have been enabled on your user account.',
-		}
-		request.user.training_required = False
-		request.user.save()
 		return render(request, 'acknowledgement.html', dictionary)
