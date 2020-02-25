@@ -20,7 +20,7 @@ def directory(request):
 # staff/equiresp status is more useful
 		access =  user.is_staff
 		introday = user.date_joined.date()
-		user_info = {'user':user, 'group':group, 'special':access, 'intro':introday }
+		user_info = {'user':user, 'phone':user.phone, 'email':user.email, 'group':group, 'special':access, 'intro':introday }
 		people.append(user_info)
 	dictionary = {
 		'people': people

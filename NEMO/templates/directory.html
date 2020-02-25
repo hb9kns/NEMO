@@ -14,7 +14,9 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Labmember</th>
+						<th>Name</th>
+						<th>E-Mail</th>
+						<th>Phone</th>
 						<th>Affiliation</th>
 						<th>Introday</th>
 					</tr>
@@ -26,6 +28,8 @@
 							{% if person.special %}<em>{% endif %}
 							<a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.special %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a></td>
 							{% if person.special %}</em>{% endif %}
+							<td>{{ person.email }}</td>
+							<td>{{ person.phone }}</td>
 							<td>{{ person.group }}</td>
 							<td>{{ person.intro }}</td>
 						</tr>
@@ -39,7 +43,9 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Labmember</th>
+						<th>Name</th>
+						<th>E-Mail</th>
+						<th>Phone</th>
 						<th>Affiliation</th>
 						<th>Introday</th>
 					</tr>
@@ -49,6 +55,8 @@
 					{% if person.special %}
 					<tr>
 					<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:green;">{{ person.user.get_full_name }}</a></td>
+					<td>{{ person.email }}</td>
+					<td>{{ person.phone }}</td>
 					<td>{{ person.group }}</td>
 					<td>{{ person.intro }}</td>
 					</tr>
