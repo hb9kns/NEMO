@@ -268,11 +268,11 @@ class ReservationAbuseForm(Form):
 
 
 class EmailBroadcastForm(Form):
-	subject = CharField(required=False)
+	subject = CharField(required=True)
 	title = CharField(required=False)
 	greeting = CharField(required=False)
-	contents = CharField(required=False)
-	copy_me = BooleanField(initial=True)
+	contents = CharField(required=True)
+	copy_me = BooleanField(initial=True, required=False)
 
 	audience = ChoiceField([('tool', 'tool'), ('project', 'project'), ('account', 'account'), ('equiresp', 'equiresp'), ('all', 'all')])
 	selection = IntegerField()
