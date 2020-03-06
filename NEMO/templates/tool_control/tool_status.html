@@ -226,6 +226,9 @@
 			{% endif %}
 		</form>
 		<hr />
+		{% if tool.usage_link != Null and tool.usage_link != '' %}
+		<p>External usage logging for this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.usage_link }}"> {{ tool.usage_link }}</a> (should open in a new page/tab)</p>
+		{% endif %}
 		<p><small><em><a href="{% url 'logout' %}">Logout</a></em></small></p>
 		<div style="height:150px">{# Spacer #}</div>
 	</div>
