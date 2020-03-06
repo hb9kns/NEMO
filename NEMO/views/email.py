@@ -100,7 +100,10 @@ def compose_email(request):
 			elif audience == 'account':
 				users = User.objects.filter(projects__account__id=selection).distinct()
 			elif audience == 'equiresp':
-				users = User.objects.filter(groups__name='Equipment Responsibles')
+				users = User.objects.filter(groups__name='Equipment Responsibles').distinct()
+			elif audience == 'pjtresp':
+				pjtmgrs = Account.objects.values_list('manager', flat=True)
+				users = User.objects.filter(pk__in=pjtmgrs)
 			elif audience == 'all':
 				users = User.objects.all()
 			else:
