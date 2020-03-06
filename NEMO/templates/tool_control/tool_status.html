@@ -227,7 +227,8 @@
 		</form>
 		<hr />
 		{% if tool.usage_link != Null and tool.usage_link != '' %}
-		<p>External usage logging for this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.usage_link }}"> {{ tool.usage_link }}</a> (should open in a new page/tab)</p>
+		<p><a target="_blank" rel="noopener noreferrer" href="{{ tool.usage_link }}">External
+usage logging for this tool</a> (should open in a new page/tab)</p>
 		{% endif %}
 		<p><small><em><a href="{% url 'logout' %}">Logout</a></em></small></p>
 		<div style="height:150px">{# Spacer #}</div>
@@ -262,9 +263,9 @@
 					<p>Problem reports for the {{ tool.name }} are automatically emailed to <a href="{% url 'get_email_form' %}?recipient={{ tool.notification_email_address }}" title="Email {{ tool.notification_email_address }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ tool.notification_email_address }}</a>.</p>
 				{% endif %}
 				<p>The {{ tool.name }} is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
-				<p>You may dial the phone that is closest to the {{ tool.name }} at extension <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
+				<p>You may dial the phone closest to the {{ tool.name }} at number <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
 				{% if tool.external_link != Null and tool.external_link != '' %}
-				<p>Additional resources for this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
+				<p>Additional information about this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
 				{% endif %}
 				<h5>Deep links for this tool:</h5>
 				<ul>
