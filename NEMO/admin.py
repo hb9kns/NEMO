@@ -284,7 +284,7 @@ class ReservationAdmin(admin.ModelAdmin):
 @register(UsageEvent)
 class UsageEventAdmin(admin.ModelAdmin):
 	list_display = ('id', 'tool', 'user', 'operator', 'project', 'start', 'end', 'duration')
-	list_filter = ('start', 'end', 'tool')
+	list_filter = ('start', 'end', 'project', 'tool')
 	date_hierarchy = 'start'
 
 
