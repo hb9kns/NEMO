@@ -32,6 +32,7 @@
 		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><h1>Welcome to FIRST-Lab's Equipment Management &amp; Operations website</h1></div>
 		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><p>For contact information, visit <a href="http://first.ethz.ch">first.ethz.ch</a>.</p></div>
 
+
 		<form method="post" class="form-horizontal" autocomplete="off" id="login_form">
 			{% csrf_token %}
 
@@ -78,6 +79,7 @@
 				{{ login_banner|safe }}
 			</div>
 		{% endif %}
+		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><p><small>server time at page loading:<br />{% now 'l, Y-m-d, H:i' %}</small></p></div>
 	</div>
 
 	<script>
