@@ -401,8 +401,8 @@ class UserAdmin(admin.ModelAdmin):
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
 	search_fields = ('last_name', 'first_name', 'username', 'email')
-	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login')
-	list_filter = ('is_active', 'groups', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'last_login')
+	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login')
+	list_filter = ('is_active', 'groups', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'training_required', 'last_login')
 
 	def save_model(self, request, obj, form, change):
 		""" Audit project membership and qualifications when a user is saved. """
