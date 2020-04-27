@@ -103,7 +103,7 @@ def compose_email(request):
 				users = User.objects.filter(groups__name='Equipment Responsibles').distinct()
 			elif audience == 'pjtresp':
 				pjtmgrs = Account.objects.values_list('manager', flat=True)
-				users = User.objects.filter(pk__in=pjtmgrs)
+				users = User.objects.filter(pk__in=pjtmgrs).distinct()
 			elif audience == 'all':
 				users = User.objects.all()
 			else:
@@ -159,6 +159,9 @@ def send_broadcast_email(request):
 			users = User.objects.filter(projects__account__id=selection)
 		elif audience == 'equiresp':
 			users = User.objects.filter(groups__name='Equipment Responsibles')
+		elif audience == 'pjtresp':
+			pjtmgrs = Account.objects.values_list('manager', flat=True)
+			users = User.objects.filter(pk__in=pjtmgrs)
 		elif audience == 'all':
 			users = User.objects.all()
 		if active_choice:
@@ -174,6 +177,8 @@ def send_broadcast_email(request):
 		subject = t[0].name + ': ' + form.cleaned_data['subject']
 	elif audience == 'equiresp':
 		subject = '[equiresp]: ' + form.cleaned_data['subject']
+	elif audience == 'pjtresp':
+		subject = '[FIRST-Lab]: ' + form.cleaned_data['subject']
 	elif audience == 'project':
 		p = Project.objects.filter(id=selection)
 		subject = p[0].name + ': ' + form.cleaned_data['subject']
