@@ -520,6 +520,7 @@ def set_reservation_title(request, reservation_id):
 	return HttpResponse()
 
 @login_required
+@permission_required('NEMO.approve_reservation', raise_exception=True)
 @require_GET
 def toggle_reservation_approval(request, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
