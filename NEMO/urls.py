@@ -87,6 +87,8 @@ urlpatterns = [
 
 	# Calendar:
 	url(r'^calendar/(?P<tool_id>\d+)/$', calendar.calendar, name='calendar'),
+	# with list of pre-checked tools:
+	url(r'^calendar/(?P<tool_id>\d+)/(?P<showtools>[0-9,]+)/$', calendar.calendar, name='calendar'),
 	url(r'^calendar/$', calendar.calendar, name='calendar'),
 	url(r'^event_feed/$', calendar.event_feed, name='event_feed'),
 	url(r'^create_reservation/$', calendar.create_reservation, name='create_reservation'),

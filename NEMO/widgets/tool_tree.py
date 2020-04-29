@@ -8,6 +8,7 @@ class ToolTree(Widget):
 		This widget takes a list of tools and creates nested unordered lists in a hierarchical manner.
 		The parameters name and attrs are not used.
 		'value' is a dictionary which must contain a 'tools' key with a value that is a QuerySet of all tools to be put in the list.
+		It also contains a set 'checktools' of tool ids to be rendered with checked checkboxes.
 		A collection of unordered HTML lists is returned with various callbacks and properties attached to each nested element.
 
 		For a more concrete example, suppose the following tools are input to the tool tree:
@@ -40,7 +41,7 @@ class ToolTree(Widget):
 		tree = ToolTreeHelper(None)
 		for tool in value['tools']:
 			tree.add(tool.category + '/' + tool.name, tool.id)
-		return mark_safe(tree.render())
+		return mark_safe(tree.render(value['checktools']))
 
 
 class ToolTreeHelper:
@@ -70,7 +71,7 @@ class ToolTreeHelper:
 		else:
 			self.children[-1].id = identifier
 
-	def render(self):
+	def render(self, checktools):
 		"""
 		This function cycles through the root node of the tool list and enumerates all the child nodes directly.
 		The function assumes that a tree structure of the tools has already been created by calling 'add(...)' multiple
@@ -78,24 +79,32 @@ class ToolTreeHelper:
 		"""
 		result = '<ul class="nav nav-list" id="tool_tree" style="display:none">'
 		for child in self.children:
-			result += self.__render_helper(child, '')
+			result += self.__render_helper(child, '', checktools)
 		result += '</ul>'
+#		for debugging:
+#		result += '<!-- ' + str(checktools) + ' -->'
 		return result
 
-	def __render_helper(self, node, result):
+	def __render_helper(self, node, result, checktools):
 		"""
 		Recursively dive through the tree structure and convert it to unordered HTML lists.
 		Each node is output as an HTML list item. If the node has children then those are also output.
-		A checkbox has been added to each leaf for a multitool calendar view
+		A checkbox has been added to each leaf for a multitool calendar view, and if the leaf's id
+		is contained in the set 'checktools', the box will be
+checked.
+
 		"""
 		result += '<li>'
 		if node.__is_leaf():
-			result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden"></span>'
+			if str(node.id) in checktools:
+				result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden" checked></span>'
+			else:
+				result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden"></span>'
 			result += f'<span><a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a></span>'
 		if not node.__is_leaf():
 			result += f'<label class="tree-toggler nav-header"><div>{node.name}</div></label><ul class="nav nav-list tree" data-category="{node.name}">'
 			for child in node.children:
-				result = self.__render_helper(child, result)
+				result = self.__render_helper(child, result, checktools)
 			result += '</ul>'
 		result += '</li>'
 		return result

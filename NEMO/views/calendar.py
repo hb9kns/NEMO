@@ -26,8 +26,11 @@ from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
 @require_GET
-def calendar(request, tool_id=None):
-	""" Present the calendar view to the user. """
+def calendar(request, tool_id=None, showtools=None):
+	"""
+	Present the calendar view to the user.
+	showtools: comma-separated list of tools displayed (active checkboxes)
+	"""
 
 	if request.device == 'mobile':
 		if tool_id:
@@ -35,8 +38,14 @@ def calendar(request, tool_id=None):
 		else:
 			return redirect('choose_tool', 'view_calendar')
 
+	# convert comma-separated list to (possibly empty) set
+	if showtools:
+		checktools = set(showtools.split(","))
+	else:
+		checktools = set()
+
 	tools = Tool.objects.filter(visible=True).order_by('category', 'name')
-	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools})
+	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools, 'checktools': checktools})
 	tool_summary = create_tool_summary(request)
 	dictionary = {
 		'rendered_tool_tree_html': rendered_tool_tree_html,
