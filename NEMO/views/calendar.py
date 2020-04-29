@@ -26,7 +26,7 @@ from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
 @require_GET
-def calendar(request, tool_id=None, showtools=None):
+def calendar(request, tool_id=None, showtools=None, titledesc=None):
 	"""
 	Present the calendar view to the user.
 	showtools: comma-separated list of tools displayed (active checkboxes)
@@ -52,6 +52,7 @@ def calendar(request, tool_id=None, showtools=None):
 		'tools': tools,
 		'auto_select_tool': tool_id,
 		'tool_summary': tool_summary,
+		'title_description': titledesc,
 	}
 	if request.user.is_staff:
 		dictionary['users'] = User.objects.all()
