@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET
@@ -9,6 +10,7 @@ from NEMO.models import Task, TaskCategory, TaskStatus
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def maintenance(request, sort_by=''):
 	pending_tasks = Task.objects.filter(cancelled=False, resolved=False)
