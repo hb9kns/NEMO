@@ -31,7 +31,7 @@ def create_or_modify_user(request, user_id):
 		'projects': Project.objects.filter(active=True, account__active=True),
 		'tools': Tool.objects.filter(visible=True),
 		'actmentors': User.objects.filter(is_active=True, projects__name=settings.MENTOR_PROJECT_NAME).distinct(),
-		'affiliations': Account.objects.filter(active=True),
+		'affiliations': Account.objects.all(),
 		'physical_access_levels': PhysicalAccessLevel.objects.all(),
 		'one_year_from_now': timezone.now() + timedelta(days=365),
 		'half_year_from_now': timezone.now() + timedelta(days=183),
