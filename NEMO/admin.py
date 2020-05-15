@@ -392,7 +392,7 @@ class UserTypeAdmin(admin.ModelAdmin):
 
 @register(User)
 class UserAdmin(admin.ModelAdmin):
-	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
+	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels', 'type')
 	fieldsets = (
 		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'badge_number', 'type', 'remarks')}),
 #		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
@@ -400,9 +400,9 @@ class UserAdmin(admin.ModelAdmin):
 		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
-	search_fields = ('last_name', 'first_name', 'username', 'email')
-	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login')
-	list_filter = ('is_active', 'groups', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'training_required', 'last_login')
+	search_fields = ('last_name', 'first_name', 'username', 'email', 'type')
+	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login', 'type')
+	list_filter = ('is_active', 'groups', 'type', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'training_required', 'last_login')
 
 	def save_model(self, request, obj, form, change):
 		""" Audit project membership and qualifications when a user is saved. """
