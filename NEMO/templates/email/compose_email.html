@@ -16,7 +16,7 @@
 						<label><input type="checkbox" name="copy_me" checked> Send a copy of this email to myself</label>
 					</div>
 					{% for u in users %}
-						<span {% if not u.is_active %}style="color:lightgrey"{% endif %}>{% if not u.is_active %}<em>{% endif %}"{{ u }}{% if not u.is_active %}</em>{% endif %} ({{ u.affiliation }})"  &lt;{{ u.email }}&gt;</span><br>
+						<span {% if not u.is_active %}style="color:lightgrey"{% endif %}>{% if not u.is_active %}<em>{% endif %}"{{ u }}{% if not u.is_active %}</em>{% endif %} ({{ u.affiliation }}{% if not u.is_active %} - inactive{% endif %})"  &lt;{{ u.email }}&gt;</span><br>
 					{% endfor %}
 				</div>
 				<div class="col-sm-6">
