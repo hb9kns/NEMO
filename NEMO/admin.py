@@ -400,7 +400,7 @@ class UserAdmin(admin.ModelAdmin):
 		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
-	search_fields = ('last_name', 'first_name', 'username', 'email', 'type')
+	search_fields = ('last_name', 'first_name', 'username', 'email')
 	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'date_joined', 'last_login', 'type')
 	list_filter = ('is_active', 'groups', 'type', 'affiliation', 'mentor_trained', 'fire_trained', 'date_joined', 'is_staff', 'training_required', 'last_login')
 
