@@ -392,7 +392,7 @@ class UserTypeAdmin(admin.ModelAdmin):
 
 @register(User)
 class UserAdmin(admin.ModelAdmin):
-	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels', 'type')
+	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
 		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'badge_number', 'type', 'remarks')}),
 #		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
