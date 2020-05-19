@@ -1,4 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
@@ -8,6 +9,7 @@ from NEMO.models import Account, Project, User, MembershipHistory, ActivityHisto
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_account', raise_exception=True)
 @require_GET
 def accounts_and_projects(request, kind=None, identifier=None):
 	try:
@@ -29,6 +31,7 @@ def accounts_and_projects(request, kind=None, identifier=None):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_account', raise_exception=True)
 @require_POST
 def toggle_active(request, kind, identifier):
 	if kind == 'account':
@@ -48,6 +51,7 @@ def toggle_active(request, kind, identifier):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.add_project', raise_exception=True)
 @require_http_methods(['GET', 'POST'])
 def create_project(request):
 	dictionary = {
@@ -75,6 +79,7 @@ def create_project(request):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.add_account', raise_exception=True)
 @require_http_methods(['GET', 'POST'])
 def create_account(request):
 	if request.method == 'GET':
@@ -92,6 +97,7 @@ def create_account(request):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_project', raise_exception=True)
 @require_POST
 def remove_user_from_project(request, user_id, project_id):
 	user = get_object_or_404(User, id=user_id)
@@ -112,6 +118,7 @@ def remove_user_from_project(request, user_id, project_id):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_project', raise_exception=True)
 @require_POST
 def add_user_to_project(request, user_id, project_id):
 	user = get_object_or_404(User, id=user_id)
