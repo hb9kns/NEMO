@@ -27,7 +27,7 @@
 	User: <a href="{% url 'get_email_form_for_user' reservation.user.id %}"> {{ reservation.user }} </a><br>
 	Created by: {{ reservation.creator }}<br>
 	Created on: {{ reservation.creation_time }}<br>
-	Approved: <a href="{% url 'toggle_reservation_approval' reservation.id %}">{{ reservation.approved }}</a> (
+	Approved: <a target="_blank" rel="noopener noreferrer" href="{% url 'toggle_reservation_approval' reservation.id %}">{{ reservation.approved }}</a> (
 	{% if reservation.approved_by %}
 		<a href="{% url 'get_email_form_for_user' reservation.approved_by.id %}"> {{ reservation.approved_by }} </a>
 	{% else %}
