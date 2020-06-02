@@ -92,6 +92,7 @@ class User(models.Model):
 
 	# Physical access fields
 	badge_number = models.PositiveIntegerField(null=True, blank=True, unique=True, help_text="The badge number associated with this user. This number must correctly correspond to a user in order for the tablet-login system (in the NanoFab lobby) to work properly.")
+	deposit = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Deposit by the user (e.g for badge), to be returned when leaving.")
 	access_expiration = models.DateField(blank=True, null=True, help_text="The user will lose all access rights after this date. Typically this is used to ensure that safety training has been completed by the user every year.")
 	physical_access_levels = models.ManyToManyField('PhysicalAccessLevel', blank=True, related_name='users')
 
