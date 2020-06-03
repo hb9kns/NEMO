@@ -33,6 +33,24 @@
 						</a>
 					</form>
 				</h2>
+				<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#account_details" class="pointer" style="text-decoration:none">
+						<span id="account_chevron" class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
+				<em>Account details</em>
+				</a>
+				<div style="margin-left:34px">
+					<div id="account_details" class="collapse">
+					<span class="grey">Financial responsible:</span> {{ account.manager }}<br />
+					<span class="grey">Technical contact:</span> {{ account.techcontact }}<br />
+					{% if account.admin_name or account.admin_email %}
+					<span class="grey">Administrative contact:</span> {{ account.admin_name }} <a href="mailto:{{ account.admin_email }}">{{ account.admin_email }}</a><br />
+					{% endif %}
+					<span class="grey">Users belonging to this account:</span>
+						<div style="height:10px"></div>
+						<div id="account_users">
+							{% include 'accounts_and_projects/users_for_account.html' with users=account.user_set.all %}
+						</div>
+					</div>
+				</div>
 				{% for project in account.project_set.all %}
 					<h3>
 						<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#project_{{ project.id }}_details" class="pointer" style="text-decoration:none">

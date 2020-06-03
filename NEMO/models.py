@@ -502,6 +502,8 @@ class Account(models.Model):
 	manager = models.ForeignKey(User, null=True, blank=True, default='', related_name="account_manager", help_text="Account Manager, financially responsible")
 	techcontact = models.ForeignKey(User, null=True, blank=True, default='', related_name="technical_contact", help_text="Contact person for planning")
 	department = models.CharField(max_length=50, null=True, blank=True, default='')
+	admin_name = models.CharField(blank=True, null=True, max_length=100, help_text="Contact person for administration, unless already covered by technical contact")
+	admin_email = models.EmailField(blank=True, null=True, help_text="E-mail address of administrative contact")
 	remarks = models.TextField(blank=True)
 	class Meta:
 		ordering = ['name']

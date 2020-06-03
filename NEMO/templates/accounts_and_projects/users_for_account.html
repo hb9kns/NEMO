@@ -1,0 +1,7 @@
+<ul>
+{% for u in users %}
+	<li>{% if u.is_active %}{{ u }}{% else %}<span class="light-grey">{{ u }} (inactive)</span>{% endif %}</li>
+{% empty %}
+	<li><em>This account does not have any users!</em></li>
+{% endfor %}
+</ul>

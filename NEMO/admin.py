@@ -208,7 +208,7 @@ class ConfigurationHistoryAdmin(admin.ModelAdmin):
 
 @register(Account)
 class AccountAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'active', 'manager', 'techcontact', 'department', 'remarks')
+	list_display = ('name', 'id', 'active', 'manager', 'techcontact', 'department', 'admin_email', 'remarks')
 	search_fields = ('name', 'department',)
 	list_filter = ('active', 'department',)
 
