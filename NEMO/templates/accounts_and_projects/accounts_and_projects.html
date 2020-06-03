@@ -83,10 +83,13 @@
 			</div>
 		</div>
 	{% else %}
-	<h2>Accounts</h2>
+	<h2>Present accounts / responsibles</h2>
 	<ul>
 	{% for acct in account_list %}
-	<li>{% if not acct.active %}<em>{% endif %}<a href="{% url 'account' acct.id %}">{{ acct.name }}</a>{% if not acct.active %} (INACTIVE)</em>{% endif %}</span></li>
+	<li>{% if not acct.active %}<em>{% endif %}
+		<a href="{% url 'account' acct.id %}">{{ acct.name }}</a> / {{ acct.manager }}
+		{% if acct.techcontact %}&sdot; tech.contact: {{ acct.techcontact }}{% endif %}
+	{% if not acct.active %}(INACTIVE)</em>{% endif %}</span></li>
 	{% empty %}
 	<li><span class="grey"><em>No accounts yet!</em></span></li>
 	{% endfor %}
