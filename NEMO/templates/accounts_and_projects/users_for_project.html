@@ -1,5 +1,17 @@
 {% for u in users %}
-	<a href="javascript:remove_user_from_project('{{ u.id }}', '{{ project.id }}')" class="{% if u.is_active %}grey{% else %}light-grey{% endif %} hover-black" title="Remove {{ u.first_name }}"><span class="glyphicon glyphicon-remove-circle"></span></a> {% if u.is_active %}{{ u }}{% else %}<span class="light-grey">{{ u }} (inactive)</span>{% endif %}<br>
+	<a href="javascript:remove_user_from_project('{{ u.id }}', '{{ project.id }}')" class="{% if u.is_active %}grey{% else %}light-grey{% endif %} hover-black" title="Remove {{ u.first_name }}"><span class="glyphicon glyphicon-remove-circle"></span></a>
+	<a href="{% url 'create_or_modify_user' u.id %}">
+		{% if u.is_active %}
+			{% if u.is_staff %}<em style="color:green">{{ u }}</em>
+			{% else %}{{ u }}
+			{% endif %}
+		{% else %}<span class="light-grey">{{ u }} (inactive)</span>
+		{% endif %}
+	</a>
+	{% if u.affiliation.id != parent_affiliation %}
+	(affiliation: {{ u.affiliation }})
+	{% endif %}
+	<br>
 {% empty %}
 	This project does not have any members.
 {% endfor %}

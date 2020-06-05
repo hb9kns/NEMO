@@ -73,7 +73,7 @@
 								<label class="control-label"><input id="search_user_for_project_{{ project.id }}" type="text" class="form-control user_search" placeholder="Search for a user to add" data-project-id="{{ project.id }}"></label>
 							</div>
 							<div id="project_{{ project.id }}_users">
-								{% include 'accounts_and_projects/users_for_project.html' with users=project.user_set.all %}
+								{% include 'accounts_and_projects/users_for_project.html' with users=project.user_set.all parent_affiliation=account.id %}
 							</div>
 						</div>
 					</div>
