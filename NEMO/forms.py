@@ -12,7 +12,7 @@ from NEMO.utilities import format_datetime
 class UserForm(ModelForm):
 	class Meta:
 		model = User
-		fields = ['username', 'last_name', 'first_name', 'email', 'phone', 'address', 'position', 'affiliation', 'mentor', 'badge_number', 'deposit', 'access_expiration', 'type', 'domain', 'is_active', 'training_required', 'physical_access_levels', 'qualifications', 'projects', 'fire_trained', 'mentor_trained', 'remarks']
+		fields = ['username', 'last_name', 'first_name', 'email', 'phone', 'address', 'position', 'affiliation', 'mentor', 'badge_number', 'deposit', 'access_expiration', 'type', 'domain', 'is_active', 'training_required', 'physical_access_levels', 'qualifications', 'projects', 'fire_trained', 'mentor_trained', 'remarks', 'is_staff']
 
 
 class ProjectForm(ModelForm):

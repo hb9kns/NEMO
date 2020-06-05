@@ -166,6 +166,7 @@ def create_or_modify_user(request, user_id):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_user', raise_exception=True)
 @require_http_methods(['GET', 'POST'])
 def deactivate(request, user_id):
 	dictionary = {
