@@ -109,6 +109,7 @@ class User(models.Model):
 	date_joined = models.DateTimeField(default=timezone.now, help_text='introday in most cases')
 	last_login = models.DateTimeField(null=True, blank=True)
 	mentor_trained = models.DateField(null=True, blank=True)
+	equiresp_trained = models.DateField(null=True, blank=True)
 	fire_trained = models.DateField(null=True, blank=True)
 
 	# NanoFab information:
