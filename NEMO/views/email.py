@@ -98,9 +98,10 @@ def compose_email(request):
 			if audience == 'project':
 				users = User.objects.filter(projects__id=selection).distinct()
 			elif audience == 'account':
-				users = User.objects.filter(projects__account__id=selection).distinct()
+				users = User.objects.filter(affiliation=selection).distinct()
 			elif audience == 'equiresp':
-				users = User.objects.filter(groups__name='Equipment Responsibles').distinct()
+				users = User.objects.filter(groups__name='Equipment_Responsibles').distinct()
+				# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME).distinct()
 			elif audience == 'pjtresp':
 				pjtmgrs = Account.objects.values_list('manager', flat=True)
 				users = User.objects.filter(pk__in=pjtmgrs).distinct()
@@ -158,7 +159,8 @@ def send_broadcast_email(request):
 		elif audience == 'account':
 			users = User.objects.filter(projects__account__id=selection)
 		elif audience == 'equiresp':
-			users = User.objects.filter(groups__name='Equipment Responsibles')
+			users = User.objects.filter(groups__name='Equipment_Responsibles')
+			# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME)
 		elif audience == 'pjtresp':
 			pjtmgrs = Account.objects.values_list('manager', flat=True)
 			users = User.objects.filter(pk__in=pjtmgrs)
@@ -187,6 +189,13 @@ def send_broadcast_email(request):
 	users = [x.email for x in users]
 	if form.cleaned_data['copy_me']:
 		users += [request.user.email]
+	if form.cleaned_data['carbon_copy']:
+		cc_recipient=form.cleaned_data['carbon_copy']
+		try:
+			validate_email(cc_recipient)
+		except:
+			return HttpResponseBadRequest('Cc:-Recipient not valid.')
+		users += [cc_recipient]
 	try:
 		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users))
 		email.attach_alternative(content, 'text/html')
