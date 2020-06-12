@@ -224,6 +224,7 @@ def create_reservation(request):
 	new_reservation.start = start
 	new_reservation.end = end
 	new_reservation.short_notice = determine_insufficient_notice(tool, start)
+
 	policy_problems, overridable = check_policy_to_save_reservation(None, new_reservation, user, explicit_policy_override)
 
 	# If there was a problem in saving the reservation then return the error...
@@ -516,7 +517,13 @@ def cancel_outage(request, outage_id):
 @require_POST
 def set_reservation_title(request, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
-	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	newtitle = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	if reservation.title:
+		oldtitle = str(reservation.title)
+	else:
+		oldtitle = ""
+	reservation.additional_information += "\n# Title was `"+oldtitle+"`, modified by "+request.user.first_name+" "+request.user.last_name
+	reservation.title = newtitle
 	reservation.save()
 	return HttpResponse()
 
@@ -529,7 +536,7 @@ def toggle_reservation_approval(request, reservation_id):
 	reservation.approved_by = request.user
 	reservation.approval_time = timezone.now()
 	reservation.save()
-	return redirect('calendar')
+	return HttpResponse()
 
 @login_required
 @permission_required('NEMO.trigger_timed_services', raise_exception=True)
