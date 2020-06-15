@@ -94,9 +94,9 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="control-label col-sm-2" for="address">address</label>
+			<label class="control-label col-sm-2" for="address">Address</label>
 			<div class="col-sm-4">
-			<textarea id="address" name="address">{{ form.address.value|default_if_none:"" }}</textarea>
+			<textarea id="address" name="address" cols="55">{{ form.address.value|default_if_none:"" }}</textarea>
 			</div>
 		</div>
 		<div class="form-group">
@@ -284,7 +284,7 @@
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="remarks">Remarks</label>
 			<div class="col-sm-4">
-			<textarea id="remarks" name="remarks">{{ form.remarks.value|default_if_none:"" }}</textarea>
+			<textarea id="remarks" name="remarks" cols="55">{{ form.remarks.value|default_if_none:"" }}</textarea>
 			</div>
 		</div>
 <!--
