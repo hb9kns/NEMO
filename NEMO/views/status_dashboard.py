@@ -25,6 +25,7 @@ def status_dashboard(request):
 	elif interest == "tools":
 		dictionary = {
 			'tool_summary': create_tool_summary(request),
+			'visible_tools': Tool.objects.filter(visible=True),
 		}
 		return render(request, 'status_dashboard/tools.html', dictionary)
 	elif interest == "occupancy":
