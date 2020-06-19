@@ -1,4 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.files.storage import get_storage_class
 from django.core.validators import validate_email
 from django.http import HttpResponseBadRequest
@@ -17,6 +18,7 @@ def get_media_file_contents(file_name):
 	return f.read().strip()
 
 
+@permission_required('NEMO.change_customization')
 def store_media_file(content, file_name):
 	""" Delete any existing media file with the same name and save the new content into file_name in the media directory. If content is blank then no new file is created. """
 	storage = get_storage_class()()
@@ -67,6 +69,7 @@ def get_customization(name):
 		return ''
 
 
+@permission_required('NEMO.change_customization')
 def set_customization(name, value):
 	if name not in customizable_key_values:
 		raise Exception(f'Invalid customization: {value}')
@@ -82,6 +85,7 @@ def set_customization(name, value):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_customization')
 @require_GET
 def customization(request):
 	dictionary = {x: get_media_file_contents(x + '.html') for x in customizable_content}
@@ -90,6 +94,7 @@ def customization(request):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_customization')
 @require_POST
 def customize(request, element):
 	if element in customizable_content:

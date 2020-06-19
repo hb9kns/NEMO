@@ -7,8 +7,8 @@
 			<form action="{% url 'send_broadcast_email' %}" method="post">
 				{% csrf_token %}
 				<div class="col-sm-6">
-					<h3>Recipients</h3>
-					Active NEMO users are listed below in black. Inactive users are <span style="color:lightgrey">gray</span>.
+					<h3>Recipients: {{ audience }}</h3>
+					Active NEMO users are listed below in black. Inactive users are <span style="color:lightgrey"><em>gray</em></span>.
 					<div class="checkbox">
 						<label><input type="checkbox" name="only_active_users" checked> Only send this email to active users</label>
 					</div>
@@ -16,7 +16,7 @@
 						<label><input type="checkbox" name="copy_me" checked> Send a copy of this email to myself</label>
 					</div>
 					{% for u in users %}
-						<span {% if not u.is_active %}style="color:lightgrey"{% endif %}>{{ u }} - {{ u.email }}</span><br>
+						<span {% if not u.is_active %}style="color:lightgrey"{% endif %}>{% if not u.is_active %}<em>{% endif %}"{{ u }}{% if not u.is_active %}</em>{% endif %} ({{ u.affiliation }}{% if not u.is_active %} - inactive{% endif %})"  &lt;{{ u.email }}&gt;</span><br>
 					{% endfor %}
 				</div>
 				<div class="col-sm-6">
@@ -25,7 +25,9 @@
 					<input type="hidden" name="selection" value="{{ selection }}">
 					<div class="form-group">
 						<input type="text" name="subject" class="form-control" placeholder="Subject line" autofocus>
+					<p><em>Caution: pressing Enter in any one-line field will send the message!</em></p>
 					</div>
+<!--
 					<div class="form-group">
 						Title background color:
 						<div class="radio" style="background-color:#5bc0de; padding:5px">
@@ -52,6 +54,10 @@
 								Red, for conveying danger
 							</label>
 						</div>
+					</div>
+-->
+					<div class="form-group">
+						<input type="text" name="carbon_copy" class="form-control" placeholder="Cc: recipient (optional)">
 					</div>
 					<div class="form-group">
 						<input type="text" name="title" class="form-control" style="text-transform:uppercase" placeholder="Title (always uppercase)">

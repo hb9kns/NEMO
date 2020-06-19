@@ -3,6 +3,8 @@ from urllib.parse import urljoin
 import requests
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import permission_required
+
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
@@ -11,6 +13,7 @@ from NEMO.models import Tool, MembershipHistory, User
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def qualifications(request):
 	""" Present a web page to allow staff to qualify or disqualify users on particular tools. """
@@ -20,6 +23,7 @@ def qualifications(request):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_tool', raise_exception=True)
 @require_POST
 def modify_qualifications(request):
 	""" Change the tools that a set of users is qualified to use. """

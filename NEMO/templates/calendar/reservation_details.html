@@ -10,7 +10,7 @@
 		<div class="alert alert-danger">This reservation was automatically removed from the tool calendar due to tool inactivity.</div>
 	{% endif %}
 
-	{% if user.is_staff %}
+	{% if "1" == "1" %}
 		<div class="input-group">
 			<span class="input-group-addon">
 				Title
@@ -27,6 +27,16 @@
 	User: <a href="{% url 'get_email_form_for_user' reservation.user.id %}"> {{ reservation.user }} </a><br>
 	Created by: {{ reservation.creator }}<br>
 	Created on: {{ reservation.creation_time }}<br>
+	Approved: <a target="_blank" rel="noopener noreferrer" href="{% url 'toggle_reservation_approval' reservation.id %}">{{ reservation.approved }}</a> (
+	{% if reservation.approved_by %}
+		<a href="{% url 'get_email_form_for_user' reservation.approved_by.id %}"> {{ reservation.approved_by }} </a>
+	{% else %}
+		nobody
+	{% endif %}
+	{% if reservation.approval_time %}
+		on {{ reservation.approval_time }}
+	{% endif %}
+	)<br>
 	Tool: <a href="{% url 'tool_control' reservation.tool.id %}"> {{ reservation.tool }} </a><br>
 	{% if reservation.project %}Project: {{ reservation.project }}<br>{% endif %}
 	Start: {{ reservation.start }}<br>

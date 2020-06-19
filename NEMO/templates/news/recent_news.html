@@ -4,12 +4,12 @@
 	<h1>
 		Recent news
 		{% if device == 'desktop' and user.is_staff %}
-			<a href="{% url 'new_news_form' %}" class="btn btn-success pull-right">Publish new news</a>
+			<a href="{% url 'new_news_form' %}" class="btn btn-success pull-right">Publish fresh news (core staff only)</a>
 		{% endif %}
 	</h1>
 	{% if news %}
 		{% if user.is_staff %}
-			{% if device == 'mobile' %}<p><a href="{% url 'new_news_form' %}" class="btn btn-success">Publish new news</a></p>{% endif %}
+			{% if device == 'mobile' %}<p><a href="{% url 'new_news_form' %}" class="btn btn-success">Publish fresh news (core staff only)</a></p>{% endif %}
 			<p>Click a news story title to publish an update or archive it.</p>
 		{% endif %}
 		<p>Stories that were updated recently appear first.</p>
@@ -39,7 +39,7 @@
 			</div>
 		{% empty %}
 			<div class="col-sm-12">
-				There's no news!
+				No news are good news!
 			</div>
 		{% endfor %}
 	</div>

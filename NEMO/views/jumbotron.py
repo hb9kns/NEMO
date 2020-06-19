@@ -6,7 +6,7 @@ from django.views.decorators.http import require_GET
 from NEMO.models import AreaAccessRecord, UsageEvent, Alert, Resource
 from NEMO.views.alerts import delete_expired_alerts
 
-
+@login_required
 
 @require_GET
 def jumbotron(request):

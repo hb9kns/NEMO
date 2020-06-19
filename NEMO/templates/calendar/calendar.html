@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load custom_tags_and_filters %}
-{% block title %}Calendar{% endblock %}
+{% block title %}{% if title_description %}{{ title_description }} / {% endif %}Calendar{% endblock %}
 {% block extrahead %}
 	{% load static %}
 	<link rel="stylesheet" type="text/css" href="{% static "fullcalendar/fullcalendar.css" %}" />
@@ -301,23 +301,25 @@ function create_calendar()
 		"views": {
 			"day": {
 				"titleFormat": ' ',
-				"columnFormat": 'dddd MM/DD/YYYY'
+				"columnFormat": 'dddd YYYY-MM-DD'
 			},
 			"week": {
-				"titleFormat": ' '
+				"titleFormat": ' ',
+				"columnFormat": 'ddd,M-DD'
 			},
 			"month": {
 				"titleFormat": 'MMMM YYYY'
 			}
 		},
-		"firstDay": 1, {# Make Monday the first day of the week #}
-		"scrollTime": '07:00:00', {# The day starts at 7 AM #}
+		"firstDay": 1, {# of the week: 1=Monday #}
+		"scrollTime": '09:00:00', {# Start of day in day view #}
 		"defaultView": "agendaWeek",
 		"allDaySlot": false,
 		"allDayDefault": false,
 		"slotDuration": '00:15:00', {# 15 minutes each row #}
 		"slotLabelInterval": '1:00', {# One hour intervals for label #}
 		"editable": false,
+		"nowIndicator": true,
 		"selectable": true,
 		"selectHelper": true,
 		"select": create,

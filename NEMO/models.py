@@ -4,7 +4,7 @@ import struct
 import pytz
 from datetime import timedelta
 from logging import getLogger
-from pymodbus3.client.sync import ModbusTcpClient
+from pymodbus.client.sync import ModbusTcpClient
 
 from django.conf import settings
 from django.contrib import auth
@@ -82,11 +82,17 @@ class User(models.Model):
 	first_name = models.CharField(max_length=100)
 	last_name = models.CharField(max_length=100)
 	email = models.EmailField(verbose_name='email address')
+	phone = models.CharField(max_length=100, null=True, blank=True, default='', verbose_name='phone number')
 	type = models.ForeignKey(UserType, null=True, on_delete=models.SET_NULL)
+	affiliation = models.ForeignKey('Account', null=True, blank=True, default='', help_text="account (group/company) the user is affiliated to")
+	mentor = models.ForeignKey('User', null=True, blank=True, default='')
+	address = models.TextField(blank=True, help_text="post address / contact information")
+	position = models.CharField(max_length=100, null=True, blank=True, default='', help_text="semester/master/postdoc/..")
 	domain = models.CharField(max_length=100, blank=True, help_text="The Active Directory domain that the account resides on")
 
 	# Physical access fields
 	badge_number = models.PositiveIntegerField(null=True, blank=True, unique=True, help_text="The badge number associated with this user. This number must correctly correspond to a user in order for the tablet-login system (in the NanoFab lobby) to work properly.")
+	deposit = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Deposit by the user (e.g for badge), to be returned when leaving.")
 	access_expiration = models.DateField(blank=True, null=True, help_text="The user will lose all access rights after this date. Typically this is used to ensure that safety training has been completed by the user every year.")
 	physical_access_levels = models.ManyToManyField('PhysicalAccessLevel', blank=True, related_name='users')
 
@@ -100,12 +106,16 @@ class User(models.Model):
 	user_permissions = models.ManyToManyField(Permission, blank=True, help_text='Specific permissions for this user.')
 
 	# Important dates
-	date_joined = models.DateTimeField(default=timezone.now)
+	date_joined = models.DateTimeField(default=timezone.now, help_text='introday in most cases')
 	last_login = models.DateTimeField(null=True, blank=True)
+	mentor_trained = models.DateField(null=True, blank=True)
+	equiresp_trained = models.DateField(null=True, blank=True)
+	fire_trained = models.DateField(null=True, blank=True)
 
 	# NanoFab information:
 	qualifications = models.ManyToManyField('Tool', blank=True, help_text='Select the tools that the user is qualified to use.')
 	projects = models.ManyToManyField('Project', blank=True, help_text='Select the projects that this user is currently working on.')
+	remarks = models.TextField(blank=True, help_text="for internal staff use")
 
 	USERNAME_FIELD = 'username'
 	REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
@@ -172,7 +182,8 @@ class User(models.Model):
 		send_mail(subject=subject, message='', from_email=from_email, recipient_list=[self.email], html_message=message)
 
 	def get_full_name(self):
-		return self.first_name + ' ' + self.last_name + ' (' + self.username + ')'
+		return self.last_name + ' ' + self.first_name
+#		return self.last_name + ' ' + self.first_name + ' (' + self.username + ')'
 
 	def get_short_name(self):
 		return self.first_name
@@ -209,7 +220,7 @@ class User(models.Model):
 			return None
 
 	class Meta:
-		ordering = ['first_name']
+		ordering = ['last_name']
 		permissions = (
 			("trigger_timed_services", "Can trigger timed services"),
 			("use_billing_api", "Can use billing API"),
@@ -221,7 +232,7 @@ class User(models.Model):
 
 
 class Tool(models.Model):
-	name = models.CharField(max_length=100, unique=True)
+	name = models.CharField(max_length=100, unique=True, help_text="Do NOT use slashes here!")
 	category = models.CharField(max_length=1000, help_text="Create sub-categories using slashes. For example \"Category 1/Sub-category 1\".")
 	visible = models.BooleanField(default=True, help_text="Specifies whether this tool is visible to users.")
 	operational = models.BooleanField(default=False, help_text="Marking the tool non-operational will prevent users from using the tool.")
@@ -229,6 +240,8 @@ class Tool(models.Model):
 	backup_owners = models.ManyToManyField(User, blank=True, related_name="backup_for_tools", help_text="Alternate staff members who are responsible for administration of this tool when the primary owner is unavailable.")
 	location = models.CharField(max_length=100)
 	phone_number = models.CharField(max_length=100)
+	external_link = models.CharField(max_length=200, blank=True, null=True, help_text="Weblink to external resource (equipment page etc)")
+	usage_link = models.CharField(max_length=200, blank=True, null=True, help_text="Weblink to external usage logging")
 	notification_email_address = models.EmailField(blank=True, null=True, help_text="Messages that relate to this tool (such as comments, problems, and shutdowns) will be forwarded to this email address. This can be a normal email address or a mailing list address.")
 	# Policy fields:
 	requires_area_access = models.ForeignKey('Area', null=True, blank=True, help_text="Indicates that this tool is physically located in a billable area and requires an active area access record in order to be operated.")
@@ -487,7 +500,12 @@ class ConfigurationHistory(models.Model):
 class Account(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	active = models.BooleanField(default=True, help_text="Users may only charge to an account if it is active. Deactivate the account to block future billable activity (such as tool usage and consumable check-outs) of all the projects that belong to it.")
-	manager_email = models.EmailField(blank=True, null=True, help_text="Email address of the account manager")
+	manager = models.ForeignKey(User, null=True, blank=True, default='', related_name="account_manager", help_text="Account Manager, financially responsible")
+	techcontact = models.ForeignKey(User, null=True, blank=True, default='', related_name="technical_contact", help_text="Contact person for planning")
+	department = models.CharField(max_length=50, null=True, blank=True, default='')
+	admin_name = models.CharField(blank=True, null=True, max_length=100, help_text="Contact person for administration, unless already covered by technical contact")
+	admin_email = models.EmailField(blank=True, null=True, help_text="E-mail address of administrative contact")
+	remarks = models.TextField(blank=True)
 	class Meta:
 		ordering = ['name']
 
@@ -500,6 +518,8 @@ class Project(models.Model):
 	application_identifier = models.CharField(max_length=100)
 	account = models.ForeignKey(Account, help_text="All charges for this project will be billed to the selected account.")
 	active = models.BooleanField(default=True, help_text="Users may only charge to a project if it is active. Deactivate the project to block billable activity (such as tool usage and consumable check-outs).")
+	project_contact = models.ForeignKey(User, null=True, blank=True, default='', help_text="for technical and budgetary discussions")
+	project_description = models.TextField(blank=True, help_text="project description, remarks")
 
 	class Meta:
 		ordering = ['name']
@@ -535,6 +555,9 @@ class Reservation(CalendarDisplay):
 	cancelled = models.BooleanField(default=False, help_text="Indicates that the reservation has been cancelled, moved, or resized.")
 	cancellation_time = models.DateTimeField(null=True, blank=True)
 	cancelled_by = models.ForeignKey(User, null=True, blank=True)
+	approved = models.BooleanField(default=False)
+	approval_time = models.DateTimeField(null=True, blank=True)
+	approved_by = models.ForeignKey(User, null=True, blank=True, related_name="reservation_approver")
 	missed = models.BooleanField(default=False, help_text="Indicates that the tool was not enabled by anyone before the tool's \"missed reservation threshold\" passed.")
 	shortened = models.BooleanField(default=False, help_text="Indicates that the user finished using the tool and relinquished the remaining time on their reservation. The reservation will no longer be visible on the calendar and a descendant reservation will be created in place of the existing one.")
 	descendant = models.OneToOneField('Reservation', related_name='ancestor', null=True, blank=True, help_text="Any time a reservation is moved or resized, the old reservation is cancelled and a new reservation with updated information takes its place. This field links the old reservation to the new one, so the history of reservation moves & changes can be easily tracked.")
@@ -1143,36 +1166,6 @@ class Alert(models.Model):
 		return str(self.id)
 
 
-class ContactInformationCategory(models.Model):
-	name = models.CharField(max_length=200)
-	display_order = models.IntegerField(help_text="Contact information categories are sorted according to display order. The lowest value category is displayed first in the 'Contact information' page.")
-
-	class Meta:
-		verbose_name_plural = 'Contact information categories'
-		ordering = ['display_order', 'name']
-
-	def __str__(self):
-		return str(self.name)
-
-
-class ContactInformation(models.Model):
-	name = models.CharField(max_length=200)
-	image = models.ImageField(blank=True, help_text='Portraits are resized to 266 pixels high and 200 pixels wide. Crop portraits to these dimensions before uploading for optimal bandwidth usage')
-	category = models.ForeignKey(ContactInformationCategory)
-	email = models.EmailField(blank=True)
-	office_phone = models.CharField(max_length=40, blank=True)
-	office_location = models.CharField(max_length=200, blank=True)
-	mobile_phone = models.CharField(max_length=40, blank=True)
-	mobile_phone_is_sms_capable = models.BooleanField(default=True, verbose_name='Mobile phone is SMS capable', help_text="Is the mobile phone capable of receiving text messages? If so, a link will be displayed for users to click to send a text message to the recipient when viewing the 'Contact information' page.")
-
-	class Meta:
-		verbose_name_plural = 'Contact information'
-		ordering = ['name']
-
-	def __str__(self):
-		return str(self.name)
-
-
 class Notification(models.Model):
 	user = models.ForeignKey(User, related_name='notifications')
 	expiration = models.DateTimeField()
@@ -1199,7 +1192,7 @@ class LandingPageChoice(models.Model):
 	hide_from_mobile_devices = models.BooleanField(default=False, help_text="Hides this choice when the landing page is viewed from a mobile device")
 	hide_from_desktop_computers = models.BooleanField(default=False, help_text="Hides this choice when the landing page is viewed from a desktop computer")
 	hide_from_users = models.BooleanField(default=False, help_text="Hides this choice from normal users. When checked, only staff, technicians, and super-users can see the choice")
-	notifications = models.CharField(max_length=25, blank=True, null=True, choices=Notification.Types.Choices, help_text="Displays a the number of new notifications for the user. For example, if the user has two unread news notifications then the number '2' would appear for the news icon on the landing page.")
+	notifications = models.CharField(max_length=25, blank=True, null=True, choices=Notification.Types.Choices, help_text="Displays the number of new notifications for the user. For example, if the user has two unread news notifications then the number '2' would appear for the news icon on the landing page.")
 
 	class Meta:
 		ordering = ['display_priority']
@@ -1238,7 +1231,7 @@ class ScheduledOutage(models.Model):
 	details = models.TextField(blank=True, help_text="A detailed description of why there is a scheduled outage, and what users can expect during the outage")
 	category = models.CharField(blank=True, max_length=200, help_text="A categorical reason for why this outage is scheduled. Useful for trend analytics.")
 	tool = models.ForeignKey(Tool, null=True)
-	resource = models.ForeignKey(Resource, null=True)
+	resource = models.ForeignKey(Resource, null=True, blank=True)
 
 	def __str__(self):
 		return str(self.title)

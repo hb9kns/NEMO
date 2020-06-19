@@ -1,5 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -39,6 +39,7 @@ def view_archived_news(request, page=1):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_news', raise_exception=True)
 @require_POST
 def archive_story(request, story_id):
 	try:
@@ -52,12 +53,14 @@ def archive_story(request, story_id):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_news', raise_exception=True)
 @require_GET
 def new_news_form(request):
 	return render(request, 'news/new_news_form.html')
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_news', raise_exception=True)
 @require_GET
 def news_update_form(request, story_id):
 	dictionary = {}
@@ -69,6 +72,7 @@ def news_update_form(request, story_id):
 
 
 @staff_member_required(login_url=None)
+@permission_required('NEMO.change_news', raise_exception=True)
 @require_POST
 def publish(request, story_id=None):
 	now = timezone.now()

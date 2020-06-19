@@ -21,7 +21,8 @@
 							The tool was shut down because of this task.<br>
 						{% endif %}
 						{% if user.is_staff %}
-							You can <a href="{% url 'task_update_form' i.id %}">reopen</a> this task if it was mistakenly resolved.
+							You can <a href="{% url 'task_update_form' i.id %}">reopen/update</a> this task if it was mistakenly resolved,
+							or you can <a href="{% url 'task_resolution_form' i.id %}">resolve</a> it.
 						{% endif %}
 					</span>
 					{% if i.progress_description %}

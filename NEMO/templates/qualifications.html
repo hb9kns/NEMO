@@ -7,8 +7,8 @@
 	<p>
 		Use this form to qualify one or more users on one or more tools. You may select as many users or tools as you like.
 		User and tool names are automatically searched for when you type in the text boxes below. All of the selected users
-		will be qualified or disqualified for all of the selected tools. You can remove a selected user or tool by clicking
-		on the representative button.
+		will be qualified or disqualified for all of the selected tools. You can remove selected users or tools by clicking
+		on their buttons.
 	</p>
 
 	<form method="post" action="{% url 'modify_qualifications' %}">
@@ -25,14 +25,14 @@
 		<div class="row">
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="user_search">Search for user</label>
+					<label for="user_search">Individual users</label>
 					<input id='user_search' class="form-control"/>
 				</div>
 				<div id="chosen_users" class="form-group"></div>
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="tool_search">Search for tool</label>
+					<label for="tool_search">Target tool</label>
 					<input id='tool_search' class="form-control"/>
 				</div>
 				<div id="chosen_tools" class="form-group"></div>

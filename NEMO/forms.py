@@ -6,13 +6,13 @@ from django.forms.utils import ErrorDict
 from django.utils import timezone
 
 from NEMO.models import Account, Alert, ChemicalRequest, Comment, Consumable, ConsumableWithdraw, StockroomItem, StockroomWithdraw, Project, SafetyIssue, ScheduledOutage, Task, TaskCategory, User, UserChemical
-from NEMO.utilities import bootstrap_primary_color, format_datetime
+from NEMO.utilities import format_datetime
 
 
 class UserForm(ModelForm):
 	class Meta:
 		model = User
-		fields = ['username', 'first_name', 'last_name', 'email', 'badge_number', 'access_expiration', 'type', 'domain', 'is_active', 'training_required', 'physical_access_levels', 'qualifications', 'projects']
+		fields = ['username', 'last_name', 'first_name', 'email', 'phone', 'address', 'position', 'affiliation', 'mentor', 'badge_number', 'deposit', 'access_expiration', 'type', 'domain', 'is_active', 'training_required', 'physical_access_levels', 'qualifications', 'projects', 'fire_trained', 'mentor_trained', 'equiresp_trained', 'remarks', 'is_staff']
 
 
 class ProjectForm(ModelForm):
@@ -268,14 +268,13 @@ class ReservationAbuseForm(Form):
 
 
 class EmailBroadcastForm(Form):
-	subject = CharField(required=False)
-	color = ChoiceField(choices=((bootstrap_primary_color('info'), 'info'), (bootstrap_primary_color('success'), 'success'), (bootstrap_primary_color('warning'), 'warning'), (bootstrap_primary_color('danger'), 'danger')))
+	subject = CharField(required=True)
 	title = CharField(required=False)
 	greeting = CharField(required=False)
-	contents = CharField(required=False)
-	copy_me = BooleanField(initial=True)
-
-	audience = ChoiceField([('tool', 'tool'), ('project', 'project'), ('account', 'account'), ('all', 'all')])
+	contents = CharField(required=True)
+	copy_me = BooleanField(initial=True, required=False)
+	carbon_copy = CharField(required=False)
+	audience = ChoiceField([('tool', 'tool'), ('project', 'project'), ('account', 'account'), ('equiresp', 'equiresp'), ('pjtresp', 'pjtresp'), ('all', 'all')])
 	selection = IntegerField()
 	only_active_users = BooleanField(initial=True)
 

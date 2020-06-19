@@ -1,8 +1,19 @@
-.idea/
 __pycache__/
 venv/
 settings.py
+<<<<<<< HEAD
 fake_authentication.py
 Dockerfile*
 start*.sh
 secrets
+=======
+logs/
+media/
+fonts/
+img/
+static/
+*.bmp
+*.ico
+*.jpg
+*.png
+>>>>>>> first-prod

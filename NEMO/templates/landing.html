@@ -3,6 +3,11 @@
 
 {% block title %}NEMO{% endblock %}
 {% block content %}
+	<div class="row">
+	 <div class="col-lg-12">
+	  <p style="text-align: right"><small><em>Server time: {% now 'l, Y-m-d, H:i' %}</em></small></p>
+	 </div>
+	</div>
 	{% if user.training_required %}
 		<div class="row">
 			<div class="col-lg-12">
@@ -13,7 +18,7 @@
 							<h2>{{ facility_name }} Rules Tutorial</h2>
 							<p style="text-align: center">You must complete your {{ facility_name }} rules tutorial before you can make reservations or use {{ facility_name }} tools. Click here to begin the tutorial.</p>
 						</div>
-						<div class="col-lg-2 text-center"><img src="{% static 'icons/agreement.png' %}" height="128" width="128"></div>
+{#						<div class="col-lg-2 text-center"><img src="{% static 'icons/agreement.png' %}" height="128" width="128"></div> #}
 					</div>
 				</a>
 			</div>
@@ -29,11 +34,11 @@
 							{% if r.title %}<b>{{ r.title }}</b><br>{% endif %}
 							<b>{% if r.start < now %}You're late for your {{ r.tool }} reservation!{% else %}{{ r.tool }}{% endif %}</b><br>
 							{% if r.start|date == now|date %}
-								Starting Today {{ r.start|date:"@ g:i A" }}<br>
-								Ending {{ r.end|date:"@ g:i A" }}
+								Starting Today {{ r.start }}<br>
+								Ending {{ r.end }}
 							{% else %}
-								Starting on {{ r.start|date:"l, M jS @ g:i A" }}<br>
-								Ending on {{ r.end|date:"l, M jS @ g:i A" }}
+								Starting on {{ r.start }}<br>
+								Ending on {{ r.end }}
 							{% endif %}
 						</div>
 					</a>

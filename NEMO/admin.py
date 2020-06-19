@@ -5,9 +5,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Permission
 
 from NEMO.actions import lock_selected_interlocks, synchronize_with_tool_usage, unlock_selected_interlocks
-from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, ChemicalRequest, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, ContactInformation, ContactInformationCategory, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, Sensor, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserChemical, UserType
+from NEMO.models import Account, ActivityHistory, Alert, Area, AreaAccessRecord, ChemicalRequest, Comment, Configuration, ConfigurationHistory, Consumable, ConsumableCategory, ConsumableWithdraw, Customization, Door, Interlock, InterlockCard, LandingPageChoice, MembershipHistory, News, Notification, PhysicalAccessLevel, PhysicalAccessLog, Project, Reservation, Resource, ResourceCategory, SafetyIssue, ScheduledOutage, ScheduledOutageCategory, Sensor, StockroomItem, StockroomWithdraw, StockroomCategory, StaffCharge, Task, TaskCategory, TaskHistory, TaskStatus, Tool, TrainingSession, UsageEvent, User, UserChemical, UserType
 
-admin.site.site_header = "NEMO"
+admin.site.site_header = "NEMO/FIRST-Lab"
 admin.site.site_title = "NEMO"
 admin.site.index_title = "Detailed administration"
 
@@ -157,7 +157,7 @@ class ToolAdmin(admin.ModelAdmin):
 	fieldsets = (
 		(None, {'fields': ('name', 'category', 'qualified_users', 'post_usage_questions'),}),
 		('Current state', {'fields': ('visible', 'operational'),}),
-		('Contact information', {'fields': ('primary_owner', 'backup_owners', 'notification_email_address', 'location', 'phone_number'),}),
+		('Contact information', {'fields': ('primary_owner', 'backup_owners', 'notification_email_address', 'location', 'phone_number', 'external_link', 'usage_link'),}),
 		('Usage policy', {'fields': ('reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'grant_physical_access_level_upon_qualification', 'grant_badge_reader_access_upon_qualification', 'interlock', 'allow_delayed_logoff', 'reservation_required'),}),
 		('Dependencies', {'fields': ('required_resources', 'nonrequired_resources'),}),
 	)
@@ -208,9 +208,9 @@ class ConfigurationHistoryAdmin(admin.ModelAdmin):
 
 @register(Account)
 class AccountAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'active', 'manager_email')
-	search_fields = ('name',)
-	list_filter = ('active',)
+	list_display = ('name', 'id', 'active', 'manager', 'techcontact', 'department', 'admin_email', 'remarks')
+	search_fields = ('name', 'department',)
+	list_filter = ('active', 'department',)
 
 	def save_model(self, request, obj, form, change):
 		""" Audit account and project active status. """
@@ -240,8 +240,8 @@ class ProjectAdminForm(forms.ModelForm):
 
 @register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'application_identifier', 'account', 'active')
-	search_fields = ('name', 'application_identifier', 'account__name')
+	list_display = ('name', 'id', 'application_identifier', 'account', 'project_contact', 'active')
+	search_fields = ('name', 'application_identifier', 'project_contact', 'account__name')
 	list_filter = ('active',)
 	form = ProjectAdminForm
 
@@ -276,15 +276,15 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-	list_display = ('id', 'user', 'creator', 'tool', 'project', 'start', 'end', 'duration', 'cancelled', 'missed')
-	list_filter = ('cancelled', 'missed', 'tool')
+	list_display = ('id', 'user', 'creator', 'tool', 'project', 'start', 'end', 'duration', 'approved', 'cancelled', 'missed')
+	list_filter = ('approved', 'cancelled', 'missed', 'tool')
 	date_hierarchy = 'start'
 
 
 @register(UsageEvent)
 class UsageEventAdmin(admin.ModelAdmin):
 	list_display = ('id', 'tool', 'user', 'operator', 'project', 'start', 'end', 'duration')
-	list_filter = ('start', 'end', 'tool')
+	list_filter = ('start', 'end', 'project', 'tool')
 	date_hierarchy = 'start'
 
 
@@ -394,14 +394,15 @@ class UserTypeAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
 	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
-		('Personal information', {'fields': ('first_name', 'last_name', 'username', 'email', 'badge_number', 'type', 'domain')}),
-		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
-		('Important dates', {'fields': ('date_joined', 'last_login', 'access_expiration')}),
+		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'badge_number', 'deposit', 'type', 'remarks')}),
+#		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
+		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
+		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
-	search_fields = ('first_name', 'last_name', 'username', 'email')
-	list_display = ('first_name', 'last_name', 'username', 'email', 'badge_number', 'is_active', 'is_staff', 'is_superuser', 'access_expiration', 'date_joined', 'last_login')
-	list_filter = ('is_active', 'domain', 'is_staff', 'is_technician', 'is_superuser', 'date_joined', 'last_login')
+	search_fields = ('last_name', 'first_name', 'username', 'email')
+	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'date_joined', 'last_login', 'type', 'deposit')
+	list_filter = ('is_active', 'groups', 'type', 'affiliation', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'date_joined', 'is_staff', 'training_required', 'last_login', 'deposit')
 
 	def save_model(self, request, obj, form, change):
 		""" Audit project membership and qualifications when a user is saved. """
@@ -441,16 +442,6 @@ class AlertAdmin(admin.ModelAdmin):
 @register(PhysicalAccessLevel)
 class PhysicalAccessLevelAdmin(admin.ModelAdmin):
 	list_display = ('name', 'area', 'schedule')
-
-
-@register(ContactInformationCategory)
-class ContactInformationCategoryAdmin(admin.ModelAdmin):
-	list_display = ('name', 'display_order')
-
-
-@register(ContactInformation)
-class ContactInformationAdmin(admin.ModelAdmin):
-	list_display = ('name', 'category')
 
 
 @register(LandingPageChoice)

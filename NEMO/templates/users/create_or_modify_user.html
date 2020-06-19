@@ -13,11 +13,13 @@
 			{{ form.non_field_errors }}
 		</div>
 	{% endif %}
+<!--
 	{% if warning %}
 		<div class="alert alert-warning">
 			{{ warning }}
 		</div>
 	{% endif %}
+-->
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="form-group">
@@ -65,6 +67,7 @@
 					{{ form.username.errors|striptags }}
 				</div>
 			{% endif %}
+			<small>(for virtual names like contacts etc, prepend "v-" and remove "active" flag)</small>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="email"><strong>E-mail address</strong></label>
@@ -78,6 +81,47 @@
 			{% endif %}
 		</div>
 		<div class="form-group">
+			<label class="control-label col-sm-2" for="position">Position</label>
+			<div class="col-sm-4">
+				<input id="position" name="position" type="text" autocomplete="off" class="form-control" value="{{ form.position.value|default_if_none:"" }}">
+			</div>
+			<small>(master/semester student, postdoc, ..)</small>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="phone">phone</label>
+			<div class="col-sm-4">
+				<input id="phone" name="phone" type="text" autocomplete="off" class="form-control" value="{{ form.phone.value|default_if_none:"" }}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="address">Address</label>
+			<div class="col-sm-4">
+			<textarea id="address" name="address" cols="55">{{ form.address.value|default_if_none:"" }}</textarea>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="affiliation"><strong>Affiliation</strong></label>
+			<div class="col-sm-4">
+				<select id="affiliation" name="affiliation" class="form-control" required>
+						<option value="">(Please select!)</option>
+					{% for a in affiliations %}
+						<option value="{{ a.id }}" {% if a.id == form.affiliation.value|to_int %}selected{% endif %}>{{ a.name }}{% if a.active == 0 %} - INACTIVE!{% endif %}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="mentor">Mentor</label>
+			<div class="col-sm-4">
+				<select id="mentor" name="mentor" class="form-control">
+						<option value="">-----------</option>
+					{% for u in actmentors %}
+						<option value="{{ u.id }}" {% if u.id == form.mentor.value|to_int %}selected{% endif %}>{{ u.last_name }}, {{ u.first_name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
 			<label class="control-label col-sm-2" for="type"><strong>Type</strong></label>
 			<div class="col-sm-4">
 				<select id="type" name="type" class="form-control" required>
@@ -86,6 +130,7 @@
 					{% endfor %}
 				</select>
 			</div>
+			<small>Note: this is unrelated to permission groups (see Detailed administration)!</small>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="badge_number">Badge number</label>
@@ -99,12 +144,23 @@
 			{% endif %}
 		</div>
 		<div class="form-group">
+			<label class="control-label col-sm-2{% if form.deposit.value != 0 %} danger-highlight{% endif %}" for="deposit">Deposit</label>
+			<div class="col-sm-4">
+				<input id="deposit" name="deposit" type="text" autocomplete="off" class="form-control" value="{{ form.deposit.value }}" placeholder="Deposit amount (badge etc)">
+			</div>
+			{% if form.deposit.errors %}
+				<div class="col-sm-6 form-control-static danger-highlight">
+					{{ form.deposit.errors|striptags }}
+				</div>
+			{% endif %}
+		</div>
+		<div class="form-group">
 			<label class="control-label col-sm-2" for="access_expiration">Access expiration</label>
 			<div class="col-sm-2">
 				<input id="access_expiration" name="access_expiration" type="text" autocomplete="off" class="form-control" value="{{ form.access_expiration.value|default_if_none:'' }}">
 			</div>
 			<div class="control-label col-sm-2" style="text-align:left">
-				<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ one_year_from_now|date }}')">One year from now</a>
+				<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ one_year_from_now|date }}')">One year</a>/<a href="javascript:void(0)" onclick="$('#access_expiration').val('{{ half_year_from_now|date }}')">Half a year</a> from now
 			</div>
 			{% if form.access_expiration.errors %}
 				<div class="col-sm-6 form-control-static danger-highlight">
@@ -113,6 +169,16 @@
 			{% endif %}
 		</div>
 		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<div class="checkbox">
+			{% if form.is_staff.value %}
+				<label><em style="color:green">This user has <strong>staff</strong> permissions.</em></label>
+			{% else %}
+				<label>This user has only normal (non-staff) permissions.</em></label>
+			{% endif %}
+				<small>&mdash; must be modified in Detailed administration</small>
+				</div>
+			</div>
 			<div class="col-sm-offset-2 col-sm-10">
 				<div class="checkbox">
 					<label {% if form.is_active.value %}data-toggle="tooltip" data-placement="left" title="Pro-tip: you can safely deactivate this user using the link at the top of this page so that no future costs are incurred (such as missed reservations)."{% endif %}>
@@ -137,7 +203,41 @@
 					{{ form.instance.last_login|default_if_none:"Never" }}
 				</div>
 			</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="fire_trained">Firefighting training</label>
+			<div class="col-sm-2">
+				<input id="fire_trained" name="fire_trained" type="text" autocomplete="off" class="form-control" value="{{ form.fire_trained.value|default_if_none:'' }}">
+			</div>
+			{% if form.fire_trained.errors %}
+				<div class="col-sm-6 form-control-static danger-highlight">
+					{{ form.fire_trained.errors|striptags }}
+				</div>
+			{% endif %}
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="mentor_trained">Mentor training</label>
+			<div class="col-sm-2">
+				<input id="mentor_trained" name="mentor_trained" type="text" autocomplete="off" class="form-control" value="{{ form.mentor_trained.value|default_if_none:'' }}">
+			</div>
+			{% if form.mentor_trained.errors %}
+				<div class="col-sm-6 form-control-static danger-highlight">
+					{{ form.mentor_trained.errors|striptags }}
+				</div>
+			{% endif %}
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="equiresp_trained">Equipment responsibles training</label>
+			<div class="col-sm-2">
+				<input id="equiresp_trained" name="equiresp_trained" type="text" autocomplete="off" class="form-control" value="{{ form.equiresp_trained.value|default_if_none:'' }}">
+			</div>
+			{% if form.equiresp_trained.errors %}
+				<div class="col-sm-6 form-control-static danger-highlight">
+					{{ form.equiresp_trained.errors|striptags }}
+				</div>
+			{% endif %}
+		</div>
 		{% endif %}
+<!--
 		<div class="form-group" style="margin-left:0">
 			{% if identity_service_domains|length == 1 %}
 				<div class="row">
@@ -158,6 +258,7 @@
 				</div>
 			{% endif %}
 		</div>
+-->
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="add_a_project">Projects</label>
 			<div class="col-sm-4">
@@ -180,6 +281,13 @@
 				This user is not qualified to use any tools.
 			</div>
 		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="remarks">Remarks</label>
+			<div class="col-sm-4">
+			<textarea id="remarks" name="remarks" cols="55">{{ form.remarks.value|default_if_none:"" }}</textarea>
+			</div>
+		</div>
+<!--
 		{% if physical_access_levels or externally_managed_access_levels %}
 			<div class="form-group">
 				<span class="control-label col-sm-2">Physical access levels</span>
@@ -215,6 +323,7 @@
 				</div>
 			</div>
 		{% endif %}
+-->
 		<div class="form-group">
 			<div class="col-sm-2">
 				<input type="submit" class="btn btn-success pull-right" value="{% if form.instance.id %}Save changes{% else %}Create user{% endif %}">
@@ -271,7 +380,10 @@
 		function on_load()
 		{
 			$('[data-toggle="tooltip"]').tooltip();
-			$("#access_expiration").datetimepicker({format: 'MM/DD/YYYY'});
+			$("#access_expiration").datetimepicker({format: 'YYYY-MM-DD'});
+			$("#fire_trained").datetimepicker({format: 'YYYY-MM-DD'});
+			$("#mentor_trained").datetimepicker({format: 'YYYY-MM-DD'});
+			$("#equiresp_trained").datetimepicker({format: 'YYYY-MM-DD'});
 			$('#add_a_project').autocomplete('projects', on_search_selection, {% json_search_base_with_extra_fields projects 'application_identifier' %});
 			$('#add_a_tool_qualification').autocomplete('tools', on_search_selection, {{ tools|json_search_base }});
 			{% if form.instance.id %} {# Only look for projects and qualifications if this is an existing user (and not a new user). #}

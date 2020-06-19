@@ -80,7 +80,7 @@ def email_broadcast(request, audience=''):
 		dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
 	elif audience == 'account':
 		dictionary['search_base'] = Account.objects.filter(active=True)
-	elif audience == 'all':
+	elif audience == 'all' or audience == 'equiresp' or audience == 'pjtresp' :
 		dictionary['search_base'] = 'all'
 		dictionary['all'] = True
 	dictionary['audience'] = audience
@@ -98,7 +98,13 @@ def compose_email(request):
 			if audience == 'project':
 				users = User.objects.filter(projects__id=selection).distinct()
 			elif audience == 'account':
-				users = User.objects.filter(projects__account__id=selection).distinct()
+				users = User.objects.filter(affiliation=selection).distinct()
+			elif audience == 'equiresp':
+				users = User.objects.filter(groups__name='Equipment_Responsibles').distinct()
+				# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME).distinct()
+			elif audience == 'pjtresp':
+				pjtmgrs = Account.objects.values_list('manager', flat=True)
+				users = User.objects.filter(pk__in=pjtmgrs).distinct()
 			elif audience == 'all':
 				users = User.objects.all()
 			else:
@@ -122,7 +128,6 @@ def compose_email(request):
 			'title': 'TITLE',
 			'greeting': 'Greeting',
 			'contents': 'Contents',
-			'template_color': '#5bc0de',
 		}
 		dictionary['generic_email_sample'] = Template(generic_email_sample).render(Context(generic_email_context))
 	return render(request, 'email/compose_email.html', dictionary)
@@ -139,7 +144,6 @@ def send_broadcast_email(request):
 		'title': form.cleaned_data['title'],
 		'greeting': form.cleaned_data['greeting'],
 		'contents': form.cleaned_data['contents'],
-		'template_color': form.cleaned_data['color'],
 	}
 	content = get_media_file_contents('generic_email.html')
 	content = Template(content).render(Context(dictionary))
@@ -154,6 +158,12 @@ def send_broadcast_email(request):
 			users = User.objects.filter(projects__id=selection)
 		elif audience == 'account':
 			users = User.objects.filter(projects__account__id=selection)
+		elif audience == 'equiresp':
+			users = User.objects.filter(groups__name='Equipment_Responsibles')
+			# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME)
+		elif audience == 'pjtresp':
+			pjtmgrs = Account.objects.values_list('manager', flat=True)
+			users = User.objects.filter(pk__in=pjtmgrs)
 		elif audience == 'all':
 			users = User.objects.all()
 		if active_choice:
@@ -167,11 +177,25 @@ def send_broadcast_email(request):
 	if audience == 'tool':
 		t = Tool.objects.filter(id=selection)
 		subject = t[0].name + ': ' + form.cleaned_data['subject']
+	elif audience == 'equiresp':
+		subject = '[equiresp]: ' + form.cleaned_data['subject']
+	elif audience == 'pjtresp':
+		subject = '[FIRST-Lab]: ' + form.cleaned_data['subject']
+	elif audience == 'project':
+		p = Project.objects.filter(id=selection)
+		subject = p[0].name + ': ' + form.cleaned_data['subject']
 	else:
 		subject = form.cleaned_data['subject']
 	users = [x.email for x in users]
 	if form.cleaned_data['copy_me']:
 		users += [request.user.email]
+	if form.cleaned_data['carbon_copy']:
+		cc_recipient=form.cleaned_data['carbon_copy']
+		try:
+			validate_email(cc_recipient)
+		except:
+			return HttpResponseBadRequest('Cc:-Recipient not valid.')
+		users += [cc_recipient]
 	try:
 		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users))
 		email.attach_alternative(content, 'text/html')

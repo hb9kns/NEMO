@@ -1,4 +1,4 @@
-from pymodbus3.client.sync import ModbusTcpClient
+from pymodbus.client.sync import ModbusTcpClient
 from smtplib import SMTPException
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.contrib.admin.views.decorators import staff_member_required

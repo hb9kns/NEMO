@@ -93,7 +93,7 @@ class LDAPAuthenticationBackend(ModelBackend):
 			try:
 				t = Tls(validate=CERT_REQUIRED, version=PROTOCOL_TLSv1_2, ca_certs_file=server['certificate'])
 				s = Server(server['url'], port=636, use_ssl=True, tls=t)
-				c = Connection(s, user='{}\\{}'.format(server['domain'], username), password=password, auto_bind=AUTO_BIND_TLS_BEFORE_BIND, authentication=SIMPLE)
+				c = Connection(s, user='{}={},{}'.format(server['attribute'], username, server['base']), password=password, auto_bind=AUTO_BIND_TLS_BEFORE_BIND, authentication=SIMPLE)
 				c.unbind()
 				# At this point the user successfully authenticated to at least one LDAP server.
 				return user

@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
-from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, calendar, configuration_agenda, consumables, contact_staff, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
+from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, beacon, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -34,7 +34,6 @@ urlpatterns = [
 	url(r'^forgot_password/$', forgot_password.forgot_password, name='forgot_password'),
 	url(r'^forgot_password_process/$', forgot_password.forgot_password_process, name='forgot_password_process'),
 	url(r'^password_reset_token/(?P<token>[a-zA-Z0-9]+)/$', forgot_password.password_reset_token, name='password_reset_token'),
-
 	url(
 		r'^favicon.ico$',
 		RedirectView.as_view(
@@ -42,6 +41,21 @@ urlpatterns = [
 			permanent=False),
 		name="favicon"
 	),
+	url(
+		r'^robots.txt$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('robots.txt'),
+			permanent=False),
+		name="robots"
+	),
+	url(
+		r'^([0-9A-Za-z]{1,}).php$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('howtos/changemarks.html'),
+			permanent=False),
+		name="changemarks"
+	),
+
 
 	# Root URL defaults to the calendar page on desktop systems, and the mobile homepage for mobile devices:
 	url(r'^$', landing.landing, name='landing'),
@@ -73,6 +87,9 @@ urlpatterns = [
 
 	# Calendar:
 	url(r'^calendar/(?P<tool_id>\d+)/$', calendar.calendar, name='calendar'),
+	# with list of pre-checked tools:
+	url(r'^calendar/(?P<tool_id>\d+)/(?P<showtools>[0-9,]+)/$', calendar.calendar, name='calendar'),
+	url(r'^calendar/(?P<tool_id>\d+)/(?P<showtools>[0-9,]+)/(?P<titledesc>[0-9-,.:A-Za-z_]+)/$', calendar.calendar, name='calendar'),
 	url(r'^calendar/$', calendar.calendar, name='calendar'),
 	url(r'^event_feed/$', calendar.event_feed, name='event_feed'),
 	url(r'^create_reservation/$', calendar.create_reservation, name='create_reservation'),
@@ -84,6 +101,7 @@ urlpatterns = [
 	url(r'^cancel_reservation/(?P<reservation_id>\d+)/$', calendar.cancel_reservation, name='cancel_reservation'),
 	url(r'^cancel_outage/(?P<outage_id>\d+)/$', calendar.cancel_outage, name='cancel_outage'),
 	url(r'^set_reservation_title/(?P<reservation_id>\d+)/$', calendar.set_reservation_title, name='set_reservation_title'),
+	url(r'^toggle_reservation_approval/(?P<reservation_id>\d+)/$', calendar.toggle_reservation_approval, name='toggle_reservation_approval'),
 	url(r'^event_details/reservation/(?P<reservation_id>\d+)/$', calendar.reservation_details, name='reservation_details'),
 	url(r'^event_details/outage/(?P<outage_id>\d+)/$', calendar.outage_details, name='outage_details'),
 	url(r'^event_details/usage/(?P<event_id>\d+)/$', calendar.usage_details, name='usage_details'),
@@ -112,6 +130,9 @@ urlpatterns = [
 	# Utility functions:
 	url(r'^refresh_sidebar_icons/$', sidebar.refresh_sidebar_icons, name='refresh_sidebar_icons'),
 
+	# Beacon
+	url(r'^beacon/$', beacon.beacon, name='beacon'),
+
 	# NanoFab feedback
 	url(r'^feedback/$', feedback.feedback, name='feedback'),
 	url(r'^consultation/$', consultation.consultation, name='consultation'),
@@ -129,7 +150,7 @@ urlpatterns = [
 	url(r'^get_email_form_for_user/(?P<user_id>\d+)/$', email.get_email_form_for_user, name='get_email_form_for_user'),
 	url(r'^send_email/$', email.send_email, name='send_email'),
 	url(r'^email_broadcast/$', email.email_broadcast, name='email_broadcast'),
-	url(r'^email_broadcast/(?P<audience>tool|account|project|all)/$', email.email_broadcast, name='email_broadcast'),
+	url(r'^email_broadcast/(?P<audience>tool|account|project|equiresp|pjtresp|all)/$', email.email_broadcast, name='email_broadcast'),
 	url(r'^compose_email/$', email.compose_email, name='compose_email'),
 	url(r'^send_broadcast_email/$', email.send_broadcast_email, name='send_broadcast_email'),
 
@@ -178,8 +199,7 @@ urlpatterns = [
 	url(r'^view_calendar/(?P<tool_id>\d+)/$', mobile.view_calendar, name='view_calendar'),
 	url(r'^view_calendar/(?P<tool_id>\d+)/(?P<date>20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))/$', mobile.view_calendar, name='view_calendar'),
 
-	# Contact staff:
-	url(r'^contact_staff/$', contact_staff.contact_staff, name='contact_staff'),
+	# People:
 	url(r'^directory/$', directory.directory, name='directory'),
 
 	# Area access:

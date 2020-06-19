@@ -95,6 +95,9 @@
 				</div>
 			</div>
 		{% endif %}
+		{% if user_to_deactivate.deposit != 0 %}
+			<h3>Non-zero deposit of {{ user_to_deactivate.deposit }} present!</h3>
+		{% endif %}
 		{% if not reservations and not tool_usage and not user_to_deactivate.in_area and not staff_charges %}
 			<h4>This user has no future reservations, is not using any tools, is not in a billable area, and has no staff charges in progress. It is safe to proceed.</h4>
 		{% endif %}

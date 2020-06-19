@@ -117,11 +117,13 @@ label
 .warning-highlight
 {
 	color: #f0ad4e;
+	font-style: italic;
 }
 
 .danger-highlight
 {
 	color: red;
+	font-weight: bold;
 }
 
 .grey

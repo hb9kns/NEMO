@@ -1,0 +1,16 @@
+<ul>
+{% for u in users %}
+	<li>
+	<a href="{% url 'create_or_modify_user' u.id %}">
+		{% if u.is_active %}
+			{% if u.is_staff %}<em style="color:green">{{ u }}</em>
+			{% else %}{{ u }}
+			{% endif %}
+		{% else %}<span class="light-grey">{{ u }} (inactive)</span>
+		{% endif %}
+	</a>
+	</li>
+{% empty %}
+	<li><em>This account does not have any users!</em></li>
+{% endfor %}
+</ul>

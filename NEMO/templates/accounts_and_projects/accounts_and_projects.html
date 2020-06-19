@@ -33,6 +33,24 @@
 						</a>
 					</form>
 				</h2>
+				<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#account_details" class="pointer" style="text-decoration:none">
+						<span id="account_chevron" class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
+				<em>Account details</em>
+				</a>
+				<div style="margin-left:34px">
+					<div id="account_details" class="collapse">
+					<span class="grey">Financial responsible:</span> {{ account.manager }}<br />
+					<span class="grey">Technical contact:</span> {{ account.techcontact }}<br />
+					{% if account.admin_name or account.admin_email %}
+					<span class="grey">Administrative contact:</span> {{ account.admin_name }} <a href="mailto:{{ account.admin_email }}">{{ account.admin_email }}</a><br />
+					{% endif %}
+					<span class="grey">Users belonging to this account:</span>
+						<div style="height:10px"></div>
+						<div id="account_users">
+							{% include 'accounts_and_projects/users_for_account.html' with users=account.user_set.all %}
+						</div>
+					</div>
+				</div>
 				{% for project in account.project_set.all %}
 					<h3>
 						<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#project_{{ project.id }}_details" class="pointer" style="text-decoration:none">
@@ -55,7 +73,7 @@
 								<label class="control-label"><input id="search_user_for_project_{{ project.id }}" type="text" class="form-control user_search" placeholder="Search for a user to add" data-project-id="{{ project.id }}"></label>
 							</div>
 							<div id="project_{{ project.id }}_users">
-								{% include 'accounts_and_projects/users_for_project.html' with users=project.user_set.all %}
+								{% include 'accounts_and_projects/users_for_project.html' with users=project.user_set.all parent_affiliation=account.id %}
 							</div>
 						</div>
 					</div>
@@ -64,6 +82,18 @@
 				{% endfor %}
 			</div>
 		</div>
+	{% else %}
+	<h2>Present accounts / responsibles</h2>
+	<ul>
+	{% for acct in account_list %}
+	<li>{% if not acct.active %}<em>{% endif %}
+		<a href="{% url 'account' acct.id %}">{{ acct.name }}</a> / {{ acct.manager }}
+		{% if acct.techcontact %}&sdot; tech.contact: {{ acct.techcontact }}{% endif %}
+	{% if not acct.active %}(INACTIVE)</em>{% endif %}</span></li>
+	{% empty %}
+	<li><span class="grey"><em>No accounts yet!</em></span></li>
+	{% endfor %}
+	</ul>
 	{% endif %}
 	<script>
 		function get_account(jquery_event, search_selection, dataset_name)

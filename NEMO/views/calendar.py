@@ -26,8 +26,11 @@ from NEMO.widgets.tool_tree import ToolTree
 
 @login_required
 @require_GET
-def calendar(request, tool_id=None):
-	""" Present the calendar view to the user. """
+def calendar(request, tool_id=None, showtools=None, titledesc=None):
+	"""
+	Present the calendar view to the user.
+	showtools: comma-separated list of tools displayed (active checkboxes)
+	"""
 
 	if request.device == 'mobile':
 		if tool_id:
@@ -35,14 +38,21 @@ def calendar(request, tool_id=None):
 		else:
 			return redirect('choose_tool', 'view_calendar')
 
+	# convert comma-separated list to (possibly empty) set
+	if showtools:
+		checktools = set(showtools.split(","))
+	else:
+		checktools = set()
+
 	tools = Tool.objects.filter(visible=True).order_by('category', 'name')
-	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools})
+	rendered_tool_tree_html = ToolTree().render(None, {'tools': tools, 'checktools': checktools})
 	tool_summary = create_tool_summary(request)
 	dictionary = {
 		'rendered_tool_tree_html': rendered_tool_tree_html,
 		'tools': tools,
 		'auto_select_tool': tool_id,
 		'tool_summary': tool_summary,
+		'title_description': titledesc,
 	}
 	if request.user.is_staff:
 		dictionary['users'] = User.objects.all()
@@ -214,6 +224,7 @@ def create_reservation(request):
 	new_reservation.start = start
 	new_reservation.end = end
 	new_reservation.short_notice = determine_insufficient_notice(tool, start)
+
 	policy_problems, overridable = check_policy_to_save_reservation(None, new_reservation, user, explicit_policy_override)
 
 	# If there was a problem in saving the reservation then return the error...
@@ -502,15 +513,32 @@ def cancel_outage(request, outage_id):
 		return render(request, 'mobile/cancellation_result.html', dictionary)
 
 
-@staff_member_required(login_url=None)
+@login_required
 @require_POST
 def set_reservation_title(request, reservation_id):
-	""" Cancel a reservation for a user. """
 	reservation = get_object_or_404(Reservation, id=reservation_id)
+	try:
+		reservation.additional_information += "\n"
+	except:
+		reservation.additional_information = ""
+	try:
+		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name
+	except:
+		pass
 	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
 	reservation.save()
 	return HttpResponse()
 
+@login_required
+@permission_required('NEMO.approve_reservation', raise_exception=True)
+@require_GET
+def toggle_reservation_approval(request, reservation_id):
+	reservation = get_object_or_404(Reservation, id=reservation_id)
+	reservation.approved = not reservation.approved
+	reservation.approved_by = request.user
+	reservation.approval_time = timezone.now()
+	reservation.save()
+	return HttpResponse()
 
 @login_required
 @permission_required('NEMO.trigger_timed_services', raise_exception=True)
