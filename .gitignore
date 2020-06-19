@@ -1,12 +1,6 @@
 __pycache__/
 venv/
 settings.py
-<<<<<<< HEAD
-fake_authentication.py
-Dockerfile*
-start*.sh
-secrets
-=======
 logs/
 media/
 fonts/
@@ -16,4 +10,3 @@ static/
 *.ico
 *.jpg
 *.png
->>>>>>> first-prod
