@@ -1,6 +1,7 @@
 from logging import getLogger
 from smtplib import SMTPException
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
@@ -100,8 +101,7 @@ def compose_email(request):
 			elif audience == 'account':
 				users = User.objects.filter(affiliation=selection).distinct()
 			elif audience == 'equiresp':
-				users = User.objects.filter(groups__name='Equipment_Responsibles').distinct()
-				# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME).distinct()
+				users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME).distinct()
 			elif audience == 'pjtresp':
 				pjtmgrs = Account.objects.values_list('manager', flat=True)
 				users = User.objects.filter(pk__in=pjtmgrs).distinct()
