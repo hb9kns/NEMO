@@ -7,7 +7,7 @@
 		Names of staff and equipment responsibles are in <em style="color:green">green</em>.
 	</p>
 	<p>
-		<em>The condensed list of equipment responsibles only is repeated further down.</em>
+		<em>The condensed list of staff only is repeated further down.</em>
 	</p>
 
   <div class="col-lg-8" style="margin-top:30px">
@@ -39,15 +39,15 @@
 	</div>
 
   <div class="col-lg-8" style="margin-top:30px">
-	<h2>Equipment Responsibles Directory</h2>
+	<h2>Staff Directory</h2>
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
 						<th>Name</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
-						<th>Affiliation</th>
-						<th>Introday</th>
+						<th>Primary responsible for</th>
+						<th>Backup responsible for</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -57,8 +57,8 @@
 					<td><a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:green;">{{ person.user.get_full_name }}</a></td>
 					<td>{{ person.email }}</td>
 					<td>{{ person.phone }}</td>
-					<td>{{ person.group }}</td>
-					<td>{{ person.intro }}</td>
+					<td>{% for tool in person.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
+					<td>{% for tool in person.backup_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
 					</tr>
 					{% endif %}
 					{% endfor %}
