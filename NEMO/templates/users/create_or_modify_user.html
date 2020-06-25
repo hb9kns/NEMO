@@ -176,7 +176,8 @@
 			{% else %}
 				<label>This user has only normal (non-staff) permissions.</em></label>
 			{% endif %}
-				<small>&mdash; must be modified in Detailed administration</small>
+				<small>&mdash; modify in <a href="{% url 'admin:NEMO_user_change' form.instance.id %}">Detailed administration</a></small>
+
 				</div>
 			</div>
 			<div class="col-sm-offset-2 col-sm-10">
