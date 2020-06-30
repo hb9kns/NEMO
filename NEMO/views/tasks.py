@@ -82,11 +82,11 @@ def send_new_task_emails(request, task):
 		recipients = tuple([r for r in [task.tool.primary_owner.email, *task.tool.backup_owners.all().values_list('email', flat=True), task.tool.notification_email_address] if r])
 		send_mail(subject, '', request.user.email, recipients, html_message=message)
 
-	# Send an email to all users (excluding staff) qualified on the tool:
+	# Send an email to active users (excluding staff) qualified on the tool:
 	user_office_email = get_customization('user_office_email_address')
 	message = get_media_file_contents('new_task_email.html')
 	if user_office_email and message:
-		users = User.objects.filter(qualifications__id=task.tool.id, is_staff=False)
+		users = User.objects.filter(qualifications__id=task.tool.id, is_staff=False,is_active=True)
 		dictionary = {
 			'template_color': bootstrap_primary_color('danger') if task.force_shutdown else bootstrap_primary_color('warning'),
 			'user': request.user,
