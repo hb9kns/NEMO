@@ -231,6 +231,9 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 	if new_reservation.tool not in user.qualifications.all():
 		policy_problems.append("You are not qualified to use this tool. Creating, moving, and resizing reservations is forbidden.")
 
+	if new_reservation.tool.reservation_physical_access_level and new_reservation.tool.reservation_physical_access_level not in user.physical_access_levels.all():
+		policy_problems.append("You are missing physical access permission for this tool and are not allowed to create or modify reservations.")
+
 	# The reservation start time may not exceed the tool's reservation horizon.
 	# Staff may break this rule.
 	# An explicit policy override allows this rule to be broken.

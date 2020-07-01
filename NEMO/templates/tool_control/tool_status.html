@@ -262,8 +262,11 @@ usage logging for this tool</a> (should open in a new page/tab)</p>
 				{% if tool.notification_email_address %}
 					<p>Problem reports for the {{ tool.name }} are automatically emailed to <a href="{% url 'get_email_form' %}?recipient={{ tool.notification_email_address }}" title="Email {{ tool.notification_email_address }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ tool.notification_email_address }}</a>.</p>
 				{% endif %}
-				<p>The {{ tool.name }} is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
-				<p>You may dial the phone closest to the {{ tool.name }} at number <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
+				<p>This tool is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
+				{% if tool.reservation_physical_access_level %}
+				<p>For making reservations, permission to access &laquo;{{ tool.reservation_physical_access_level }}&raquo; is required.</p>
+				{% endif %}
+				<p>You may dial the phone closest to this tool at number <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
 				{% if tool.external_link != Null and tool.external_link != '' %}
 				<p>Additional information about this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
 				{% endif %}
