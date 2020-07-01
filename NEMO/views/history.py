@@ -46,7 +46,10 @@ def history(request, item_type, item_id):
 			message += "now"
 		else:
 			message += "no longer"
-		message += " belongs to " + o.parent_content_type.name + " \"" + o.parent_content_object.name + "\"."
+		try:
+			message += " belongs to " + o.parent_content_type.name + " \"" + o.parent_content_object.name + "\"."
+		except:
+			message += " was meant to belong to an unknown (probably deleted) object."
 		action_list.append({'date': o.date, 'authorizer': str(o.authorizer), 'message': message})
 	# Sort the list of actions by date:
 	action_list.sort(key=lambda x: x['date'])
