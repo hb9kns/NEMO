@@ -22,34 +22,25 @@ explained further down.
 
 ## Administration
 
-<!--
-### Alerts (inactive)
-
-Alerts are messages displayed at NEMO's main page after login.
-In general, they are issued by FTT members, but there might be
-cases where it makes sense for equipment responsibles to alert
-all users logging in to NEMO.
-The `Alert` page should be self-explanatory.
-
-*Due to date/time entry issues, this is not yet working.*
-FIRST-Lab team members can use the `Alert` section in the
-"Detailed Administration" pull-down.
--->
-
 ### Email
 
 The `Email` page allows to send a message to all users,
 responsibles, or to those who are
 qualified for a tool, work on a specific project, or bill to a specific
-account (yet unused in NEMO/FIRST-Lab).
+account.
 
 Please note: Mentors belong to the project "_MENTOR" which
 can be selected to send a message to all of them.
 
-### Maintenance (inactive)
+### Maintenance
 
 The `Maintenance` page permits to display maintenance state of all tools.
-This is not yet used.
+Equipment responsibles may update problem reports.
+
+### News
+
+This leads to a list of recent news.
+Normally, there should be a link on the landing page to the same list.
 
 ### Tool Qualifications
 
@@ -76,14 +67,19 @@ After selecting all the required user names, you can click either the
 tool (equipment), or the `Disqualify users` at the right to remove them.
 
 Please note: it is technically well possible for equipment responsibles
-to add (qualify) themselves for any equipment ...
+to add (qualify) themselves for any equipment, but ...
 
-### User directory
+Most tools are configured in such a way that qualifying a user will
+automatically also grant them access to the required physical area.
+Therefore please double-check user names before adding them!
+
+### User and Staff directory
 
 This page displays a list of all active users and their affiliations (group).
 
 In addition, equipment responsibles are marked in _green_ and
-listed a second time in an additional table at the end of the page.
+listed a second time in an additional table at the end of the page,
+together with the tools for which they are (primary or backup) responsibles.
 
 ### Reservation Abuse
 
@@ -104,6 +100,11 @@ The selection parameters are still work in progress:
 the "Starting" and "Ending" fields and manually choose dates, before
 generating the report; otherwise, you will get an empty one.
 
+### Accounts and projects / Alerts / User administration
+
+These functions are to be used by FIRST team members only;
+access is blocked for equipment responsibles.
+
 ### Detailed Administration
 
 This selection switches view to an internal Django page, the system
@@ -121,10 +122,17 @@ It is also possible to add new entries; however, this is more tedious
 and error-prone than through the Calendar and therefore not recommended.
 
 In this view, you can also manually enter begin and end times, which may
-be more practical than pulling the corresponding entrie across calendar
+be more practical than pulling the corresponding entry across calendar
 panes. To make use of this, create an outage anywhere in the calendar,
 then switch to the detailed administration and edit/enter the correct
 dates/times.
+
+#### Tasks
+
+This permits direct access to task entries, which show up in tool details
+or the "Maintenance" view mentioned above. In general, those methods
+should be used to manipulate/update tasks, instead of this detailed
+administration page.
 
 #### Tools Change
 
@@ -141,4 +149,4 @@ instruction by FIRST-Lab staff, and it is currently not yet needed.*
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-02-14/Y.Bonetti*
+*2020-07-02/Y.Bonetti*

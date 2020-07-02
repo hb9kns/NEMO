@@ -25,7 +25,8 @@ of the page (with a red-white NO-ENTRY symbol).
 
 The [reservation Calendar][calendar] consists of two panes. The left pane
 lists the available tools or permits to see past usage, the right pane
-shows a calendar view into reservations and outage notifications.
+shows a calendar view into reservations, usage and outage notifications.
+The left pane also provides a link for displaying one's own reservations.
 
 ### Tool pane
 
@@ -68,6 +69,13 @@ Reservations can be cancelled with the `Cancel` button at the bottom of
 the detailed view popping up when clicking its body (they remain in the
 database, but will neither show up nor interfere with other reservations).
 
+There are some special "tools" for use by the team (announcement, planning
+etc). Specifically, the `_no-tool_` is preselected in some views.
+It has a reservation limit of 1 minute, therefore any reservation attempt
+by normal users for this tool will fail with a warning.
+Please remember to always click the name of the tool to be reserved
+before making a reservation in the calendar pane!
+
 ## Tool control
 
 The [Tool control][toolcontrol] also consists of two panes, the left one
@@ -92,10 +100,15 @@ but another person already is occupying the tool, you may kick them
 off by a link provided a the top of this page. Then you can start
 your own use on the Summary tab.
 
+This page also shows the physical access level required for making
+a reservation. If you lose access to a certain area (e.g by not
+coming to FIRST during 6 months), you will get a warning about
+lack of permission when trying to make a reservation.
+
 ### Report a problem
 
 This can be used to inform the responsibles and other users about issues
-with the tool. If possible, also send a message to the responsible(s).
+with the tool. A message will also be sent by e-mail.
 
 ### Post a comment
 
@@ -150,4 +163,4 @@ on the server.
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-06-11/Y.Bonetti*
+*2020-07-02/Y.Bonetti*
