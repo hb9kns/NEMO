@@ -26,9 +26,11 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 	if not tool.operational and not operator.is_staff:
 		return HttpResponseBadRequest("This tool is currently non-operational.")
 
-	# The tool must not be in use.
+	# The tool must not be in use or be virtual.
+# Note: this is not correct if multiplicity > 1, but we first need to
+# review all the logics if get_current_usage_event() returns several event.
 	current_usage_event = tool.get_current_usage_event()
-	if current_usage_event:
+	if current_usage_event and tool.multiplicity > 0:
 		return HttpResponseBadRequest("The tool is currently being used by " + str(current_usage_event.user) + ".")
 
 	# The user must be qualified to use the tool.
@@ -122,7 +124,6 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 def check_policy_to_disable_tool(tool, operator, downtime):
 	""" Check that the user is allowed to disable the tool. """
 	current_usage_event = tool.get_current_usage_event()
-	current_usage_event = tool.get_current_usage_event()
 	try:
 		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=operator, tool=tool)
 		allow_logoff_force = True
@@ -162,7 +163,7 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 	# The event starts and ends after the time-window.
 	coincident_events = coincident_events.exclude(start__lt=new_reservation.start, end__lte=new_reservation.start)
 	coincident_events = coincident_events.exclude(start__gte=new_reservation.end, end__gt=new_reservation.end)
-	if coincident_events.count() > 0:
+	if coincident_events.count() >= new_reservation.tool.multiplicity and new_reservation.tool.multiplicity > 0:
 		policy_problems.append("Your reservation coincides with another reservation that already exists. Please choose a different time.")
 
 	# The user may not create, move, or resize a reservation to coincide with a scheduled outage.

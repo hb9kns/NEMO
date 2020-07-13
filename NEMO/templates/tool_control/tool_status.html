@@ -37,8 +37,14 @@
 						{% endif %}
 						for the project named {{ current_usage_event.project.name }} since {{ current_usage_event.start }}.
 					</h3>
+					{% if tool.multiplicity == 0 %}
+					<p>This is a <strong>virtual tool</strong> which may be used an unlimited number of times in parallel.</p>
+					{% endif %}
+					{% if tool.multiplicity > 1 %}
+					<p>This is a <strong>multiple tool</strong> which may be used {{ tool.multiplicity }} times in parallel.</p>
+					{% endif %}
 					<h4>
-						{% if current_usage_event.operator.id != user.id %}
+						{% if current_usage_event.operator.id != user.id and tool.multiplicity == 1 %}
 							<a href="{% url 'get_email_form_for_user' current_usage_event.operator.id %}"> Click to email {{ current_usage_event.operator }} </a>
 						{% endif %}
 					</h4>
@@ -267,6 +273,12 @@ usage logging for this tool</a> (should open in a new page/tab)</p>
 				<p>For making reservations, permission to access &laquo;{{ tool.reservation_physical_access_level }}&raquo; is required.</p>
 				{% endif %}
 				<p>You may dial the phone closest to this tool at number <span class="glyphicon glyphicon-phone small-icon"></span>{{ tool.phone_number }}.</p>
+				{% if tool.multiplicity == 0 %}
+				<p>This is a <strong>virtual tool: reservation and usage in parallel is possible without limits!</strong></p>
+				{% endif %}
+				{% if tool.multiplicity > 1 %}
+				<p>This is a <strong>multiple tool</strong> which may be used {{ tool.multiplicity }} times in parallel.</p>
+				{% endif %}
 				{% if tool.external_link != Null and tool.external_link != '' %}
 				<p>Additional information about this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
 				{% endif %}
