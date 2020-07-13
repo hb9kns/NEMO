@@ -13,5 +13,5 @@
 	{% else %}
 		This tool is currently in use.<br>
 	{% endif %}
-	Identifier: {{ event.id }}<br>
+	Identifier: <a href="{% url 'admin:NEMO_usageevent_change' event.id %}">{{ event.id }}</a><br>
 </div>
