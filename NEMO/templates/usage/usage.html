@@ -93,8 +93,7 @@
 					<div class="alert {% if u.user == u.operator %}alert-info{% else %}alert-warning{% endif %}">
 						<span style="font-weight:bold">{{ u.tool }}</span><br>
 						{% if u.user != u.operator %}<span style="font-weight:bold">Operated by {{ u.operator }} on your behalf</span><br>{% endif %}
-						{{ u.start }}<br>
-						{{ u.end }}<br>
+						{{ u.start }} ... {{ u.end }} = {{ u.start|timesince:u.end }}<br>
 						Charged to project {{ u.project }}
 					</div>
 				{% endfor %}
