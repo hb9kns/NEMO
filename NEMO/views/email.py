@@ -165,8 +165,7 @@ def send_broadcast_email(request):
 		elif audience == 'physicalaccess':
 			users = User.objects.filter(physical_access_levels__id=selection)
 		elif audience == 'equiresp':
-			users = User.objects.filter(groups__name='Equipment_Responsibles')
-			# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME)
+			users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME)
 		elif audience == 'pjtresp':
 			pjtmgrs = Account.objects.values_list('manager', flat=True)
 			users = User.objects.filter(pk__in=pjtmgrs)
