@@ -12,7 +12,7 @@ from django.template import Template, Context
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.forms import EmailBroadcastForm
-from NEMO.models import Tool, Account, Project, User
+from NEMO.models import Tool, Account, Project, User, PhysicalAccessLevel
 from NEMO.views.customization import get_media_file_contents
 
 
@@ -81,6 +81,8 @@ def email_broadcast(request, audience=''):
 		dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
 	elif audience == 'account':
 		dictionary['search_base'] = Account.objects.filter(active=True)
+	elif audience == 'physicalaccess':
+		dictionary['search_base'] = PhysicalAccessLevel.objects.all()
 	elif audience == 'all' or audience == 'equiresp' or audience == 'pjtresp' :
 		dictionary['search_base'] = 'all'
 		dictionary['all'] = True
@@ -100,6 +102,8 @@ def compose_email(request):
 				users = User.objects.filter(projects__id=selection).distinct()
 			elif audience == 'account':
 				users = User.objects.filter(affiliation=selection).distinct()
+			elif audience == 'physicalaccess':
+				users = User.objects.filter(physical_access_levels=selection).distinct()
 			elif audience == 'equiresp':
 				users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME).distinct()
 			elif audience == 'pjtresp':
@@ -158,6 +162,8 @@ def send_broadcast_email(request):
 			users = User.objects.filter(projects__id=selection)
 		elif audience == 'account':
 			users = User.objects.filter(projects__account__id=selection)
+		elif audience == 'physicalaccess':
+			users = User.objects.filter(physical_access_levels__id=selection)
 		elif audience == 'equiresp':
 			users = User.objects.filter(groups__name='Equipment_Responsibles')
 			# users = User.objects.filter(groups__name=settings.EQUIRESP_GROUP_NAME)
@@ -181,6 +187,9 @@ def send_broadcast_email(request):
 		subject = '[equiresp]: ' + form.cleaned_data['subject']
 	elif audience == 'pjtresp':
 		subject = '[FIRST-Lab]: ' + form.cleaned_data['subject']
+	elif audience == 'physicalaccess':
+		p = PhysicalAccessLevel.objects.filter(id=selection)
+		subject = p[0].name + ': ' + form.cleaned_data['subject']
 	elif audience == 'project':
 		p = Project.objects.filter(id=selection)
 		subject = p[0].name + ': ' + form.cleaned_data['subject']
