@@ -14,19 +14,29 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from NEMO.utilities import parse_start_and_end_date
 from NEMO.models import User, Tool, Project, Account, UsageEvent
 
-def get_tool_span_events(tool, begin, end):
+def allowed_tools(request):
+	""" tools for which the requester is allowed to view usage events"""
+# somebody who is allowed to change events can view them for all tools
+	if request.user.has_perm('NEMO.change_usageevent'):
+		return Tool.objects.all()
+# others can just view tools where they are primary responsibles
+	else:
+		return Tool.objects.filter(primary_owner=request.user)
+
+def get_tool_span_events(request, tool, begin, end):
 	""" get all usage events ending after begin and before or at end """
 	toolusage = []
-	events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
-	for event in events:
-		fullname = event.user.last_name + " " + event.user.first_name
-		projectname = event.project.name
-		groupname = event.project.account.name
-		start = event.start
-		end = event.end
-		minutes = int((end-start)/timedelta(minutes=1)+0.5)
-		event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'groupname': groupname, 'user': fullname}
-		toolusage.append(event_entry)
+	if Tool.objects.get(pk=tool) in allowed_tools(request):
+		events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
+		for event in events:
+			fullname = event.user.last_name + " " + event.user.first_name
+			projectname = event.project.name
+			groupname = event.project.account.name
+			start = event.start
+			end = event.end
+			minutes = int((end-start)/timedelta(minutes=1)+0.5)
+			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'groupname': groupname, 'user': fullname}
+			toolusage.append(event_entry)
 	return toolusage
 
 @staff_member_required(login_url=None)
@@ -34,16 +44,22 @@ def get_tool_span_events(tool, begin, end):
 def toolstats(request):
 	""" Presents a page displaying tool usage for a given time span. """
 	dictionary = {}
+	dictionary['tools'] = allowed_tools(request)
+	tool = 0
 	try:
 		tool = int(request.GET['tool'])
-		dictionary['tool'] = tool
-		dictionary['toolname'] = Tool.objects.get(pk=tool).name
-		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
-		dictionary['start'] = start
-		dictionary['end'] = end
+		if Tool.objects.get(pk=tool) in allowed_tools(request):
+			start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
+			dictionary['start'] = start
+			dictionary['end'] = end
+			dictionary['toolusage'] = get_tool_span_events(request, tool, start, end)
+			dictionary['toolname'] = Tool.objects.get(pk=tool).name
+		else:
+			dictionary['toolname'] = Tool.objects.get(pk=tool).name
+			tool = 0
 	except:
-		pass
-	dictionary['toolusage'] = get_tool_span_events(tool, start, end)
+		dictionary['toolname'] = '(undefined tool)'
+	dictionary['tool'] = tool
 	return render(request, 'toolstats.html', dictionary)
 
 

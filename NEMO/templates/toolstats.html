@@ -7,9 +7,14 @@
 {% endblock %}
 {% block content %}
 	<h1>Tool usage</h1>
-	Compile usage report for {{ toolname }}:
 	<form id="view_records" action="{% url 'toolstats' %}" class="form-inline" method="get">
-	<input type="hidden" name="tool" value="24">
+	<p>Compile usage report for
+	<select name="tool" id="tool">{% for t in tools %}
+		<option value="{{ t.id }}"
+		{% if t.id == tool %}selected{% endif %}>
+		{{ t.name }}</option>
+	{% endfor %}</select>
+	</p>
 		<div class="form-group">
 			<div class="datetimepicker-container">
 				between <input type="text" id="start" name="start" class="form-control" autocomplete="off" placeholder="start" value="{{ start|date:"Y-m-d" }}">
@@ -52,8 +57,9 @@
 				</tbody>
 			</table>
 		{% else %}
-			{% if start or end %}
-				No records exist between {{ start }} and {{ end }} for tool "{{ toolname }}".
+			{% if tool == 0 %}<p>Sorry, you don't have permission for viewing "{{ toolname }}"!</p>
+			{% elif start or end %}
+				No records exist between {{ start }} and {{ end }} for "{{ toolname }}".
 			{% endif %}
 		{% endif %}
 	</div>
