@@ -9,7 +9,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
 from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, beacon, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
-from NEMO.views import toolstats
+from NEMO.views import toolevents
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -265,7 +265,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		url(r'^billingxls/$', billing.billingxls, name='billingxls'),
 
 		# tool usage statistics
-		url(r'^toolstats/$', toolstats.toolstats, name='toolstats'),
+		url(r'^toolevents/$', toolevents.toolevents, name='toolevents'),
 
 		# General area occupancy table, for use with Kiosk and Area Access tablets
 		url(r'^occupancy/$', status_dashboard.occupancy, name='occupancy'),

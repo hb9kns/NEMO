@@ -12,7 +12,7 @@ from django.utils.http import urlencode
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
 
 from NEMO.utilities import parse_start_and_end_date
-from NEMO.models import User, Tool, Project, Account, UsageEvent
+from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
 def allowed_tools(request):
 	""" tools for which the requester is allowed to view usage events"""
@@ -23,36 +23,43 @@ def allowed_tools(request):
 	else:
 		return Tool.objects.filter(primary_owner=request.user)
 
-def get_tool_span_events(request, tool, begin, end):
-	""" get all usage events ending after begin and before or at end """
-	toolusage = []
+def get_tool_span_events(request, eventtype, tool, begin, end):
+	""" get all usage events ending after begin and before or at end
+	    (type selects between 'reservation' or 'usage') """
+	toolevents = []
 	if Tool.objects.get(pk=tool) in allowed_tools(request):
-		events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
+		if eventtype == 'reservation':
+			events = Reservation.objects.filter(tool=tool, end__gt=begin, end__lte=end, cancelled=False).order_by('start')
+		else:
+			events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
 		for event in events:
 			fullname = event.user.last_name + " " + event.user.first_name
 			projectname = event.project.name
-			groupname = event.project.account.name
+			affiliation = event.user.affiliation.name
+			#accountname = 'test'
 			start = event.start
 			end = event.end
 			minutes = int((end-start)/timedelta(minutes=1)+0.5)
-			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'groupname': groupname, 'user': fullname}
-			toolusage.append(event_entry)
-	return toolusage
+			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname}
+			toolevents.append(event_entry)
+	return toolevents
 
 @staff_member_required(login_url=None)
 @require_GET
-def toolstats(request):
-	""" Presents a page displaying tool usage for a given time span. """
+def toolevents(request):
+	""" Presents a page displaying tool events for a given time span. """
 	dictionary = {}
 	dictionary['tools'] = allowed_tools(request)
 	tool = 0
+	eventtype = 'reservation'
 	try:
 		tool = int(request.GET['tool'])
+		eventtype = request.GET['eventtype']
 		if Tool.objects.get(pk=tool) in allowed_tools(request):
 			start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 			dictionary['start'] = start
 			dictionary['end'] = end
-			dictionary['toolusage'] = get_tool_span_events(request, tool, start, end)
+			dictionary['events'] = get_tool_span_events(request, eventtype, tool, start, end)
 			dictionary['toolname'] = Tool.objects.get(pk=tool).name
 		else:
 			dictionary['toolname'] = Tool.objects.get(pk=tool).name
@@ -60,7 +67,8 @@ def toolstats(request):
 	except:
 		dictionary['toolname'] = '(undefined tool)'
 	dictionary['tool'] = tool
-	return render(request, 'toolstats.html', dictionary)
+	dictionary['eventtype'] = eventtype
+	return render(request, 'toolevents.html', dictionary)
 
 
 #@staff_member_required(login_url=None)
