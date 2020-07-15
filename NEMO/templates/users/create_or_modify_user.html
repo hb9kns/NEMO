@@ -133,6 +133,17 @@
 			<small>Note: this is unrelated to permission groups (see Detailed administration)!</small>
 		</div>
 		<div class="form-group">
+			<label class="control-label col-sm-2" for="personnel_number">Personnel number</label>
+			<div class="col-sm-4">
+				<input id="personnel_number" name="personnel_number" autocomplete="off" type="text" class="form-control" value="{{ form.personnel_number.value|default_if_none:"" }}">
+			</div>
+			{% if form.personnel_number.errors %}
+				<div class="col-sm-6 form-control-static danger-highlight">
+					{{ form.personnel_number.errors|striptags }}
+				</div>
+			{% endif %}
+		</div>
+		<div class="form-group">
 			<label class="control-label col-sm-2" for="badge_number">Badge number</label>
 			<div class="col-sm-4">
 				<input id="badge_number" name="badge_number" autocomplete="off" type="text" class="form-control" value="{{ form.badge_number.value|default_if_none:"" }}">

@@ -394,13 +394,13 @@ class UserTypeAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
 	filter_horizontal = ('groups', 'user_permissions', 'qualifications', 'projects', 'physical_access_levels')
 	fieldsets = (
-		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'badge_number', 'deposit', 'type', 'remarks')}),
+		('Personal information', {'fields': ('last_name', 'first_name', 'username', 'email', 'phone', 'mentor', 'address', 'position', 'affiliation', 'personnel_number', 'badge_number', 'deposit', 'type', 'remarks')}),
 #		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'is_superuser', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
 		('Permissions', {'fields': ('is_active', 'is_staff', 'is_technician', 'training_required', 'groups', 'user_permissions', 'physical_access_levels')}),
 		('Important dates', {'fields': ('date_joined', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'last_login', 'access_expiration')}),
 		('NanoFab information', {'fields': ('qualifications', 'projects')}),
 	)
-	search_fields = ('last_name', 'first_name', 'username', 'email')
+	search_fields = ('last_name', 'first_name', 'username', 'email', 'badge_number')
 	list_display = ('last_name', 'first_name', 'username', 'email', 'affiliation', 'is_active', 'is_staff', 'training_required', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'date_joined', 'last_login', 'type', 'deposit')
 	list_filter = ('is_active', 'groups', 'type', 'affiliation', 'mentor_trained', 'fire_trained', 'equiresp_trained', 'date_joined', 'is_staff', 'training_required', 'last_login', 'deposit')
 
