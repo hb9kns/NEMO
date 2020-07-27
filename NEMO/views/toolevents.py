@@ -33,13 +33,27 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 		else:
 			events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
 		for event in events:
-			fullname = event.user.last_name + " " + event.user.first_name
-			projectname = event.project.name
-			affiliation = event.user.affiliation.name
+			try:
+				fullname = event.user.last_name + " " + event.user.first_name
+			except:
+				fullname = "(unknown user)"
+			try:
+				projectname = event.project.name
+			except:
+				projectname = "(unknown project)"
+			try:
+				affiliation = event.user.affiliation.name
+			except:
+				affiliation = "(unknown affiliation)"
 			#accountname = 'test'
-			start = event.start
-			end = event.end
-			minutes = int((end-start)/timedelta(minutes=1)+0.5)
+			try:
+				start = event.start
+				end = event.end
+				minutes = int((end-start)/timedelta(minutes=1)+0.5)
+			except:
+				start = None
+				end = None
+				minutes = None
 			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname}
 			toolevents.append(event_entry)
 	return toolevents
@@ -50,22 +64,28 @@ def toolevents(request):
 	""" Presents a page displaying tool events for a given time span. """
 	dictionary = {}
 	dictionary['tools'] = allowed_tools(request)
-	tool = 0
-	eventtype = 'reservation'
 	try:
 		tool = int(request.GET['tool'])
-		eventtype = request.GET['eventtype']
-		if Tool.objects.get(pk=tool) in allowed_tools(request):
-			start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
-			dictionary['start'] = start
-			dictionary['end'] = end
-			dictionary['events'] = get_tool_span_events(request, eventtype, tool, start, end)
-			dictionary['toolname'] = Tool.objects.get(pk=tool).name
-		else:
-			dictionary['toolname'] = Tool.objects.get(pk=tool).name
-			tool = 0
 	except:
+		tool = 0
 		dictionary['toolname'] = '(undefined tool)'
+	try:
+		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
+	except:
+		start = ''
+		end = ''
+	dictionary['start'] = start
+	dictionary['end'] = end
+	try:
+		eventtype = request.GET['eventtype']
+	except:
+		eventtype = 'reservation'
+	try:
+		dictionary['toolname'] = Tool.objects.get(pk=tool).name
+		if Tool.objects.get(pk=tool) in allowed_tools(request):
+			dictionary['events'] = get_tool_span_events(request, eventtype, tool, start, end)
+	except:
+		pass
 	dictionary['tool'] = tool
 	dictionary['eventtype'] = eventtype
 	return render(request, 'toolevents.html', dictionary)
