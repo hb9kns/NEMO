@@ -45,6 +45,13 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 				affiliation = event.user.affiliation.name
 			except:
 				affiliation = "(unknown affiliation)"
+			if eventtype == 'reservation':
+				try:
+					remarks = event.title
+				except:
+					remarks = "(unknown title)"
+			else:
+				remarks = ""
 			#accountname = 'test'
 			try:
 				start = event.start
@@ -54,7 +61,7 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 				start = None
 				end = None
 				minutes = None
-			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname}
+			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname, 'remarks': remarks}
 			toolevents.append(event_entry)
 	return toolevents
 

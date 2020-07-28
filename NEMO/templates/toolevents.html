@@ -48,6 +48,9 @@
 						<th>Project</th>
 						<th>User</th>
 						<th>Affiliation</th>
+				{% if eventtype == "reservation" %}
+						<th>Title</th>
+				{% endif %}
 					</tr>
 				</thead>
 				<tbody>
@@ -59,6 +62,9 @@
 							<td>{{ e.projectname }}</td>
 							<td>{{ e.user }}</td>
 							<td>{{ e.affiliation }}</td>
+				{% if eventtype == "reservation" %}
+							<td>{{ e.remarks }}</td>
+				{% endif %}
 						</tr>
 					{% endfor %}
 				</tbody>
