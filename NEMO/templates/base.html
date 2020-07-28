@@ -52,7 +52,9 @@
 
 	<title>{% block title %}{% endblock %}</title>
 </head>
-<body>
+<body 	{% if user.is_superuser %}style="background-color:LavenderBlush"
+	{% elif user.is_staff %}style="background-color:GhostWhite"
+	{% endif %}>
 <nav class="navbar navbar-default navbar-static-top">
 	<div class="container">
 		<div class="navbar-header">
