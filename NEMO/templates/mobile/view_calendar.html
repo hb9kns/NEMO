@@ -8,6 +8,10 @@
 			{{ tool }}<br>
 			{{ current_day|date:"l" }}<br>
 			{{ current_day|date:"F jS" }}
+			{% if tool.problems %}<br /><small><em>
+			Tool has issues,<br />
+			see <a href="{% url 'tool_control' tool.id %}">tool control!</a>
+			</em></small>{% endif %}
 		</div>
 		<div class="col-xs-2"><a href="{% url 'view_calendar' tool.id %}{{ next_day|date:"Y-m-d" }}/"><span class="glyphicon glyphicon-chevron-right"></span></a></div>
 	</div>
