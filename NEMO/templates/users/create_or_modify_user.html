@@ -209,16 +209,24 @@
 			</div>
 		</div>
 		{% if form.instance.id %}
-			<div class="form-group">
-				<div class="control-label col-sm-2">Date joined</div>
-				<div class="col-sm-4 form-control-static">{{ form.instance.date_joined }}</div>
+		<div class="form-group">
+			<div class="control-label col-sm-2">Last login</div>
+			<div class="col-sm-4 form-control-static">
+				{{ form.instance.last_login|default_if_none:"Never" }}
 			</div>
-			<div class="form-group">
-				<div class="control-label col-sm-2">Last login</div>
-				<div class="col-sm-4 form-control-static">
-					{{ form.instance.last_login|default_if_none:"Never" }}
-				</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="date_joined">Date joined / Introday</label>
+			<div class="col-sm-2">
+			<input id="date_joined" name="date_joined" type="text" autocomplete="off" class="form-control" value="{{ form.date_joined.value|date:'Y-m-d,H:i'|default_if_none:'' }}">
 			</div>
+		{% if form.date_joined.errors %}
+			<div class="col-sm-6 form-control-static danger-highlight">
+				{{ form.date_joined.errors|striptags }}
+			</div>
+		{% endif %}
+			<small>Note: hours and minutes are irrelevant.</small>
+		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="fire_trained">Firefighting training</label>
 			<div class="col-sm-2">
@@ -388,6 +396,7 @@
 		function on_load()
 		{
 			$('[data-toggle="tooltip"]').tooltip();
+			$("#date_joined").datetimepicker({format: 'YYYY-MM-DD,HH:mm'});
 			$("#access_expiration").datetimepicker({format: 'YYYY-MM-DD'});
 			$("#fire_trained").datetimepicker({format: 'YYYY-MM-DD'});
 			$("#mentor_trained").datetimepicker({format: 'YYYY-MM-DD'});
