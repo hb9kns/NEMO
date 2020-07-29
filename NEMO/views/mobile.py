@@ -62,6 +62,11 @@ def make_reservation(request):
 	reservation = Reservation()
 	reservation.user = request.user
 	reservation.creator = request.user
+	reservation.title = request.POST.get('reservation_title')
+	if reservation.title:
+		reservation.title = reservation.title[:200]
+	else:
+		reservation.title = request.user.first_name+" "+request.user.last_name
 	reservation.tool = tool
 	reservation.start = start
 	reservation.end = end
