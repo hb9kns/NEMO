@@ -16,7 +16,7 @@ from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
 def allowed_tools(request):
 	""" tools for which the requester is allowed to view usage events"""
-# somebody who is allowed to change events can view them for all tools
+# reusing permissions: those allowed to change events can view all tools
 	if request.user.has_perm('NEMO.change_usageevent'):
 		return Tool.objects.all()
 # others can just view tools where they are primary responsibles
@@ -52,7 +52,6 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 					remarks = "(unknown title)"
 			else:
 				remarks = ""
-			#accountname = 'test'
 			try:
 				start = event.start
 				end = event.end
@@ -73,69 +72,63 @@ def toolevents(request):
 	dictionary['tools'] = allowed_tools(request)
 	try:
 		tool = int(request.GET['tool'])
+		toolname = Tool.objects.get(pk=tool).name
 	except:
 		tool = 0
-		dictionary['toolname'] = '(undefined tool)'
+		toolname = '(undefined tool)'
 	try:
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 	except:
-		start = ''
-		end = ''
-	dictionary['start'] = start
-	dictionary['end'] = end
+# by default, start is beginnning of the year, end is today
+		start = date.today().replace(month=1,day=1)
+		end = date.today()
 	try:
 		eventtype = request.GET['eventtype']
 	except:
-		eventtype = 'reservation'
+		eventtype = 'usage'
+	events = []
 	try:
-		dictionary['toolname'] = Tool.objects.get(pk=tool).name
 		if Tool.objects.get(pk=tool) in allowed_tools(request):
-			dictionary['events'] = get_tool_span_events(request, eventtype, tool, start, end)
+			events = get_tool_span_events(request, eventtype, tool, start, end)
 	except:
 		pass
-	dictionary['tool'] = tool
-	dictionary['eventtype'] = eventtype
-	return render(request, 'toolevents.html', dictionary)
-
-
-#@staff_member_required(login_url=None)
-#@require_GET
-#def toolusagexlsx(request):
-#	dictionary = {}
-#	try:
-#		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
-#		tool = int(request.GET['tool'])
-#		fn = "toolusage_" + str(tool) + "_" + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
-#		toolusage = get_tool_span_usage(tool, start, end)
-#		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-#		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
-#		book = Workbook(response, {'in_memory': True})
-#		sheet = book.add_worksheet('tool usage')
-#		bold = book.add_format()
-#		bold.set_bold()
-#		title = [ Tool.name(pk=tool), 'from', start.strftime("%Y-%m-%d"), 'to', end.strftime("%Y-%m-%d") ]
-#		sheet.write_row('A1', title, bold)
-#		columntitles = ['Start', 'End', 'Duration/min', 'Project', 'Account,Group', 'User']
-#		sheet.write_row('A2', columntitles, bold)
-#		iter = 1
-#		for e in toolusage:
-#			if not r['billable_days'] == 0 or not r['total_bill'] == 0:
-#				days_cell = xl_rowcol_to_cell(iter,5)
-#				adj_cell = xl_rowcol_to_cell(iter,7)
-#				if r['user_type'] == 'Internal - Unlimited':
-#					usage_eq = 1125
-#				elif r['user_type'] == 'Internal - Full'or r['user_type'] == 'Internal - Packaging' or r['user_type'] == 'Internal - SMP':
-#					usage_eq = f'=min({xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)},10)*{xl_rowcol_to_cell(iter,7)}+max(-10+{xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)},0)*45'
-#				else:
-#					usage_eq = f'=({xl_rowcol_to_cell(iter,5)}+{xl_rowcol_to_cell(iter,6)})*{xl_rowcol_to_cell(iter,7)}'
-#				total_eq = f'=sum({xl_range(iter, 8, iter, 11)})'
-#				row = [r['username'], r['name'], r['email'], r['PI'], r['user_type'], r['billable_days'], "", r['rate'], usage_eq, r['stockroom_bill'], r['staff_charge_bill'], "", total_eq]
-#				sheet.write_row(iter,0,row)
-#				iter +=1
-#		sheet.set_column('H:M', None, money)
-#		sheet.set_column('G:G', None, redgreen)
-#		sheet.set_column('L:L', None, rgmoney)
-#		book.close()
-#		return response
-#	except:
-#		return render(request, 'billing.html', dictionary)
+	try:
+		outputtype = request.GET['outputtype']
+	except:
+		outputtype = 'table'
+	if outputtype != 'xlsx':
+		dictionary['tool'] = tool
+		dictionary['toolname'] = toolname
+		dictionary['start'] = start
+		dictionary['end'] = end
+		dictionary['events'] = events
+		dictionary['eventtype'] = eventtype
+		if outputtype == 'txt':
+			return render(request, 'toolevents.txt', dictionary, content_type="text/plain")
+		else:
+# HTML table output
+			return render(request, 'toolevents.html', dictionary)
+	else:
+# XLSX output
+		fn = eventtype + '_' + str(tool) + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
+		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
+		book = Workbook(response, {'in_memory': True})
+		sheet = book.add_worksheet(eventtype+' '+str(tool))
+		bold = book.add_format()
+		bold.set_bold()
+		italic = book.add_format()
+		italic.set_italic()
+		title = [ eventtype, toolname ]
+		sheet.write_row('A1', title, bold)
+		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d") ]
+		sheet.write_row('A2', title)
+		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/Remarks']
+		sheet.write_row('A4', columntitles, italic)
+		rownum = 4
+		for e in events:
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['projectname'], e['user'], e['affiliation'], e['remarks'] ]
+			sheet.write_row(rownum,0,row)
+			rownum += 1
+		book.close()
+		return response

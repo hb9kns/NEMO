@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Tool usage{% endblock %}
+{% block title %}Tool event reports{% endblock %}
 {% block extrahead %}
 	{% load static %}
 	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
 	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
 {% endblock %}
 {% block content %}
-	<h1>Tool events</h1>
+	<h1>Tool event reports</h1>
 	<form id="view_records" action="{% url 'toolevents' %}" class="form-inline" method="get">
+	<input type="hidden" id="outputtype" name="outputtype" value="table">
 	<p>
 	Compile
 	<select name="eventtype" id="eventtype">
@@ -23,12 +24,12 @@
 	<br />
 		<div class="form-group">
 			<div class="datetimepicker-container">
-				between <input type="text" id="start" name="start" class="form-control" autocomplete="off" placeholder="start" value="{{ start|date:"Y-m-d" }}">
+				between <input type="text" id="start" name="start" class="form-control" autocomplete="off" value="{{ start|date:'Y-m-d' }}">
 			</div>
 		</div>
 		<div class="form-group">
 			<div class="datetimepicker-container">
-				and <input type="text" id="end" name="end" class="form-control" autocomplete="off" placeholder="end" value="{{ end|date:"Y-m-d" }}">
+				and <input type="text" id="end" name="end" class="form-control" autocomplete="off" value="{{ end|date:'Y-m-d' }}">
 			</div>
 		</div>
 	<br />
@@ -39,6 +40,12 @@
 	</form>
 	<div class="col-lg-12" style="margin-top:30px">
 		{% if events %}
+			<h3>{{ eventtype }} events for {{ toolname }}</h3>
+			<h5>{{ start }} &mdash; {{ end }}</h5>
+			<p><small><em>get this data as
+			<a href="{% url 'toolevents' %}?outputtype=txt&eventtype={{ eventtype }}&tool={{ tool }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
+			or <a href="{% url 'toolevents' %}?outputtype=xlsx&eventtype={{ eventtype }}&tool={{ tool }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
+			</em></small></p>
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
@@ -70,9 +77,9 @@
 				</tbody>
 			</table>
 		{% else %}
-			{% if tool == 0 %}<p>Sorry, you don't have permission for viewing "{{ toolname }}"!</p>
+			{% if tool == 0 %}<p>{# Sorry, you don't have permission for viewing "{{ toolname }}"! #}</p>
 			{% elif start or end %}
-				No records exist between {{ start }} and {{ end }} for "{{ toolname }}".
+				No records exist between {{ start }} and {{ end }} for "{{ toolname }}" {{ eventtype }} events.
 			{% endif %}
 		{% endif %}
 	</div>
