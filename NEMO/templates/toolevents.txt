@@ -1,0 +1,5 @@
+# {{ eventtype }} events for {{ toolname }}
+# from {{ start }} to {{ end }}
+Start (ISO)	End (ISO)	Minutes	Project	User	Affiliation{% if eventtype == "reservation" %}	Title{% endif %}
+{% for e in events %}{{ e.start|date:"y-m-d,H:i" }}	{{ e.end|date:"y-m-d,H:i" }}	{{ e.minutes }}	{{ e.projectname }}	{{ e.user }}	{{ e.affiliation }}{% if eventtype == "reservation" %}	{{ e.remarks }}{% endif %}
+{% endfor %}
