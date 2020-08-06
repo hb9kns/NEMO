@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from NEMO.models import User, Tool
+from NEMO.models import User, Tool, Project
 from NEMO.views.customization import get_customization
 
 @login_required
@@ -20,6 +20,7 @@ def directory(request):
 # staff/equiresp status is more useful
 		staffperms = user.is_staff
 		introday = user.date_joined.date()
+		projects = [pjt.name for pjt in Project.objects.filter(user=user,active=True) if pjt.name[0:1] not in settings.PROJECTNAME_BEGIN_SUPPRESS]
 		if staffperms:
 			owning_all = Tool.objects.filter(primary_owner=user.id)
 			owning = [tool for tool in owning_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
@@ -29,7 +30,7 @@ def directory(request):
 		else:
 			owning = []
 			backup = ["(none)"]
-		user_info = {'user':user, 'phone':user.phone, 'email':user.email, 'group':group, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup }
+		user_info = {'user':user, 'phone':user.phone, 'email':user.email, 'group':group, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects }
 		people.append(user_info)
 	dictionary = {
 		'people': people

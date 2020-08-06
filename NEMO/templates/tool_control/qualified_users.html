@@ -26,11 +26,11 @@
 					{% for u in qualified_users %}
 						{% if user.is_staff %}
 							{% if u.is_active %}
-								<a href="javascript:remove_qualified_user('{{ u.id }}', '{{ tool.id }}')" class="grey hover-black" title="Disqualify {{ u.first_name }}"><span class="glyphicon glyphicon-remove-circle"></span></a> {{ u }}<br>
+								<a href="javascript:remove_qualified_user('{{ u.id }}', '{{ tool.id }}')" class="grey hover-black" title="Disqualify {{ u.first_name }}"><span class="glyphicon glyphicon-remove-circle"></span></a> {{ u }} ({{ u.affiliation }})<br>
 							{% endif %}
 						{% else %}
 							{% if u.is_active %}
-								<a href="{% url 'get_email_form_for_user' u.id %}"> {{ u }} </a><br>
+								<a href="{% url 'get_email_form_for_user' u.id %}"> {{ u }} ({{ u.affiliation }}) </a><br>
 							{% endif %}
 						{% endif %}
 					{% endfor %}
