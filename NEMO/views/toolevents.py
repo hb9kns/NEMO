@@ -29,7 +29,7 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 	toolevents = []
 	if Tool.objects.get(pk=tool) in allowed_tools(request):
 		if eventtype == 'reservation':
-			events = Reservation.objects.filter(tool=tool, end__gt=begin, end__lte=end, cancelled=False).order_by('start')
+			events = Reservation.objects.filter(tool=tool, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start')
 		else:
 			events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
 		for event in events:
@@ -60,6 +60,8 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 				start = None
 				end = None
 				minutes = None
+			start = timezone.localtime(start)
+			end = timezone.localtime(end)
 			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname, 'remarks': remarks}
 			toolevents.append(event_entry)
 	return toolevents
