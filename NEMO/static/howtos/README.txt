@@ -14,14 +14,18 @@ convertert on all `*.md` files in the current directory.
 The scripts are located in folder `./bin/` and require
 Perl and the usual shell stuff.
 
-1. edit markdown files, with suffix `.md`
-2. `. /home/wwwnemo/public/NEMO/venv/bin/activate` (source script into shell)
-3. `django-admin collectstatic`
-4. `deactivate`
-5. `chmod -R a+r /home/wwwnemo/public/NEMO/static`
-5. `cd /home/wwwnemo/public/NEMO/static/howtos`
-6. `poorkyll first.css`
+First edit markdown files with suffix `.md` then:
+
+	cd /home/wwwnemo/public/NEMO
+	. venv/bin/activate
+	export PYTHONPATH="/home/wwwnemo/public/NEMO:$PYTHONPATH"
+	export DJANGO_SETTINGS_MODULE=settings
+	django-admin collectstatic
+	deactivate
+	chmod -R a+r /home/wwwnemo/public/NEMO/static
+	cd /home/wwwnemo/public/NEMO/static/howtos
+	PATH=bin:$PATH poorkyll first.css
 
 ---
 
-*2020-2-18/Y.Bonetti*
+*2020-8-10/Y.Bonetti*

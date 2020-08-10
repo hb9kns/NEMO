@@ -37,6 +37,13 @@ can be selected to send a message to all of them.
 The `Maintenance` page permits to display maintenance state of all tools.
 Equipment responsibles may update problem reports.
 
+To resolve an issue (e.g to mark a tool as available after a shut-down),
+select the "Resolve" radio button, note the corrective actions, and
+select a Resolution category (if applicable), then click on "Save task".
+(A shortcut for this can also be accessed through the Tool control menu,
+by clicking on the wrench symbol in case of open issues, which will
+display links on "update or resolve this task".)
+
 ### News
 
 This leads to a list of recent news.
@@ -81,6 +88,9 @@ In addition, equipment responsibles are marked in _green_ and
 listed a second time in an additional table at the end of the page,
 together with the tools for which they are (primary or backup) responsibles.
 
+Administrative staff (from the core team) in addition can export the
+user list in XLSX format for further processing.
+
 ### Reservation Abuse
 
 This page allows to display reservations cancelled by users, to check
@@ -99,6 +109,23 @@ The selection parameters are still work in progress:
 - There is a glitch in the code populating the dates: please click into
 the "Starting" and "Ending" fields and manually choose dates, before
 generating the report; otherwise, you will get an empty one.
+
+### Tool event reports
+
+On this page, primary responsibles for tools can display and download
+reservation and usage reports for tools (administrative staff can do
+this for any of the tools).
+
+Select usage or reservation reporting on the first pulldown menu and the
+appropriate tool from the second menu, then the time span for the report
+(by default, beginning of the year until today is selected).
+
+Clicking on "View event records" will then display a table, or an error
+message in case of missing data. At the beginning of the table, links
+are available permitting export of the data as TAB-separated text or in
+XLSX-format, for further processing. (Use the back button of the browser
+to return from display of TAB-separated text.) In case of reservations,
+also the reservation titles are displayed, in the last column.
 
 ### Accounts and projects / Alerts / User administration
 
@@ -149,4 +176,4 @@ instruction by FIRST-Lab staff, and it is currently not yet needed.*
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main site"
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 
-*2020-07-02/Y.Bonetti*
+*2020-08-10/Y.Bonetti*
