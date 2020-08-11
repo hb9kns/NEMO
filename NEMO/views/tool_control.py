@@ -175,7 +175,9 @@ def enable_tool(request, tool_id, user_id, project_id, staff_charge):
 
 	# All policy checks passed so enable the tool for the user.
 	if tool.interlock and not tool.interlock.unlock():
-		raise Exception("The interlock command for this tool failed. The error message returned: " + str(tool.interlock.most_recent_reply))
+		pass
+		# raise Exception("The interlock command for this tool failed. The error message returned: " + str(tool.interlock.most_recent_reply))
+		response = HttpResponse("Tool interlocking did not work, error message: " + str(tool.interlock.most_recent_reply))
 
 	# Create a new usage event to track how long the user uses the tool.
 	new_usage_event = UsageEvent()

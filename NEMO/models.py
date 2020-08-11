@@ -725,51 +725,18 @@ class Interlock(models.Model):
 			self.state = command_type
 			self.save()
 			return True
+# 'sswitch://' designates a switch controlled through a shell script on
+# a (local or remote) server connected by ssh
+		if self.card.server[0:10] == 'sswitch://':
+			self.most_recent_reply = "ssh-interlock interface under test, last change on " + format_datetime(timezone.now())
+			self.state = command_type
+			self.save()
+			return True
 
 		interlocks_logger = getLogger("NEMO.interlocks")
 
-		# The string in this next function call identifies the format of the interlock message.
-		# '!' means use network byte order (big endian) for the contents of the message.
-		# '20s' means that the message begins with a 20 character string.
-		# Each 'i' is an integer field (4 bytes).
-		# Each 'b' is a byte field (1 byte).
-		# '18s' means that the message ends with a 18 character string.
-		# More information on Python structs can be found at:
-		# http://docs.python.org/library/struct.html
-# 		command_schema = struct.Struct('!20siiiiiiiiibbbbb18s')
-# 		command_message = command_schema.pack(
-# 			b'EQCNTL_BEGIN_COMMAND',
-# 			1,  # Instruction count
-# 			self.card.number,
-# 			self.card.even_port,
-# 			self.card.odd_port,
-# 			self.channel,
-# 			0,  # Command return value
-# 			command_type,  # Type
-# 			0,  # Command
-# 			0,  # Delay
-# 			0,  # SD overload
-# 			0,  # RD overload
-# 			0,  # ADC done
-# 			0,  # Busy
-# 			0,  # Instruction return value
-# 			b'EQCNTL_END_COMMAND'
-# 		)
-#
-# 		reply_message = ""
-
 		# Create a TCP socket to send the interlock command.
-# 		sock = socket.socket()
 		try:
-# 			sock.settimeout(3.0)  # Set the send/receive timeout to be 3 seconds.
-# 			server_address = (self.card.server, self.card.port)
-# 			sock.connect(server_address)
-# 			sock.send(command_message)
-# 			# The reply schema is the same as the command schema except there are no start and end strings.
-# 			reply_schema = struct.Struct('!iiiiiiiiibbbbb')
-# 			reply = sock.recv(reply_schema.size)
-# 			reply = reply_schema.unpack(reply)
-
 			client = ModbusTcpClient(self.card.server)
 			client.connect()
 			client.write_coil(self.channel, command_type, unit=1)
@@ -793,22 +760,7 @@ class Interlock(models.Model):
 			if reply.bits[0] == command_type:  # Index 5 of the reply is the return value of the whole command.
 				reply_message += "succeeded."
 			else:
-				reply_message += "failed. Response information: " #+\
-# 								"Instruction count = " + str(reply[0]) + ", " +\
-# 								"card number = " + str(reply[1]) + ", " +\
-# 								"even port = " + str(reply[2]) + ", " +\
-# 								"odd port = " + str(reply[3]) + ", " +\
-# 								"channel = " + str(reply[4]) + ", " +\
-# 								"command return value = " + str(reply[5]) + ", " +\
-# 								"instruction type = " + str(reply[6]) + ", " +\
-# 								"instruction = " + str(reply[7]) + ", " +\
-# 								"delay = " + str(reply[8]) + ", " +\
-# 								"SD overload = " + str(reply[9]) + ", " +\
-# 								"RD overload = " + str(reply[10]) + ", " +\
-# 								"ADC done = " + str(reply[11]) + ", " +\
-# 								"busy = " + str(reply[12]) + ", " +\
-# 								"instruction return value = " + str(reply[13]) + "."
-
+				reply_message += "failed. Response information: "
 		# Log any errors that occurred during the operation into the database.
 		except OSError as error:
 			reply_message = "Socket error"
