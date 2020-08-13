@@ -5,11 +5,13 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import Group
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 
 from django.shortcuts import render
 
 from NEMO.models import User, Tool, Project, Account, PhysicalAccessLevel
+from NEMO.models import ActivityHistory, MembershipHistory
 from NEMO.views.customization import get_customization
 
 @login_required
@@ -62,6 +64,7 @@ def userlist(request):
 	columntitles = [
 		'Id',
 		'Active',
+		':modified',
 		'Last name',
 		'First name',
 		'Username',
@@ -88,16 +91,23 @@ def userlist(request):
 		'Firefighting training',
 		'Projects'
 		]
-	columntitles += [ a.name+' access' for a in PhysicalAccessLevel.objects.all() ]
+	physicalaccess = PhysicalAccessLevel.objects.all()
+	for a in physicalaccess:
+		columntitles += [ a.name+' access' ]
+		columntitles += [ ':modified' ]
 	columntitles += [ 'Remarks' ]
 	sheet.write_row('A2', columntitles, italic)
+
+	# get content type ids for User and PhysicalAccessLevel objects (required for history)
+	uctype = ContentType.objects.get_for_model(User.objects.first()).id
+	pctype = ContentType.objects.get_for_model(PhysicalAccessLevel.objects.first()).id
+
 	rownum = 3
 	for u in User.objects.all().exclude(type__in=user_exclude).order_by('-is_active', 'last_name', 'first_name'):
-#		try:
-#			mentor = u.mentor.first_name+u.mentor.last_name
-#		except:
-#			mentor = ''
-		mentor = ''
+		try:
+			mentor = u.mentor.first_name+' '+u.mentor.last_name
+		except:
+			mentor = ''
 		try:
 			accexp = u.access_expiration.strftime("%Y-%m-%d")
 		except:
@@ -106,8 +116,17 @@ def userlist(request):
 			affiliation = u.affiliation.name
 		except:
 			affiliation = ''
-		row = [ u.id, u.is_active,
-			u.last_name, u.first_name, u.username,
+		row = [ u.id, u.is_active ]
+		# last activity change of this user
+		try:
+			lastact = ActivityHistory.objects.filter(object_id=u.id, content_type__id__exact=uctype).order_by('date').last()
+			activitydate = lastact.date.strftime("%Y-%m-%d")
+			if lastact.action != u.is_active:
+				activitydate += ' ('+str(lastact.action)+')'
+		except:
+			activitydate = ''
+		row += [ activitydate ]
+		row += [ u.last_name, u.first_name, u.username,
 			u.email, u.phone, u.address, affiliation,
 			u.position, u.personnel_number, u.badge_number,
 			u.type.name, u.deposit, mentor,
@@ -133,7 +152,19 @@ def userlist(request):
 				pjts += p.name+' '
 		row += [ u.date_joined.strftime("%Y-%m-%d"),
 			mentortrained, equitrained, firetrained, pjts ]
-		row += [ a in u.physical_access_levels.all() for a in PhysicalAccessLevel.objects.all() ]
+		# membership activities of this user
+		memberships = MembershipHistory.objects.filter(child_object_id=u.id, child_content_type__id__exact=uctype)
+		for a in physicalaccess:
+			has_it = a in u.physical_access_levels.all()
+			row += [ has_it ]
+			try:
+				lastpact = memberships.filter(parent_object_id=a.id, parent_content_type__id__exact=pctype).order_by('date').last()
+				activitydate = lastpact.date.strftime("%Y-%m-%d")
+				if lastpact.action != has_it:
+					activitydate += ' ('+str(lastpact.action)+')'
+			except:
+				activitydate = ''
+			row += [ activitydate ]
 		row += [ u.remarks ]
 		sheet.write_row(rownum,0,row)
 		rownum += 1
