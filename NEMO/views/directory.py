@@ -16,9 +16,7 @@ from NEMO.views.customization import get_customization
 
 @login_required
 def directory(request):
-# exclude user types Test and Contact -- this should be defined in settings!
-	user_exclude = [2,7]
-	users = User.objects.filter(is_active=True).exclude(type__in=user_exclude).order_by('last_name')
+	users = User.objects.filter(is_active=True).exclude(type__in=settings.USERTYPES_DIRECTORY_SUPPRESS).order_by('last_name')
 	people = []
 	for user in users:
 		try:
@@ -48,8 +46,6 @@ def directory(request):
 @permission_required('NEMO.change_user', raise_exception=True)
 def userlist(request):
 	""" return user list in XLSX format """
-# exclude user type Test -- this should be defined in settings!
-	user_exclude = [2]
 	fn = 'usersNEMO-'+date.today().strftime("%y%m%d")+'.xlsx'
 	response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 	response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
@@ -103,7 +99,7 @@ def userlist(request):
 	pctype = ContentType.objects.get_for_model(PhysicalAccessLevel.objects.first()).id
 
 	rownum = 3
-	for u in User.objects.all().exclude(type__in=user_exclude).order_by('-is_active', 'last_name', 'first_name'):
+	for u in User.objects.all().exclude(type__in=settings.USERTYPES_EXPORT_SUPPRESS).order_by('-is_active', 'last_name', 'first_name'):
 		try:
 			mentor = u.mentor.first_name+' '+u.mentor.last_name
 		except:
