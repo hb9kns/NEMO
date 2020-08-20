@@ -2,6 +2,8 @@ import datetime
 import socket
 import struct
 import pytz
+import re
+import subprocess
 from datetime import timedelta
 from logging import getLogger
 from pymodbus.client.sync import ModbusTcpClient
@@ -725,13 +727,40 @@ class Interlock(models.Model):
 			self.state = command_type
 			self.save()
 			return True
-# 'sswitch://' designates a switch controlled through a shell script on
-# a (local or remote) server connected by ssh
-		if self.card.server[0:10] == 'sswitch://':
-			self.most_recent_reply = "ssh-interlock interface under test, last change on " + format_datetime(timezone.now())
-			self.state = command_type
+# 'shwitch://' designates a switch controlled through a shell script
+# first argument: channel, second argument: new status/command_type, remaining arguments ignored
+		if self.card.server[0:10] == 'shwitch://':
+			self.most_recent_reply = format_datetime(timezone.now()) +': '
+			self.state = self.State.UNKNOWN
+# remove all but alphanumeric ASCII characters from script name
+			swscript=re.sub('[^0-9A-Za-z]','',self.card.server[10:200])
+			if swscript == '':
+				self.most_recent_reply += 'no legally named script specified'
+				self.save()
+				return True
+			swscript=settings.SHWITCHDIR+'/'+swscript
+			try:
+# execute script in subprocess
+# TODO: timeout seems to be useless??
+				procrep=subprocess.run([swscript,str(self.channel),str(command_type)],stdout=subprocess.PIPE,encoding='ASCII',timeout=15)
+			except subprocess.TimeoutExpired:
+				self.most_recent_reply += 'script timed out after 15 sec!'
+				self.save()
+				return True
+			except:
+				self.most_recent_reply += 'untrapped script error'
+				self.save()
+				return True
+# script will reply on STDOUT with new status on one line
+			answer = procrep.stdout.strip('\n')
+			if answer == '0':
+				self.state = self.State.LOCKED
+			if answer == '1':
+				self.state = self.State.UNLOCKED
+# else UNKNOWN set initially will be kept
+			self.most_recent_reply += swscript +"("+answer+"):"+str(self.channel)+"="+str(command_type)
 			self.save()
-			return True
+			return self.state == command_type
 
 		interlocks_logger = getLogger("NEMO.interlocks")
 
