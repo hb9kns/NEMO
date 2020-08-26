@@ -229,7 +229,7 @@ def create_reservation(request):
 
 	# If there was a problem in saving the reservation then return the error...
 	if policy_problems:
-		return render(request, 'calendar/policy_dialog.html', {'policy_problems': policy_problems, 'overridable': overridable and request.user.is_staff})
+		return render(request, 'calendar/policy_dialog.html', {'policy_problems': policy_problems, 'overridable': overridable and request.user.is_staff, 'tool': tool})
 
 	# All policy checks have passed.
 
