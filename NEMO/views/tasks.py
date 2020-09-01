@@ -226,7 +226,7 @@ def set_task_status(request, task, status_name, user):
 	if not status_name:
 		status_name = "default"
 
-	status = TaskStatus.objects.get_or_create(name=status_name)
+	status, created = TaskStatus.objects.get_or_create(name=status_name)
 	TaskHistory.objects.create(task=task, status=status_name, user=user, shutdown=task.force_shutdown)
 
 	status_message = f'On {format_datetime(timezone.now())}, {user.get_full_name()} set the status of this task to "{status_name}".'
@@ -243,17 +243,18 @@ def set_task_status(request, task, status_name, user):
 		'status_message': status_message,
 		'notification_message': status.notification_message,
 		'task': task,
+		'user': user,
 		'tool_control_absolute_url': request.build_absolute_uri(task.tool.get_absolute_url())
 	}
 	# Send an email to the appropriate NanoFab staff that a new task has been created:
 	subject = f'{task.tool} task notification'
 	message = Template(message).render(Context(dictionary))
 	recipients = [
-		task.tool.primary_tool_owner.email if status.notify_primary_tool_owner else None,
+		task.tool.primary_owner.email if status.notify_primary_tool_owner else None,
 		task.tool.notification_email_address if status.notify_tool_notification_email else None,
 		status.custom_notification_email_address
 	]
 	if status.notify_backup_tool_owners:
-		recipients += task.tool.backup_tool_owners.values_list('email')
+		recipients += task.tool.backup_owners.values_list('email')
 	recipients = filter(None, recipients)
 	send_mail(subject, '', user.email, recipients, html_message=message)
