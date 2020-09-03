@@ -241,9 +241,9 @@
 
 	<div class="tab-pane" id="details">
 		{% if user.is_staff and tool.in_use %}
-			<p>You may <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">force {{ tool.get_current_usage_event.operator }} off this tool</a>.</p>
+			<p>You may force {{ tool.get_current_usage_event.operator }} <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">off this tool</a>. BE CAREFUL, as this may affect the tool and ongoing runs!</p>
 		{% elif tool.in_use and not user == tool.user %}
-			<p>You may <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">force {{ tool.get_current_usage_event.operator }} off this tool if you have a current reservation. Please use this judiciously</a>.</p>
+			<p>You may force {{ tool.get_current_usage_event.operator }} <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">off this tool if you have a current reservation.</a> Please use this carefully, as it may affect the tool and ongoing runs!</p>
 		{% endif %}
 		<div class="media">
 			<span class="glyphicon glyphicon-info-sign pull-left notification-icon primary-highlight"></span>
