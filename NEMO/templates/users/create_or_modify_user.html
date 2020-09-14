@@ -208,13 +208,6 @@
 			<textarea id="remarks" name="remarks" cols="55">{{ form.remarks.value|default_if_none:"" }}</textarea>
 			</div>
 		</div>
-		{% if form.instance.id %}
-		<div class="form-group">
-			<div class="control-label col-sm-2">Last login</div>
-			<div class="col-sm-4 form-control-static">
-				{{ form.instance.last_login|default_if_none:"Never" }}
-			</div>
-		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="date_joined">Date joined / Introday</label>
 			<div class="col-sm-2">
@@ -226,6 +219,13 @@
 			</div>
 		{% endif %}
 			<small>Note: hours and minutes are irrelevant.</small>
+		</div>
+		{% if form.instance.id %}
+		<div class="form-group">
+			<div class="control-label col-sm-2">Last login</div>
+			<div class="col-sm-4 form-control-static">
+				{{ form.instance.last_login|default_if_none:"Never" }}
+			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="fire_trained">Firefighting training</label>
