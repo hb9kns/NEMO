@@ -1,3 +1,4 @@
+import re
 from xlsxwriter.workbook import Workbook
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_range
 
@@ -134,3 +135,121 @@ def toolevents(request):
 			rownum += 1
 		book.close()
 		return response
+
+### reporting of total project usage
+
+def get_project_span_tool_event_sums(eventtype, projects, begin, end):
+	""" get sums of all project related usage events for each tool,
+            ending after begin and before or at end
+	    (eventtype selects between 'reservation' or 'usage')
+            and return a list of ['tool':.., 'minutes':..] """
+	if eventtype == 'reservation':
+		events = Reservation.objects.filter(project__in=projects, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start')
+	else:
+		events = UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start')
+	tools = [tool.pk for tool in Tool.objects.all().order_by('name')]
+	toolsums = {}
+	for t in tools:
+		toolsums[t] = 0
+	for event in events:
+		if True:
+			start = event.start
+			end = event.end
+			minutes = int((end-start)/timedelta(minutes=1)+0.5)
+			toolsums[event.tool.pk] += minutes
+		else:
+			pass
+	result = []
+	for t in tools:
+		if toolsums[t] != 0:
+			result.append({'tool':Tool.objects.get(pk=t).name,'minutes':toolsums[t]})
+	return result
+
+@staff_member_required(login_url=None)
+@require_GET
+def project_sums(request):
+	""" Presents a page displaying the sum of tool events
+            belonging to given projects and for a given time span. """
+# get project ids (only characters '0-9,' from request)
+	try:
+		project_ids = re.sub('[^0-9,]', '', request.GET['pjts']).rstrip(',')
+		projects = Project.objects.filter(pk__in=set(project_ids.split(",")))
+	except:
+		projects = Project.objects.filter(active=True)
+	dictionary = {}
+	dictionary['projects'] = projects
+# get eventtype and outputtype
+	try:
+		eventtype = request.GET['eventtype']
+	except:
+		eventtype = 'usage'
+	try:
+		outputtype = request.GET['outputtype']
+	except:
+		outputtype = 'table'
+# by default, start is beginnning of the year, end is today
+# generate ISO formats for defaults, to be able to use existing parser function
+	try:
+		trystart = request.GET['start']
+	except:
+		trystart = '{0}-01-01'.format(date.today().year)
+	try:
+		tryend = request.GET['end']
+	except:
+		tryend = date.today().isoformat()
+	(start, end) = parse_start_and_end_date(trystart, tryend)
+# get all event sums related to all the projects
+	if True:
+		totals = get_project_span_tool_event_sums(eventtype, projects, start, end)
+	else:
+		totals = []
+# tabular/textual output
+	if outputtype != 'xlsx':
+		dictionary['start'] = start
+		dictionary['end'] = end
+		dictionary['totals'] = totals
+		dictionary['eventtype'] = eventtype
+		if outputtype == 'txt':
+# preformatted text output
+			return render(request, 'eventsums.txt', dictionary, content_type="text/plain")
+		else:
+# HTML table output
+			return render(request, 'eventsums.html', dictionary)
+	else:
+# XLSX output
+		indicator = projects.first().name
+		if len(projects)>1:
+			indicator += '_etc'
+		fn = eventtype + '_' + indicator + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
+		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
+		book = Workbook(response, {'in_memory': True})
+		sheet = book.add_worksheet(eventtype+' '+indicator)
+		bold = book.add_format()
+		bold.set_bold()
+		italic = book.add_format()
+		italic.set_italic()
+		title = [ eventtype+' sums for all of:' ]
+		for p in projects:
+			title.append( p.name )
+		sheet.write_row('A1', title, bold)
+		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d") ]
+		sheet.write_row('A2', title)
+		columntitles = ['Tool', 'Minutes']
+		sheet.write_row('A4', columntitles, italic)
+		rownum = 4
+		for e in totals:
+			row = [ e['tool'], e['minutes'] ]
+			sheet.write_row(rownum,0,row)
+			rownum += 1
+		book.close()
+		return response
+
+#:# def allowed_tools(request):
+#:# 	""" tools for which the requester is allowed to view usage events"""
+#:# # reusing permissions: those allowed to change events can view all tools
+#:# 	if request.user.has_perm('NEMO.change_usageevent'):
+#:# 		return Tool.objects.all()
+#:# # others can just view tools where they are primary responsibles
+#:# 	else:
+#:# 		return Tool.objects.filter(primary_owner=request.user)

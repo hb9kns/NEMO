@@ -1,0 +1,5 @@
+# {{ eventtype }} totals for {% for p in projects %}{{ p.name }} {% endfor %}
+# from {{ start }} to {{ end }}
+Tool	Total Minutes
+{% for e in totals %}{{ e.tool }}	{{ e.minutes }}
+{% endfor %}
