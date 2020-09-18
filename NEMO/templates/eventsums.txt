@@ -1,5 +1,5 @@
 # {{ eventtype }} totals for {% for p in projects %}{{ p.name }} {% endfor %}
-# from {{ start }} to {{ end }}
-Tool	Total Minutes
-{% for e in totals %}{{ e.tool }}	{{ e.minutes }}
+# from {{ start }} to {{ end }} = {{ days }} days
+Tool	Usage/min	Avg.Monthly/h	Reservation/min
+{% for e in totals %}{{ e.tool }}	{{ e.usage }}	{{ e.monthly }}	{{ e.reservation }}
 {% endfor %}

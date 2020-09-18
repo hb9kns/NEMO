@@ -1,34 +1,81 @@
 {% extends 'base.html' %}
-{% block title %}Project {{ eventtype }}{% endblock %}
+{% block title %}Project sums{% endblock %}
+{% block extrahead %}
+	{% load static %}
+	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
+{% endblock %}
 {% block content %}
-	<h1>Project {{ eventtype }} sums</h1>
+	<h1>Project usage and reservation sums</h1>
+	<form id="view_records" action="{% url 'project_sums' %}" class="form-inline" method="get">
+	<input type="hidden" id="outputtype" name="outputtype" value="table">
+	<p>
+	Calculate sums for
+	<select name="pjts" id="pjts">
+		<option value="{% for p in projects %}{{ p.id }},{% endfor %}{{ t.id }}" selected>current project selection</option>
+		{% for p in allprojects %}
+		<option value="{{ p.id }}">{{ p.name }}</option>
+		{% endfor %}
+	</select>
+	<br />
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				between <input type="text" id="start" name="start" class="form-control" autocomplete="off" value="{{ start|date:'Y-m-d' }}">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				and <input type="text" id="end" name="end" class="form-control" autocomplete="off" value="{{ end|date:'Y-m-d' }}">
+			</div>
+		</div>
+	<br />
+		<div class="form-group">
+			<input type="submit" class="btn btn-default" value="Calculate event sums" onclick="javascript: form.action=' {% url 'project_sums' %}';">
+		</div>
+	</form>
 	<div class="col-lg-12" style="margin-top:30px">
 	{% if totals %}
-		<h3>{{ eventtype }} sums for {% for p in projects %}{{ p.name }} {% endfor %}</h3>
-		<h5>{{ start }} &mdash; {{ end }}</h5>
+		<h3>usage and reservation sums for {% for p in projects %}{{ p.name }} {% endfor %}</h3>
+		<h5>{{ start }} &mdash; {{ end }} = {{ days }} days</h5>
 		<p><small><em>get this data as
-		<a href="{% url 'project_sums' %}?outputtype=txt&eventtype={{ eventtype }}&pjts={% for p in projects %}{{ p.pk }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
-		or <a href="{% url 'project_sums' %}?outputtype=xlsx&eventtype={{ eventtype }}&pjts={% for p in projects %}{{ p.pk }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
+		<a href="{% url 'project_sums' %}?outputtype=txt&pjts={% for p in projects %}{{ p.pk }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
+		or <a href="{% url 'project_sums' %}?outputtype=xlsx&pjts={% for p in projects %}{{ p.pk }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
 		</em></small></p>
 		<table class="table table-bordered table-condensed">
 			<thead>
 				<tr>
 					<th>Tool</th>
-					<th>Total Duration/min</th>
+					<th>Usage/min</th>
+					<th>Average Monthly Usage/hours</th>
+					<th>Reservations/min</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for e in totals %}
 					<tr>
 						<td>{{ e.tool }}</td>
-						<td>{{ e.minutes }}</td>
+						<td>{{ e.usage }}</td>
+						<td>{{ e.monthly }}</td>
+						<td>{{ e.reservation }}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 	{% else %}
-		No records exist between {{ start }} and {{ end }} for {{ eventtype }} eventsfor
+		No records exist between {{ start }} and {{ end }} for all of
 		{% for p in projects %}{{ p.name }} {% endfor %}
 	{% endif %}
 	</div>
+	<script>
+		function on_load()
+		{
+			var timepicker_properties =
+			{
+				format: 'YYYY-MM-DD'
+			};
+			$('#start').datetimepicker(timepicker_properties);
+			$('#end').datetimepicker(timepicker_properties);
+		}
+		$(on_load);
+	</script>
 {% endblock %}

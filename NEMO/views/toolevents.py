@@ -138,31 +138,36 @@ def toolevents(request):
 
 ### reporting of total project usage
 
-def get_project_span_tool_event_sums(eventtype, projects, begin, end):
-	""" get sums of all project related usage events for each tool,
+def get_project_span_tool_event_sums(projects, begin, end):
+	""" get sums (in minutes) of all project related events for each tool,
             ending after begin and before or at end
-	    (eventtype selects between 'reservation' or 'usage')
-            and return a list of ['tool':.., 'minutes':..] """
-	if eventtype == 'reservation':
-		events = Reservation.objects.filter(project__in=projects, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start')
-	else:
-		events = UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start')
+            and return a list of ['tool':.., 'usage':.., 'monthly':.., 'reservation':..]  """
 	tools = [tool.pk for tool in Tool.objects.all().order_by('name')]
 	toolsums = {}
+	delta_months = abs((end-begin)/timedelta(days=30))
 	for t in tools:
-		toolsums[t] = 0
-	for event in events:
-		if True:
+		toolsums[t] = [0,0]
+	for event in UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start'):
+		try:
 			start = event.start
 			end = event.end
 			minutes = int((end-start)/timedelta(minutes=1)+0.5)
-			toolsums[event.tool.pk] += minutes
-		else:
+			toolsums[event.tool.pk][0] += minutes
+		except:
+			pass
+	for event in Reservation.objects.filter(project__in=projects, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start'):
+		try:
+			start = event.start
+			end = event.end
+			minutes = int((end-start)/timedelta(minutes=1)+0.5)
+			toolsums[event.tool.pk][1] += minutes
+		except:
 			pass
 	result = []
 	for t in tools:
-		if toolsums[t] != 0:
-			result.append({'tool':Tool.objects.get(pk=t).name,'minutes':toolsums[t]})
+		if toolsums[t][0] != 0 or toolsums[t][1] != 0:
+# monthly: average usage in hours (to one decimal) per month
+			result.append({'tool':Tool.objects.get(pk=t).name, 'usage':toolsums[t][0], 'monthly':int(toolsums[t][0]/delta_months/6+0.5)/10, 'reservation':toolsums[t][1]})
 	return result
 
 @staff_member_required(login_url=None)
@@ -178,11 +183,12 @@ def project_sums(request):
 		projects = Project.objects.filter(active=True)
 	dictionary = {}
 	dictionary['projects'] = projects
+	dictionary['allprojects'] = Project.objects.all()
 # get eventtype and outputtype
-	try:
-		eventtype = request.GET['eventtype']
-	except:
-		eventtype = 'usage'
+#	try:
+#		eventtype = request.GET['eventtype']
+#	except:
+#		eventtype = 'usage'
 	try:
 		outputtype = request.GET['outputtype']
 	except:
@@ -198,17 +204,19 @@ def project_sums(request):
 	except:
 		tryend = date.today().isoformat()
 	(start, end) = parse_start_and_end_date(trystart, tryend)
-# get all event sums related to all the projects
-	if True:
-		totals = get_project_span_tool_event_sums(eventtype, projects, start, end)
-	else:
+	days = int(0.5+(end-start)/timedelta(days=1))
+	dictionary['days'] = days
+# get all event sums related to all the projects as a
+# list of {'tool':.,'usage':.,'reservation':.}
+	try:
+		totals = get_project_span_tool_event_sums(projects, start, end)
+	except:
 		totals = []
 # tabular/textual output
 	if outputtype != 'xlsx':
 		dictionary['start'] = start
 		dictionary['end'] = end
 		dictionary['totals'] = totals
-		dictionary['eventtype'] = eventtype
 		if outputtype == 'txt':
 # preformatted text output
 			return render(request, 'eventsums.txt', dictionary, content_type="text/plain")
@@ -220,36 +228,27 @@ def project_sums(request):
 		indicator = projects.first().name
 		if len(projects)>1:
 			indicator += '_etc'
-		fn = eventtype + '_' + indicator + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
+		fn = 'nemo-' + indicator + '-' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
 		book = Workbook(response, {'in_memory': True})
-		sheet = book.add_worksheet(eventtype+' '+indicator)
+		sheet = book.add_worksheet(indicator)
 		bold = book.add_format()
 		bold.set_bold()
 		italic = book.add_format()
 		italic.set_italic()
-		title = [ eventtype+' sums for all of:' ]
+		title = [ 'NEMO usage and reservation sums for all of:' ]
 		for p in projects:
 			title.append( p.name )
 		sheet.write_row('A1', title, bold)
-		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d") ]
+		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 		sheet.write_row('A2', title)
-		columntitles = ['Tool', 'Minutes']
+		columntitles = ['Tool', 'Usage/min', 'Average Monthly Usage/hours', 'Reservation/min']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in totals:
-			row = [ e['tool'], e['minutes'] ]
+			row = [ e['tool'], e['usage'], e['monthly'], e['reservation'] ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
 		return response
-
-#:# def allowed_tools(request):
-#:# 	""" tools for which the requester is allowed to view usage events"""
-#:# # reusing permissions: those allowed to change events can view all tools
-#:# 	if request.user.has_perm('NEMO.change_usageevent'):
-#:# 		return Tool.objects.all()
-#:# # others can just view tools where they are primary responsibles
-#:# 	else:
-#:# 		return Tool.objects.filter(primary_owner=request.user)
