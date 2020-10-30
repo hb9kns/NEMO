@@ -60,9 +60,13 @@ def tool_status(request, tool_id):
 	}
 
 	try:
-		current_reservation = Reservation.objects.get(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=request.user, tool=tool)
-		if request.user == current_reservation.user:
-			dictionary['time_left'] = current_reservation.end
+		current_reservations = Reservation.objects.filter(start__lt=timezone.now(), end__gt=timezone.now(), cancelled=False, missed=False, shortened=False, user=request.user, tool=tool)
+		if current_reservations:
+# ::::::::::::::::::::: dirty hack for now to cope with virtual tools:
+# ::::::::::::::::::::: simply use the first of several current reservations!
+			current_reservation = current_reservations[0]
+			if request.user == current_reservation.user:
+				dictionary['time_left'] = current_reservation.end
 	except Reservation.DoesNotExist:
 		pass
 
