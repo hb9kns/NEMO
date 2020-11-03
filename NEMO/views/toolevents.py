@@ -142,11 +142,18 @@ def get_project_span_tool_event_sums(projects, begin, end):
 	""" get sums (in minutes) of all project related events for each tool,
             ending after begin and before or at end
             and return a list of ['tool':.., 'usage':.., 'monthly':.., 'reservation':..]  """
-	tools = [tool.pk for tool in Tool.objects.all().order_by('name')]
+# list of tool primary keys and corresponding billing references
+	tools = {tool.pk:tool.billing_reference for tool in Tool.objects.all().order_by('name')}
+	toolpks = tools.keys()
 	toolsums = {}
+	refsums = {}
 	delta_months = abs((end-begin)/timedelta(days=30))
-	for t in tools:
+	for t in toolpks:
+# populate toolsums
 		toolsums[t] = [0,0]
+# populate refsums for non-empty billing references
+		if tools[t]:
+			refsums[tools[t]] = [0,0]
 	for event in UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start'):
 		try:
 			start = event.start
@@ -164,7 +171,7 @@ def get_project_span_tool_event_sums(projects, begin, end):
 		except:
 			pass
 	result = []
-	for t in tools:
+	for t in toolpks:
 		if toolsums[t][0] != 0 or toolsums[t][1] != 0:
 # monthly: average usage in hours (to one decimal) per month
 			result.append({'tool':Tool.objects.get(pk=t).name, 'usage':toolsums[t][0], 'monthly':int(toolsums[t][0]/delta_months/6+0.5)/10, 'reservation':toolsums[t][1]})

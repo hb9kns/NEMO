@@ -151,11 +151,11 @@ class ToolAdminForm(forms.ModelForm):
 
 @register(Tool)
 class ToolAdmin(admin.ModelAdmin):
-	list_display = ('name', 'category', 'visible', 'operational', 'multiplicity', 'problematic', 'is_configurable')
+	list_display = ('name', 'category', 'visible', 'operational', 'billing_reference', 'multiplicity', 'problematic', 'is_configurable')
 	list_filter = ('visible', 'operational', 'category')
 	form = ToolAdminForm
 	fieldsets = (
-		(None, {'fields': ('name', 'category', 'qualified_users', 'post_usage_questions'),}),
+		(None, {'fields': ('name', 'billing_reference', 'category', 'qualified_users', 'post_usage_questions'),}),
 		('Current state', {'fields': ('visible', 'operational'),}),
 		('Contact information', {'fields': ('primary_owner', 'backup_owners', 'notification_email_address', 'location', 'phone_number', 'external_link', 'usage_link'),}),
 		('Usage policy', {'fields': ('multiplicity', 'reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'reservation_physical_access_level', 'grant_physical_access_level_upon_qualification', 'grant_badge_reader_access_upon_qualification', 'interlock', 'allow_delayed_logoff', 'reservation_required'),}),

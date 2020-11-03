@@ -236,6 +236,7 @@ class User(models.Model):
 
 class Tool(models.Model):
 	name = models.CharField(max_length=100, unique=True, help_text="Do NOT use slashes here!")
+	billing_reference = models.CharField(max_length=20, blank=True, null=True, help_text="tool reference used by financial backend")
 	category = models.CharField(max_length=1000, help_text="Create sub-categories using slashes. For example \"Category 1/Sub-category 1\".")
 	visible = models.BooleanField(default=True, help_text="Specifies whether this tool is visible to users.")
 	operational = models.BooleanField(default=False, help_text="Marking the tool non-operational will prevent users from using the tool.")
