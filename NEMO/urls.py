@@ -268,6 +268,8 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		# tool usage statistics
 		url(r'^toolevents/$', toolevents.toolevents, name='toolevents'),
 		url(r'^project_sums/$', toolevents.project_sums, name='project_sums'),
+		# total usage for all billable tools for all projects
+		url(r'^billing_sums/$', toolevents.billing_sums, name='billing_sums'),
 
 		# General area occupancy table, for use with Kiosk and Area Access tablets
 		url(r'^occupancy/$', status_dashboard.occupancy, name='occupancy'),
