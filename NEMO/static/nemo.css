@@ -84,7 +84,9 @@ label
 
 #sidebar .selected
 {
-	background-color: #e7e7e7;
+	background-color: #ffff00;
+	color: #000000;
+	font-weight: bold;
 }
 
 .status-icon
