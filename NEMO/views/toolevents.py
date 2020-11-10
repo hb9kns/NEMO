@@ -283,17 +283,22 @@ def billing_sums(request):
 	projects = Project.objects.filter(active=True)
 	dictionary = {}
 	dictionary['projects'] = projects
-# by default, start is beginnning of the year, end is today
+# by default, start is beginnning of the month, end is today
+	def_start = '{0}-{1}-01'.format(date.today().year,date.today().month)
+	def_end = date.today().isoformat()
 # generate ISO formats for defaults, to be able to use existing parser function
 	try:
 		trystart = request.GET['start']
 	except:
-		trystart = '{0}-01-01'.format(date.today().year)
+		trystart = def_start
 	try:
 		tryend = request.GET['end']
 	except:
-		tryend = date.today().isoformat()
-	(start, end) = parse_start_and_end_date(trystart, tryend)
+		tryend = def_end
+	try:
+		(start, end) = parse_start_and_end_date(trystart, tryend)
+	except:
+		(start, end) = parse_start_and_end_date(def_start, def_end)
 	days = int(0.5+(end-start)/timedelta(days=1))
 	dictionary['days'] = days
 # get all event sums related to all the projects as a
