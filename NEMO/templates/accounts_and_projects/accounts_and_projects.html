@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% load custom_tags_and_filters %}
+{% block extrahead %}
+	{% load static %}
+	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
+{% endblock %}
 {% block title %}Accounts and projects{% endblock %}
 {% block content %}
 	<h1>
@@ -85,6 +90,28 @@
 			</div>
 		</div>
 	{% else %}
+	<hr />
+	<form action="{% url 'billing_sums' %}" class="form-inline" method="get">
+	Calculate total usage for billable tools for all active projects between
+	<br />
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				<input type="text" id="start" name="start" class="form-control" autocomplete="off" value="{{ billstart|date:'Y-m-d' }}">
+			</div>
+		</div>
+	and
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				<input type="text" id="end" name="end" class="form-control" autocomplete="off" value="{{ billend|date:'Y-m-d' }}">
+			</div>
+		</div>
+		<div class="form-group">
+			{# <input type="submit" class="btn btn-default" value="Generate XLSX table" onclick="javascript: form.action=' {% url 'billing_sums' %}';"> #}
+			<input type="submit" class="btn btn-default" value="Generate XLSX table">
+&mdash; <em>may take quite some time!</em>
+		</div>
+	</form>
+	<hr />
 	<h2>Present accounts / responsibles</h2>
 	<ul>
 	{% for acct in account_list %}
@@ -120,6 +147,12 @@
 		}
 		function on_load()
 		{
+			var timepicker_properties =
+			{
+				format: 'YYYY-MM-DD'
+			};
+			$('#start').datetimepicker(timepicker_properties);
+			$('#end').datetimepicker(timepicker_properties);
 			$('#search').autocomplete('accounts_and_projects', get_account, {% json_search_base_with_extra_fields accounts_and_projects 'application_identifier' %});
 			$('.user_search').autocomplete('users', add_user_to_project, {{ users|json_search_base }});
 		}

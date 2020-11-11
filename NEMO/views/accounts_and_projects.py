@@ -1,3 +1,4 @@
+from datetime import date
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest
@@ -26,6 +27,8 @@ def accounts_and_projects(request, kind=None, identifier=None):
 		'account_list': Account.objects.all(),
 		'accounts_and_projects': set(Account.objects.all()) | set(Project.objects.all()),
 		'users': User.objects.all(),
+		'billstart': '{0}-{1}-01'.format(date.today().year, date.today().month),
+		'billend': date.today().isoformat(),
 	}
 	return render(request, 'accounts_and_projects/accounts_and_projects.html', dictionary)
 
