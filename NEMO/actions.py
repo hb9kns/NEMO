@@ -11,7 +11,12 @@ def unlock_selected_interlocks(model_admin, request, queryset):
 def synchronize_with_tool_usage(model_admin, request, queryset):
 	for interlock in queryset:
 		# Ignore interlocks with no tool assigned, and ignore interlocks connected to doors
-		if not interlock.tool or interlock.door:
+		try:
+			if interlock.door:
+				continue
+		except:
+			pass
+		if not interlock.tool:
 			continue
 		if interlock.tool.in_use():
 			interlock.unlock()
