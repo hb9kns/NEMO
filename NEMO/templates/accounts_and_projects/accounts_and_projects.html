@@ -55,6 +55,7 @@
 						<div id="account_users">
 							{% include 'accounts_and_projects/users_for_account.html' with users=account.user_set.all %}
 						</div>
+					{% if account.remarks %}<span class="grey">Remarks:</span> {{ account.remarks|escapejs }}<br />{% endif %}
 					</div>
 				</div>
 				{% for project in account.project_set.all %}
