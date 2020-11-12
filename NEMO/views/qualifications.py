@@ -11,18 +11,19 @@ from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.models import Tool, MembershipHistory, User
 
-
-@staff_member_required(login_url=None)
 @permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def qualifications(request):
-	""" Present a web page to allow staff to qualify or disqualify users on particular tools. """
+	""" Present a web page to allow staff and primary owners to qualify or disqualify users on particular tools. """
 	users = User.objects.filter(is_active=True)
-	tools = Tool.objects.filter(visible=True)
+	alltools = Tool.objects.filter(visible=True)
+	if request.user.is_staff:
+		tools = alltools
+	else:
+		tools = alltools.filter(primary_owner=request.user)
 	return render(request, 'qualifications.html', {'users': users, 'tools': tools})
 
 
-@staff_member_required(login_url=None)
 @permission_required('NEMO.change_tool', raise_exception=True)
 @require_POST
 def modify_qualifications(request):
@@ -38,6 +39,10 @@ def modify_qualifications(request):
 	tools = Tool.objects.in_bulk(tools)
 	if tools == {}:
 		return HttpResponseBadRequest("You must specify at least one tool.")
+	if not request.user.is_staff:
+		for t in tools.values():
+			if request.user != t.primary_owner:
+				return HttpResponseBadRequest('Sorry, but you are not primary responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
 
 	for user in users.values():
 		original_qualifications = set(user.qualifications.all())
@@ -97,7 +102,6 @@ def modify_qualifications(request):
 		return HttpResponse()
 
 
-@staff_member_required(login_url=None)
 @require_GET
 def get_qualified_users(request):
 	tool = get_object_or_404(Tool, id=request.GET.get('tool_id'))

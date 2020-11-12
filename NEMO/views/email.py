@@ -71,23 +71,27 @@ def send_email(request):
 	return render(request, 'acknowledgement.html', dictionary)
 
 
-@staff_member_required(login_url=None)
 @require_GET
 def email_broadcast(request, audience=''):
 	dictionary = {}
-	if audience == 'tool':
-		dictionary['search_base'] = Tool.objects.filter(visible=True)
-	elif audience == 'project':
-		dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
-	elif audience == 'account':
-		dictionary['search_base'] = Account.objects.filter(active=True)
-	elif audience == 'physicalaccess':
-		dictionary['search_base'] = PhysicalAccessLevel.objects.all()
-	elif audience == 'all' or audience == 'equiresp' or audience == 'pjtresp' :
-		dictionary['search_base'] = 'all'
-		dictionary['all'] = True
-	dictionary['audience'] = audience
+	if request.user.is_staff:
+		if audience == 'tool':
+			dictionary['search_base'] = Tool.objects.filter(visible=True)
+		elif audience == 'project':
+			dictionary['search_base'] = Project.objects.filter(active=True, account__active=True)
+		elif audience == 'account':
+			dictionary['search_base'] = Account.objects.filter(active=True)
+		elif audience == 'physicalaccess':
+			dictionary['search_base'] = PhysicalAccessLevel.objects.all()
+		elif audience == 'all' or audience == 'equiresp' or audience == 'pjtresp' :
+			dictionary['search_base'] = 'all'
+			dictionary['all'] = True
+		dictionary['audience'] = audience
+	else:
+		dictionary['audience'] = 'tool'
+		dictionary['search_base'] = Tool.objects.filter(visible=True, primary_owner=request.user)
 	return render(request, 'email/email_broadcast.html', dictionary)
+
 
 @login_required
 @require_GET
