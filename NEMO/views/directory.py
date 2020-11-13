@@ -26,20 +26,19 @@ def directory(request):
 		staffperms = user.is_staff
 		introday = user.date_joined.date()
 		projects = [pjt.name for pjt in Project.objects.filter(user=user,active=True) if pjt.name[0:1] not in settings.PROJECTNAME_BEGIN_SUPPRESS]
-		if staffperms:
+		try:
 			owning_all = Tool.objects.filter(primary_owner=user.id)
 			owning = [tool for tool in owning_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
-			backup_all = [""]
+		except:
+			owning = []
+		try:
 			backup_all = Tool.objects.filter(backup_owners__in=[user.id])
 			backup = [tool for tool in backup_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
-		else:
-			owning = []
+		except:
 			backup = ["(none)"]
 		user_info = {'user':user, 'phone':user.phone, 'email':user.email, 'group':group, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects }
 		people.append(user_info)
-	dictionary = {
-		'people': people
-	}
+	dictionary = { 'people': people }
 	return render(request, 'directory.html', dictionary)
 
 @staff_member_required(login_url=None)
