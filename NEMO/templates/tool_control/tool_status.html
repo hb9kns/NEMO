@@ -227,6 +227,9 @@
 					{% include 'tool_control/get_projects.html' with active_projects=active_projects_filtered user_id=user.id %}
 				{% endif %}
 				{% if user.is_staff or tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress %}
+					{% if tool.external_link != Null and tool.external_link != '' %}
+					<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
+					{% endif %}
 					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span> Start using the {{ tool.name }}</button>
 				{% endif %}
 			{% endif %}
@@ -279,7 +282,7 @@
 				<p>This is a <strong>multiple tool</strong> which may be used {{ tool.multiplicity }} times in parallel.</p>
 				{% endif %}
 				{% if tool.external_link != Null and tool.external_link != '' %}
-				<p>Additional information about this tool: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a> (should open in a new page/tab)</p>
+				<p>Additional information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
 				{% endif %}
 				<h5>Deep links for this tool:</h5>
 				<ul>
