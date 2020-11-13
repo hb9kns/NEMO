@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
+from django.db.models import Q
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import permission_required
 
@@ -20,7 +21,7 @@ def qualifications(request):
 	if request.user.is_staff:
 		tools = alltools
 	else:
-		tools = alltools.filter(primary_owner=request.user)
+		tools = alltools.filter( Q(primary_owner=request.user) | Q(backup_owners__in=[request.user.id]) )
 	return render(request, 'qualifications.html', {'users': users, 'tools': tools})
 
 
@@ -39,9 +40,10 @@ def modify_qualifications(request):
 	tools = Tool.objects.in_bulk(tools)
 	if tools == {}:
 		return HttpResponseBadRequest("You must specify at least one tool.")
+	permitted = Tool.objects.filter( Q(primary_owner=request.user) | Q(backup_owners__in=[request.user.id]), visible=True )
 	if not request.user.is_staff:
 		for t in tools.values():
-			if request.user != t.primary_owner:
+			if t not in permitted:
 				return HttpResponseBadRequest('Sorry, but you are not primary responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
 
 	for user in users.values():
