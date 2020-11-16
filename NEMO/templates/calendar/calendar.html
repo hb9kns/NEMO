@@ -294,7 +294,7 @@ function create_calendar()
 	{
 		"header":
 		{
-			left: "prev,next today{% if user.is_staff %} proxyReservation scheduledOutage{% endif %}",
+			left: "prev,next today{% if extended_permissions %} proxyReservation {% endif %}{% if user.is_staff %} scheduledOutage{% endif %}",
 			center: "title",
 			right: "agendaDay,agendaWeek,month"
 		},
@@ -512,7 +512,7 @@ function on_load()
 	{% else %}
 		update_event_sources();
 	{% endif %}
-	{% if user.is_staff %}
+	{% if user.is_staff or extended_permissions %}
 		$("#user_search").autocomplete('users', get_specific_user_activity, {{ users|json_search_base }});
 	{% endif %}
 	$('[data-toggle~="tooltip"]').tooltip({ container: 'body' });

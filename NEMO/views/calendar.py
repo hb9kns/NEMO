@@ -54,8 +54,12 @@ def calendar(request, tool_id=None, showtools=None, titledesc=None):
 		'tool_summary': tool_summary,
 		'title_description': titledesc,
 	}
-	if request.user.is_staff:
+	if request.user.is_staff or request.user.has_perm('NEMO.change_reservation'):
 		dictionary['users'] = User.objects.all()
+		# additional permissions for reservations
+		dictionary['extended_permissions'] = True
+	else
+		dictionary['extended_permissions'] = False
 	return render(request, 'calendar/calendar.html', dictionary)
 
 
@@ -205,7 +209,7 @@ def create_reservation(request):
 		return HttpResponseBadRequest(str(e))
 	tool = get_object_or_404(Tool, name=request.POST.get('tool_name'))
 	explicit_policy_override = False
-	if request.user.is_staff:
+	if request.user.is_staff or request.user.has_perm('NEMO.change_reservation'):
 		try:
 			user = User.objects.get(id=request.POST['impersonate'])
 		except:
@@ -229,7 +233,7 @@ def create_reservation(request):
 
 	# If there was a problem in saving the reservation then return the error...
 	if policy_problems:
-		return render(request, 'calendar/policy_dialog.html', {'policy_problems': policy_problems, 'overridable': overridable and request.user.is_staff, 'tool': tool})
+		return render(request, 'calendar/policy_dialog.html', {'policy_problems': policy_problems, 'overridable': overridable and (request.user.is_staff or request.user.has_perm('NEMO.change_reservation')), 'tool': tool})
 
 	# All policy checks have passed.
 
