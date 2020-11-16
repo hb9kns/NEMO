@@ -58,7 +58,7 @@ def calendar(request, tool_id=None, showtools=None, titledesc=None):
 		dictionary['users'] = User.objects.all()
 		# additional permissions for reservations
 		dictionary['extended_permissions'] = True
-	else
+	else:
 		dictionary['extended_permissions'] = False
 	return render(request, 'calendar/calendar.html', dictionary)
 
@@ -816,7 +816,6 @@ def cancel_unused_reservations(request):
 	return HttpResponse()
 
 
-@staff_member_required(login_url=None)
 @require_GET
 def proxy_reservation(request):
 	return render(request, 'calendar/proxy_reservation.html', {'users': User.objects.filter(is_active=True)})
