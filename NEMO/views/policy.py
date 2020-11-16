@@ -195,7 +195,8 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 			policy_problems.append(str(new_reservation.user) + " does not belong to the project named " + str(new_reservation.project) + ".")
 
 	# If the user is a staff member or there's an explicit policy override then the policy check is finished.
-	if user.is_staff or explicit_policy_override:
+	# also users with 'change_reservation' permission may override it
+	if user.is_staff or user.has_perm('NEMO.change_reservation') or explicit_policy_override:
 		return policy_problems, overridable
 
 	# If there are no blocking policy conflicts at this point, the rest of the policies can be overridden.
@@ -318,9 +319,9 @@ def check_policy_to_cancel_reservation(reservation, user):
 	Otherwise, the function returns an HTTP "Bad Request" with an error message.
 	"""
 
-	# Users may only cancel reservations that they own.
+	# Users may only cancel reservations that they own or created.
 	# Staff may break this rule.
-	if (reservation.user != user) and not user.is_staff:
+	if (reservation.user != user and reservation.creator != user) and not user.is_staff:
 		return HttpResponseBadRequest("You may not cancel reservations that you do not own.")
 
 	# Users may not cancel reservations that have already ended.

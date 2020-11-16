@@ -52,7 +52,7 @@
 </div>
 {# Allow the user to cancel the reservation if they have that priviledge. #}
 {% if not reservation.missed and not reservation.cancelled %}
-	{% if reservation.user.id == user.id and reservation.has_not_ended or user.is_staff %}
+	{% if user.is_staff or reservation.user.id == user.id and reservation.has_not_ended or reservation.creator.id == user.id and reservation.has_not_ended %}
 		<div class="modal-footer">
 			{# You must provide a reason if you are cancelling someone else's reservation. #}
 			{% if reservation.user == user %}
