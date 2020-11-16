@@ -127,5 +127,6 @@
 				<code>Administration -> Customization</code>
 			</span>
 		{% endfor %}
+	{% if versionid %}<p style="text-align: right"><small><tt>{{ versionid }}</tt></small></p>{% endif %}
 {% endblock %}
 {% block extra_whitespace %}{# Hide extra whitespace #}{% endblock %}

@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render
@@ -37,4 +38,6 @@ def landing(request):
 		'notification_counts': get_notification_counts(request.user),
 		'self_log_in': able_to_self_log_in_to_area(request.user),
 	}
+	if hasattr(settings, 'VERSIONID'):
+		dictionary['versionid'] = settings.VERSIONID
 	return render(request, 'landing.html', dictionary)
