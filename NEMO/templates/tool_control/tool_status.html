@@ -281,6 +281,9 @@
 				{% if tool.multiplicity > 1 %}
 				<p>This is a <strong>multiple tool</strong> which may be used {{ tool.multiplicity }} times in parallel.</p>
 				{% endif %}
+				{% if tool.private %}
+				<p>This is a <strong>private tool: entries are visible only to staff.</strong></p>
+				{% endif %}
 				{% if tool.external_link != Null and tool.external_link != '' %}
 				<p>Additional information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
 				{% endif %}
