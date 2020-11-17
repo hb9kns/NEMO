@@ -40,7 +40,7 @@ class ToolTree(Widget):
 		"""
 		tree = ToolTreeHelper(None)
 		for tool in value['tools']:
-			tree.add(tool.category + '/' + tool.name, tool.id)
+			tree.add(tool.category + '/' + tool.name, tool.id, tool.private)
 		return mark_safe(tree.render(value['checktools']))
 
 
@@ -53,8 +53,9 @@ class ToolTreeHelper:
 		self.name = name
 		self.children = []
 		self.id = None
+		self.priv = False
 
-	def add(self, tool, identifier):
+	def add(self, tool, identifier, priv):
 		"""
 		This function takes as input a string representation of the tool in the organization hierarchy.
 		Example input might be "Imaging and Analysis/Microscopes/Zeiss FIB". The input is parsed with '/' as the
@@ -63,13 +64,14 @@ class ToolTreeHelper:
 		part = tool.partition('/')
 		for child in self.children:
 			if child.name == part[0]:
-				child.add(part[2], identifier)
+				child.add(part[2], identifier, priv)
 				return
 		self.children.append(ToolTreeHelper(part[0]))
 		if part[2] != '':
-			self.children[-1].add(part[2], identifier)
+			self.children[-1].add(part[2], identifier, priv)
 		else:
 			self.children[-1].id = identifier
+			self.children[-1].priv = priv
 
 	def render(self, checktools):
 		"""
@@ -100,7 +102,10 @@ checked.
 				result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden" checked></span>'
 			else:
 				result += f'<span><input type="checkbox" onclick="update_event_sources()" id="{node.id}" name="toolcheck" class="chk" style="visibility:hidden"></span>'
-			result += f'<span><a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a></span>'
+			result += f'<span><a href="javascript:void(0);" onclick="set_selected_item(this)" data-tool-id="{node.id}" data-type="tool link">{node.name}</a>'
+			if node.priv:
+				result += f' [staff only]'
+			result += f'</span>'
 		if not node.__is_leaf():
 			result += f'<label class="tree-toggler nav-header"><div>{node.name}</div></label><ul class="nav nav-list tree" data-category="{node.name}">'
 			for child in node.children:
