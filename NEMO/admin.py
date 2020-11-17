@@ -240,7 +240,7 @@ class ProjectAdminForm(forms.ModelForm):
 
 @register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-	list_display = ('name', 'id', 'application_identifier', 'account', 'project_contact', 'active')
+	list_display = ('name', 'id', 'application_identifier', 'account', 'billing_reference', 'project_contact', 'active')
 	search_fields = ('name', 'application_identifier', 'project_contact', 'account__name')
 	list_filter = ('active',)
 	form = ProjectAdminForm

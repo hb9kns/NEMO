@@ -528,6 +528,7 @@ class Account(models.Model):
 class Project(models.Model):
 	name = models.CharField(max_length=100, unique=True)
 	application_identifier = models.CharField(max_length=100)
+	billing_reference = models.CharField(max_length=20, blank=True, null=True, help_text="project reference used by financial backend")
 	account = models.ForeignKey(Account, help_text="All charges for this project will be billed to the selected account.")
 	active = models.BooleanField(default=True, help_text="Users may only charge to a project if it is active. Deactivate the project to block billable activity (such as tool usage and consumable check-outs).")
 	project_contact = models.ForeignKey(User, null=True, blank=True, default='', help_text="for technical and budgetary discussions")
