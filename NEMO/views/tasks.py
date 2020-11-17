@@ -165,12 +165,18 @@ Visit {url} to view the tool control page for the task.
 	send_mail(subject, message, settings.SERVER_EMAIL, settings.MICROMANAGER)
 
 
-@staff_member_required(login_url=None)
 @require_POST
 def update(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	form = TaskForm(request.user, data=request.POST, instance=task)
 	next_page = request.POST.get('next_page', 'tool_control')
+	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+		dictionary = {
+			'title': 'Task update not allowed',
+			'heading': 'Insufficient permissions',
+			'content': 'Only staff and primary responsibles can do this.',
+		}
+		return render(request, 'acknowledgement.html', dictionary)
 	if not form.is_valid():
 		dictionary = {
 			'title': 'Task update failed',
@@ -191,11 +197,17 @@ def update(request, task_id):
 		return redirect('tool_control')
 
 
-@staff_member_required(login_url=None)
 @require_GET
 def task_update_form(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	categories = TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT)
+	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+		dictionary = {
+			'title': 'Task update not allowed',
+			'heading': 'Insufficient permissions',
+			'content': 'Only staff and primary responsibles can do this.',
+		}
+		return render(request, 'acknowledgement.html', dictionary)
 	dictionary = {
 		'categories': categories,
 		'urgency': Task.Urgency.Choices,
@@ -205,11 +217,17 @@ def task_update_form(request, task_id):
 	return render(request, 'tasks/update.html', dictionary)
 
 
-@staff_member_required(login_url=None)
 @require_GET
 def task_resolution_form(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	categories = TaskCategory.objects.filter(stage=TaskCategory.Stage.COMPLETION)
+	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+		dictionary = {
+			'title': 'Task resolution not allowed',
+			'heading': 'Insufficient permissions',
+			'content': 'Only staff and primary responsibles can do this.',
+		}
+		return render(request, 'acknowledgement.html', dictionary)
 	dictionary = {
 		'categories': categories,
 		'task': task,
@@ -219,7 +237,7 @@ def task_resolution_form(request, task_id):
 
 def set_task_status(request, task, status_name, user):
 
-	if not user.is_staff and status_name:
+	if not user.is_staff and not user == task.tool.primary_owner and status_name:
 		raise ValueError("Only staff can set task status")
 
 		#If no status is given, assign to default status. This will make sure all tasks have a proper Task History

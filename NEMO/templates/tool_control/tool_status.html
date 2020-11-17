@@ -132,7 +132,7 @@
 					<div id="task_{{ t.id }}_details" class="collapse">
 						<span class="grey">
 							This task was created by {{ t.creator }} on {{ t.creation_time }}.
-							{% if user.is_staff %}
+							{% if user.is_staff or user == tool.primary_owner %}
 								You can <a href="{% url 'task_update_form' t.id %}">update</a> or <a href="{% url 'task_resolution_form' t.id %}">resolve</a> this task.
 							{% endif %}
 							{% if t.force_shutdown %}
@@ -162,18 +162,18 @@
 		{# Display all comments... #}
 		{% for c in tool.comments %}
 			<div class="media">
-				{% if user.id == c.author.id or user.is_staff %}
+				{% if user.id == c.author.id or user.is_staff or user == tool.primary_owner %}
 					<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#comment_{{ c.id }}_actions" class="pointer">
 				{% endif %}
 				<span class="glyphicon glyphicon-comment pull-left notification-icon primary-highlight" title="{% if c.expiration_date %}This comment will expire and become hidden on {{ c.expiration_date }}{% else %}This comment will be displayed indefinitely.{% endif %}"></span>
-				{% if user.id == c.author.id or user.is_staff %}
+				{% if user.id == c.author.id or user.is_staff or user == tool.primary_owner %}
 					<span class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
 					</a>
 				{% endif %}
 				<div class="media-body">
 					{{ c.content }}<br>
 					<span style="font-size:x-small; color:grey; font-style:italic">{{ c.author }} wrote this comment on {{ c.creation_date }}</span>
-					{% if user.id == c.author.id or user.is_staff %}
+					{% if user.id == c.author.id or user.is_staff or user == tool.primary_owner %}
 						<div id="comment_{{ c.id }}_actions" class="collapse grey">
 							<form action="{% url 'hide_comment' c.id %}" method="post">
 								{% csrf_token %}
@@ -243,7 +243,7 @@
 	</div>
 
 	<div class="tab-pane" id="details">
-		{% if user.is_staff and tool.in_use %}
+		{% if user.is_staff and tool.in_use or user == tool.primary_owner and tool.in_use %}
 			<p>You may force {{ tool.get_current_usage_event.operator }} <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">off this tool</a>. BE CAREFUL, as this may affect the tool and ongoing runs!</p>
 		{% elif tool.in_use and not user == tool.user %}
 			<p>You may force {{ tool.get_current_usage_event.operator }} <a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">off this tool if you have a current reservation.</a> Please use this carefully, as it may affect the tool and ongoing runs!</p>
@@ -392,7 +392,7 @@
 				</div>
 			{% endif %}
 
-			{% if task_statuses and user.is_staff %}
+			{% if task_statuses and user.is_staff or task_statuses and user == tool.primary_owner %}
 				<div class="form-group">
 					<label for="status">What is the status of this task?</label>
 					<select id="status" name="status" class="form-control" style="max-width:300px">
@@ -408,7 +408,7 @@
 				<label for="description">Please provide a <strong>detailed</strong> description of the problem so that the {{ facility_name }} staff have enough information to resolve the problem efficiently.</label>
 				<textarea id="description" name="description" class="form-control" rows="7" required></textarea>
 			</div>
-			{% if user.is_staff %}
+			{% if user.is_staff or user == tool.primary_owner %}
 				<div class="form-group">
 					<div style="position:relative">
 						<label for="estimated_resolution_time" class="control-label">What is your best estimate of when the problem will be resolved? Leave this field blank if you are unsure.</label>
