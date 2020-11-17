@@ -240,6 +240,7 @@ class Tool(models.Model):
 	category = models.CharField(max_length=1000, help_text="Create sub-categories using slashes. For example \"Category 1/Sub-category 1\".")
 	visible = models.BooleanField(default=True, help_text="Specifies whether this tool is visible to users.")
 	operational = models.BooleanField(default=False, help_text="Marking the tool non-operational will prevent users from using the tool.")
+	private = models.BooleanField(default=False, help_text="Marking the tool private will restrict visibility to staff.")
 	multiplicity = models.PositiveIntegerField(default=1, help_text="Number of parallel user slots, normally 1 (0=virtual/infinite).")
 	primary_owner = models.ForeignKey(User, related_name="primary_tool_owner", help_text="The staff member who is responsible for administration of this tool.")
 	backup_owners = models.ManyToManyField(User, blank=True, related_name="backup_for_tools", help_text="Alternate staff members who are responsible for administration of this tool when the primary owner is unavailable.")

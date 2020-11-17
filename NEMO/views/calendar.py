@@ -103,6 +103,9 @@ def reservation_event_feed(request, start, end):
 	events = events.exclude(start__lt=start, end__lt=start)
 	events = events.exclude(start__gt=end, end__gt=end)
 
+	if not request.user.is_staff:
+		events = events.exclude(tool__private=True)
+
 	# Filter events that only have to do with the relevant tool.
 	tool = request.GET.get('tool_id')
 	if tool:
