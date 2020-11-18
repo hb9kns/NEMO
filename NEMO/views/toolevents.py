@@ -305,11 +305,11 @@ def billing_sums(request):
 # list of {'tool':.,'usage':.,'reservation':.}
 	totals={}
 	for p in projects:
-		if True: #try:
+		try:
 			totals[p.name] = get_project_span_tool_event_sums([p], start, end, billables=True)
 			# note as valid project
 			good_name = p.name
-		else: #except:
+		except:
 			totals[p.name] = []
 	if good_name:
 		# get sorted billing references from last valid project
@@ -324,18 +324,21 @@ def billing_sums(request):
 	bold.set_bold()
 	italic = book.add_format()
 	italic.set_italic()
-	title = [ 'NEMO usage for billable tools of all active projects' ]
+	title = [ 'NEMO usage hours for billable tools of all active projects' ]
 	sheet.write_row('A1', title, bold)
 	title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 	sheet.write_row('A2', title)
 	columntitles = ['Reference', 'Description']+[ p.name for p in projects ]
 	sheet.write_row('A4', columntitles, italic)
-	rownum = 4
+	columntitles = ['', '']+[ p.billing_reference for p in projects ]
+	sheet.write_row('A5', columntitles, italic)
+	rownum = 5
 	for b in billrefs:
 		# prepend billing ref and description
 		row = [ b[0], b[1] ]
 		for p in projects:
-			row += [ tot['usage'] for tot in totals[p.name] if tot['ref'] == b[0] ]
+		# two-decimals float of billrefs usage total converted to hours
+			row += [ float('{0:.2f}'.format( float(tot['usage'])/60 )) for tot in totals[p.name] if tot['ref'] == b[0] ]
 		sheet.write_row(rownum,0,row)
 		rownum += 1
 	book.close()
