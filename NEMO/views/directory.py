@@ -60,6 +60,7 @@ def userlist(request):
 		'Id',
 		'Active',
 		':modified',
+		':login',
 		'Last name',
 		'First name',
 		'Username',
@@ -120,7 +121,11 @@ def userlist(request):
 				activitydate += ' ('+str(lastact.action)+')'
 		except:
 			activitydate = ''
-		row += [ activitydate ]
+		try:
+			lastlogin = u.last_login.strftime('%Y-%m-%d')
+		except:
+			lastlogin = '(never)'
+		row += [ activitydate, lastlogin ]
 		row += [ u.last_name, u.first_name, u.username,
 			u.email, u.phone, u.address, affiliation,
 			u.position, u.personnel_number, u.badge_number,
