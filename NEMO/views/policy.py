@@ -120,6 +120,47 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 		# 	pass
 	return HttpResponse()
 
+def check_policy_to_note_pending_usage(tool, operator, user, project):
+	"""
+	Check that the user is allowed to note pending usage for the tool.
+	Do not check things which will be checked anyway at later usage.
+	No staff time may be charged on pending usage.
+	"""
+
+	# The tool must be in use and have multiplicity 1.
+	current_usage_event = tool.get_current_usage_event()
+	if not current_usage_event or tool.multiplicity != 1:
+		return HttpResponseBadRequest("The tool is not in use or has multiplicity other than 1.")
+
+	# The user must be qualified to use the tool.
+	if tool not in operator.qualifications.all() and not operator.is_staff:
+		return HttpResponseBadRequest("You are not qualified to use this tool.")
+
+	# Only staff members can operate a tool on behalf of another user.
+	if (user and operator.pk != user.pk) and not operator.is_staff:
+		return HttpResponseBadRequest("You must be a staff member to use a tool on another user's behalf.")
+
+	# All required resources must be available to operate a tool except for staff.
+	if tool.required_resource_set.filter(available=False).exists() and not operator.is_staff:
+		return HttpResponseBadRequest("A resource that is required to operate this tool is unavailable.")
+
+	# Users may only charge to projects they are members of.
+	if project not in user.active_projects():
+		return HttpResponseBadRequest('The designated user is not assigned to the selected project.')
+
+	# The tool operator must not have a lock on usage
+	if operator.training_required:
+		return HttpResponseBadRequest("You are blocked from using all tools in the facility. Please complete the rules tutorial in order to use tools.")
+
+	# Scheduling use is only allowed when delayed logoff is not in effect.
+	if tool.delayed_logoff_in_progress():
+		return HttpResponseBadRequest("Delayed tool logoff is in effect. You must wait for the delayed logoff to expire before you may note pending usage.")
+
+	# Users may not enable a tool during a scheduled outage. Staff are exempt from this rule.
+	if tool.scheduled_outage_in_progress() and not operator.is_staff:
+		return HttpResponseBadRequest("A scheduled outage is in effect. You must wait for the outage to end before you can use the tool.")
+
+	return HttpResponse()
 
 def check_policy_to_disable_tool(tool, operator, downtime):
 	""" Check that the user is allowed to disable the tool. """

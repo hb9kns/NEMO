@@ -55,6 +55,18 @@
 					Your reservation for this tool will end at {{ time_left }}. The remainder of your reservation will be relinquished when you stop using this tool.
 				</div>
 			{% endif %}
+			{% if tool.allow_pending_usage %}
+				<div>{% if tool.pending_usage %}
+					<b>Next pending usage by
+					{% if tool.pending_operator != tool.pending_user %}{{ tool.pending_operator }} on behalf of{% endif %}
+					{{ tool.pending_user }} for project {{ tool.pending_project }}.</b>
+					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id %}
+					<br /><b><a href="{% url 'cancel_pending' tool.id %}">CANCEL</a></b> this pending usage.
+					{% endif %}
+				{% else %}
+				<em>Tool is in use, but pending usage may be noted by other users.</em>
+				{% endif%}</div>
+			{% endif %}
 		{% elif tool.delayed_logoff_in_progress %}
 			{% with tool.get_delayed_logoff_usage_event as delayed_logoff_event %}
 				<div class="primary-highlight">
@@ -202,7 +214,11 @@
 					{% endif %}
 					<div id="stop_wrapper" style="display:inline-block" data-toggle="tooltip" data-placement="bottom" title="Please answer the required questions (above) to proceed"><button id="stop" class="btn btn-default" onclick="disable_tool('{% url 'disable_tool' tool.id %}'); return false"><span class="glyphicon glyphicon-stop"></span> Stop using the {{ tool.name }}</button></div><p>
 				{% endif %}
-			{% else %}
+			{% endif %}
+			{# show user and project selection if tool is unused #}
+			{# or it allows pending usage but none is noted yet #}
+			{% if not tool.in_use or tool.allow_pending_usage and not tool.pending_usage %}
+				{% if tool.in_use %}<hr /><h5>For pending usage:</h5>{% endif %}
 				{% if user.is_staff %}
 					<h4>What would you like to do?</h4>
 					<div class="radio"><label><input type="radio" onchange="use_tool_for_self()" name="staff_charge" value="false">Use this tool for my own project</label></div>
@@ -226,11 +242,11 @@
 				{% elif tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress %}
 					{% include 'tool_control/get_projects.html' with active_projects=active_projects_filtered user_id=user.id %}
 				{% endif %}
-				{% if user.is_staff or tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress %}
-					{% if tool.external_link != Null and tool.external_link != '' %}
-					<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
-					{% endif %}
-					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span> Start using the {{ tool.name }}</button>
+				{% if tool.external_link != Null and tool.external_link != '' %}
+				<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
+				{% endif %}
+				{% if user.is_staff or tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress or tool.allow_pending_usage and not tool.pending_usage %}
+					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span>{% if tool.in_use %}Note pending usage of{% else %}Start using{% endif %} {{ tool.name }}</button>
 				{% endif %}
 			{% endif %}
 			{% if tool.usage_warning and tool.usage_warning != '' %}

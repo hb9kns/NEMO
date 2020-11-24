@@ -15,7 +15,7 @@ from django.views.decorators.http import logger, require_GET, require_POST
 from NEMO.forms import nice_errors, CommentForm
 from NEMO.models import Comment, Configuration, ConfigurationHistory, Project, Reservation, StaffCharge, Task, TaskCategory, TaskStatus, Tool, UsageEvent, User
 from NEMO.utilities import quiet_int, extract_times
-from NEMO.views.policy import check_policy_to_enable_tool, check_policy_to_disable_tool
+from NEMO.views.policy import check_policy_to_enable_tool, check_policy_to_disable_tool, check_policy_to_note_pending_usage
 from NEMO.views.customization import get_customization
 from NEMO.widgets.dynamic_form import DynamicForm
 from NEMO.widgets.tool_tree import ToolTree
@@ -69,6 +69,16 @@ def tool_status(request, tool_id):
 				dictionary['time_left'] = current_reservation.end
 	except Reservation.DoesNotExist:
 		pass
+
+	if tool.pending_usage():
+	# will be checked only if pending usage is allowed for tool
+	# and if all three entries are not None and pending_user is not empty
+		dictionary['pending_usage'] = True
+		dictionary['pending_user'] = tool.pending_user
+		dictionary['pending_operator'] = tool.pending_operator
+		dictionary['pending_project'] = tool.pending_project
+	else:
+		dictionary['pending_usage'] = False
 
 	try:
 		next_4hrs = Reservation.objects.filter(start__gt=timezone.now(), start__lte=timezone.now()+timedelta(hours=4), cancelled=False, missed=False, shortened=False, tool=tool).order_by('start')
@@ -162,26 +172,39 @@ def determine_tool_status(tool):
 
 @login_required
 @require_POST
-def enable_tool(request, tool_id, user_id, project_id, staff_charge):
-	""" Enable a tool for a user. The user must be qualified to do so based on the lab usage policy. """
+def enable_tool(request, tool_id, user_id, project_id, staff_charge, operator_id=None):
+	""" Enable a tool for a user, or note pending usage for later. The user must be qualified to do so based on the lab usage policy. """
 
 	if not settings.ALLOW_CONDITIONAL_URLS:
 		return HttpResponseBadRequest('Tool control is only available on campus. We\'re working to change that! Thanks for your patience.')
 
 	tool = get_object_or_404(Tool, id=tool_id)
-	operator = request.user
+	# operator_id used by disable_tool() in case of re-enabling for pending usage
+	if operator_id:
+		operator = get_object_or_404(User, id=operator_id)
+	else:
+		operator = request.user
 	user = get_object_or_404(User, id=user_id)
 	project = get_object_or_404(Project, id=project_id)
 	staff_charge = staff_charge == 'true'
-	response = check_policy_to_enable_tool(tool, operator, user, project, staff_charge)
+	if tool.get_current_usage_event():
+		response = check_policy_to_note_pending_usage(tool, operator, user, project)
+		if response.status_code != HTTPStatus.OK:
+			return response
+		return note_pending_usage(request, tool_id, user_id, project_id)
+	else:
+		response = check_policy_to_enable_tool(tool, operator, user, project, staff_charge)
 	if response.status_code != HTTPStatus.OK:
 		return response
 
 	# All policy checks passed so enable the tool for the user.
 	if tool.interlock and not tool.interlock.unlock():
-		pass
-		# raise Exception("The interlock command for this tool failed. The error message returned: " + str(tool.interlock.most_recent_reply))
-		response = HttpResponse("Tool interlocking did not work, error message: " + str(tool.interlock.most_recent_reply))
+		error_message = f"The interlock command for the {tool} failed. The error message returned: {tool.interlock.most_recent_reply}"
+		logger.error(error_message)
+		return HttpResponseServerError(error_message)
+
+	# remove noted pending usage
+	tool.clear_pending_usage()
 
 	# Create a new usage event to track how long the user uses the tool.
 	new_usage_event = UsageEvent()
@@ -232,11 +255,14 @@ def disable_tool(request, tool_id):
 	except Reservation.DoesNotExist:
 		pass
 
-	# All policy checks passed so disable the tool for the user.
-	if tool.interlock and not tool.interlock.lock():
-		error_message = f"The interlock command for the {tool} failed. The error message returned: {tool.interlock.most_recent_reply}"
-		logger.error(error_message)
-		return HttpResponseServerError(error_message)
+	# All policy checks passed so disable the tool for the user,
+	# unless another usage is pending.
+	# (We don't want to switch the tool off in this case!)
+	if not tool.pending_usage():
+		if tool.interlock and not tool.interlock.lock():
+			error_message = f"The interlock command for the {tool} failed. The error message returned: {tool.interlock.most_recent_reply}"
+			logger.error(error_message)
+			return HttpResponseServerError(error_message)
 
 	# End the current usage event for the tool
 	current_usage_event.end = timezone.now() + downtime
@@ -252,8 +278,32 @@ def disable_tool(request, tool_id):
 		if existing_staff_charge.customer == current_usage_event.user and existing_staff_charge.project == current_usage_event.project:
 			response = render(request, 'staff_charges/reminder.html', {'tool': tool})
 
+	if tool.pending_usage():
+		response = enable_tool(request, tool_id, tool.pending_user.id, tool.pending_project.id, staff_charge=False, operator_id=tool.pending_operator.id)
+
 	return response
 
+
+@login_required
+@require_POST
+def note_pending_usage(request, tool_id, user_id, project_id):
+	""" Note pending usage of a tool. No staff charges. """
+	if not settings.ALLOW_CONDITIONAL_URLS:
+		return HttpResponseBadRequest('Tool control is only available on campus. We\'re working to change that! Thanks for your patience.')
+	tool = get_object_or_404(Tool, id=tool_id)
+	tool.pending_operator = request.user
+	tool.pending_user = get_object_or_404(User, id=user_id)
+	tool.pending_project = get_object_or_404(Project, id=project_id)
+	tool.save()
+	return HttpResponse()
+
+@login_required
+@require_GET
+def cancel_pending_usage(request, tool_id):
+	tool = get_object_or_404(Tool, id=tool_id)
+# TODO: filter user against pending_user and pending_operator!
+	tool.clear_pending_usage()
+	return redirect('tool_control', tool_id)
 
 @login_required
 @require_GET

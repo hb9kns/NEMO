@@ -266,6 +266,10 @@ class Tool(models.Model):
 	allow_delayed_logoff = models.BooleanField(default=False, help_text='Upon logging off users may enter a delay before another user may use the tool. Some tools require "spin-down" or cleaning time after use.')
 	reservation_required = models.BooleanField(default=False, help_text='Require that users have a current (within 15 minutes) reservation in order to use the tool')
 	post_usage_questions = models.TextField(null=True, blank=True, help_text="")
+	allow_pending_usage = models.BooleanField(default=False, help_text='Allow registering of automatic start of usage event as soon as tool becomes free.')
+	pending_user = models.ForeignKey('User', null=True, blank=True, related_name="pending_tool_user")
+	pending_operator = models.ForeignKey('User', null=True, blank=True, related_name="pending_tool_operator")
+	pending_project = models.ForeignKey('Project', null=True, blank=True, related_name="pending_tool_project")
 
 	class Meta:
 		ordering = ['name']
@@ -374,6 +378,24 @@ class Tool(models.Model):
 			return UsageEvent.objects.filter(end=None, tool=self.id)[0]
 		except UsageEvent.DoesNotExist:
 			return None
+
+	def pending_usage(self):
+		""" Check if pending usage exists for tool. """
+		if not self.allow_pending_usage:
+			return False
+		else:
+			try:
+				return self.pending_user != None and self.pending_operator != None and self.pending_project != None
+			except:
+				return False
+
+	def clear_pending_usage(self):
+		self.pending_user = None
+		self.pending_operator = None
+		self.pending_project = None
+		self.save()
+
+	# no "set_pending_usage", because done directly in tool control views
 
 
 class Configuration(models.Model):
