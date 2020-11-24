@@ -233,6 +233,9 @@
 					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span> Start using the {{ tool.name }}</button>
 				{% endif %}
 			{% endif %}
+			{% if tool.usage_warning and tool.usage_warning != '' %}
+			<p>Warning: <b>{{ tool.usage_warning }}</b></p>
+			{% endif %}
 		</form>
 		<hr />
 		{% if tool.usage_link != Null and tool.usage_link != '' %}

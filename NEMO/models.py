@@ -248,6 +248,7 @@ class Tool(models.Model):
 	phone_number = models.CharField(max_length=100)
 	external_link = models.CharField(max_length=200, blank=True, null=True, help_text="Weblink to external resource (equipment page etc)")
 	usage_link = models.CharField(max_length=200, blank=True, null=True, help_text="Weblink to external usage logging")
+	usage_warning = models.CharField(max_length=200, blank=True, null=True, help_text="Warning displayed next to start/stop usage button")
 	notification_email_address = models.EmailField(blank=True, null=True, help_text="Messages that relate to this tool (such as comments, problems, and shutdowns) will be forwarded to this email address. This can be a normal email address or a mailing list address.")
 	# Policy fields:
 	requires_area_access = models.ForeignKey('Area', null=True, blank=True, help_text="Indicates that this tool is physically located in a billable area and requires an active area access record in order to be operated.")

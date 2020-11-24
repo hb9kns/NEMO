@@ -188,6 +188,8 @@
 				<label>This user has only normal (non-staff) permissions.</em></label>
 			{% endif %}
 				<small>&mdash; modify in <a href="{% url 'admin:NEMO_user_change' form.instance.id %}">Detailed administration</a></small>
+				<br />
+				<small>Permission groups: {% for g in form.groups.value %}{{ g }} {% endfor %}</small>
 			</div>
 			<div class="col-sm-offset-2 col-sm-10">
 				<div class="checkbox">
