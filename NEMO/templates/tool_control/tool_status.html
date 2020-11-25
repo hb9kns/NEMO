@@ -60,11 +60,11 @@
 					<b>Next pending usage by
 					{% if tool.pending_operator != tool.pending_user %}{{ tool.pending_operator }} on behalf of{% endif %}
 					{{ tool.pending_user }} for project {{ tool.pending_project }}.</b>
-					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id %}
+					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id or user.is_staff %}
 					<br /><b><a href="{% url 'cancel_pending' tool.id %}">CANCEL</a></b> this pending usage.
 					{% endif %}
 				{% else %}
-				<em>Tool is in use, but pending usage may be noted by other users.</em>
+				<em>Tool is in use, but pending usage may be announced.</em>
 				{% endif%}</div>
 			{% endif %}
 		{% elif tool.delayed_logoff_in_progress %}
@@ -218,7 +218,7 @@
 			{# show user and project selection if tool is unused #}
 			{# or it allows pending usage but none is noted yet #}
 			{% if not tool.in_use or tool.allow_pending_usage and not tool.pending_usage %}
-				{% if tool.in_use %}<hr /><h5>For pending usage:</h5>{% endif %}
+				{% if tool.in_use %}<hr /><h4>If you want <b>to announce pending</b> usage:</h4>{% endif %}
 				{% if user.is_staff %}
 					<h4>What would you like to do?</h4>
 					<div class="radio"><label><input type="radio" onchange="use_tool_for_self()" name="staff_charge" value="false">Use this tool for my own project</label></div>
