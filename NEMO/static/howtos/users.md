@@ -1,6 +1,6 @@
 # NEMO/FIRST-Lab, Short Manual
 
-(for users and equipment responsibles)
+(for users and [equipment responsibles]( #equiresp ))
 
 Laboratory and user management for [FIRST-Lab]( https://first.phys.ethz.ch)
 is done on an instance of [NEMO,][nemorepo]
@@ -173,6 +173,7 @@ on the server.
 
 ---
 
+<a id="equiresp"></a>
 ## Equipment Responsibles
 
 Equipment responsibles have some additional permissions in [NEMO][nemo]:
@@ -187,7 +188,12 @@ Currently it contains two entries:
 *Please keep in mind all activity is logged by the system; if in doubt, ask*
 the [NEMO responsible][nemoresp] before doing anything you don't understand.
 
-### Special bookings
+### Reservations and special projects
+
+Equipment responsibles can reserve any tool, even if they are not
+qualified for them in NEMO, the reason being that they might have to
+reserve another (adjacent) tool for blocking lab space.
+However, unless they are qualified, they cannot *use* the tool.
 
 There are additional projects available to equipment responsibles:
 
@@ -250,4 +256,4 @@ Therefore please double-check user names before adding them!
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-11-25/Y.Bonetti*
+*2020-12-08/Y.Bonetti*
