@@ -52,6 +52,15 @@ The calendar pane allows for selection of `Day/Week/Month` views with the
 buttons at the top right side. With the buttons `</>/Today` at the left,
 the displayed time unit can be selected.
 
+**If the background of this pane is red, you have selected a shutdown tool.**
+Please make sure to select the correct tool!
+Equipment responsibles may reserve a shutdown tool, though,
+to permit planning of maintenance works.
+
+Please also keep in mind that some tools are always marked as shut down,
+in particular the `_no-tool_` -- therefore you
+should make sure to select another tool before making reservations.
+
 ### Reserving a tool
 
 To reserve a tool the user is qualified for, first select `Reservations`
@@ -195,6 +204,10 @@ qualified for them in NEMO, the reason being that they might have to
 reserve another (adjacent) tool for blocking lab space.
 However, unless they are qualified, they cannot *use* the tool.
 
+They can also select tools which are shut down, and therefore should
+make sure not to have selected the `_no-tool_` which is used as a dummy;
+otherwise, reservations may silently disappear.
+
 There are additional projects available to equipment responsibles:
 
 - `_MAINTENANCE` is to be used for work on equipment; if it is out of order,
@@ -256,4 +269,4 @@ Therefore please double-check user names before adding them!
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-12-08/Y.Bonetti*
+*2020-12-09/Y.Bonetti*
