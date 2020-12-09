@@ -623,6 +623,7 @@ class UsageEvent(CalendarDisplay):
 	end = models.DateTimeField(null=True, blank=True)
 	validated = models.BooleanField(default=False)
 	run_data = models.TextField(null=True, blank=True)
+	title = models.TextField(default='', blank=True, null=True, max_length=100)
 
 	def duration(self):
 		return calculate_duration(self.start, self.end, "In progress")

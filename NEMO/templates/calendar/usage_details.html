@@ -3,6 +3,7 @@
 	<h4 class="modal-title">{{ event.tool }} usage details</h4>
 </div>
 <div class="modal-body">
+	{% if event.title %}Title: {{ event.title }}<br>{% endif %}
 	User: {{ event.user }}<br>
 	Operator: {{ event.operator }}<br>
 	Project: {{ event.project.name }}<br>
