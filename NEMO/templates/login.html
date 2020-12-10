@@ -80,7 +80,8 @@
 				{{ login_banner|safe }}
 			</div>
 		{% endif %}
-		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><p><small>server time at page loading:<br />{% now 'l, Y-m-d, H:i' %}</small></p></div>
+		<div class="col-md-8 col-md-offset-2" style="text-align:center; margin-bottom:30px"><p><small>server time at page loading: {% now 'l, Y-m-d, H:i' %}<br /><tt>{{ version }}</tt></small></p></div>
+
 	</div>
 
 	<script>
