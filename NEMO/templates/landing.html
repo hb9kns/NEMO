@@ -51,7 +51,7 @@
 				{% for a in alerts %}
 					<div class="alert alert-danger">
 						{% if a.title %}<span style="font-weight:bold">{{ a.title }}</span><br>{% endif %}
-						{{ a.contents }}
+						<div title="{{ a.creator }} ({{ a.creation_time }})">{{ a.contents }}</div>
 					</div>
 				{% endfor %}
 				{% for r in disabled_resources %}
