@@ -10,7 +10,7 @@ from NEMO.models import Account, Project, User, MembershipHistory, ActivityHisto
 
 
 @staff_member_required(login_url=None)
-@permission_required('NEMO.change_account', raise_exception=True)
+@permission_required('NEMO.change_project', raise_exception=True)
 @require_GET
 def accounts_and_projects(request, kind=None, identifier=None):
 	try:
