@@ -49,10 +49,16 @@
 			<div class="col-lg-4">
 				<h3>Alerts &amp; outages</h3>
 				{% for a in alerts %}
-					<div class="alert alert-danger" title="{{ a.creator }} ({{ a.creation_time }})">
+				<div class="alert alert-danger" title="{{ a.creator }} ({{ a.creation_time }})">
+					<a onclick="toggle_details(this)" data-toggle="collapse" data-target="#alert_{{ a.id }}_details" class="pointer alert-danger" style="text-decoration:none">
+					<span id="alert_{{ a.id }}_chevron" class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
 						{% if a.title %}<span style="font-weight:bold">{{ a.title }}</span><br>{% endif %}
-						{{ a.contents }}
+{{ project }}
+					</a>
+					<div id="alert_{{ a.id }}_details" class="collapse">
+					{{ a.contents }}
 					</div>
+				</div>
 				{% endfor %}
 				{% for r in disabled_resources %}
 					<div class="alert alert-danger">
