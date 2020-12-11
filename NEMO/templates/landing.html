@@ -49,9 +49,9 @@
 			<div class="col-lg-4">
 				<h3>Alerts &amp; outages</h3>
 				{% for a in alerts %}
-					<div class="alert alert-danger">
+					<div class="alert alert-danger" title="{{ a.creator }} ({{ a.creation_time }})">
 						{% if a.title %}<span style="font-weight:bold">{{ a.title }}</span><br>{% endif %}
-						<div title="{{ a.creator }} ({{ a.creation_time }})">{{ a.contents }}</div>
+						{{ a.contents }}
 					</div>
 				{% endfor %}
 				{% for r in disabled_resources %}
