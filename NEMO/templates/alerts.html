@@ -63,8 +63,11 @@
 					</form>
 					{% if a.title %}<span style="font-weight:bold">{{ a.title }}</span><br>{% endif %}
 					{{ a.contents }}<br>
+					<small><em>
+					Created by {{ a.creator }} on {{ a.creation_time }}<br>
 					Debuts on {{ a.debut_time }}<br>
 					{% if a.expiration_time %}Expires on {{ a.expiration_time }}{% else %}This alert will never expire{% endif %}<br>
+					</em></small>
 				</div>
 			</div>
 		{% endfor %}
