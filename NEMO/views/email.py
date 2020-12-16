@@ -202,12 +202,13 @@ def send_broadcast_email(request):
 	if form.cleaned_data['copy_me']:
 		users += [request.user.email]
 	if form.cleaned_data['carbon_copy']:
-		cc_recipient=form.cleaned_data['carbon_copy']
-		try:
-			validate_email(cc_recipient)
-		except:
-			return HttpResponseBadRequest('Cc:-Recipient not valid.')
-		users += [cc_recipient]
+		cc_recipients=form.cleaned_data['carbon_copy'].split(sep=';')
+		for cc in cc_recipients:
+			try:
+				validate_email(cc)
+			except:
+				return HttpResponseBadRequest('Invalid Cc: field "'+cc+'"')
+		users += cc_recipients
 	try:
 		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users))
 		email.attach_alternative(content, 'text/html')
