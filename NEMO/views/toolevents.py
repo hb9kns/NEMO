@@ -67,7 +67,7 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 			toolevents.append(event_entry)
 	return toolevents
 
-@staff_member_required(login_url=None)
+@permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def toolevents(request):
 	""" Presents a page displaying tool events for a given time span. """

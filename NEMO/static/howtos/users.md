@@ -193,6 +193,9 @@ Currently it contains two entries:
   allowing to send e-mail for all tools you are responsible for
 - Tool qualifications,
   allowing to (dis)qualify users to/from tools you are responsible for
+- Tool event reports,
+  allowing to display tool reservation or usage for all tools where the
+  user is primary responsible
 
 *Please keep in mind all activity is logged by the system; if in doubt, ask*
 the [NEMO responsible][nemoresp] before doing anything you don't understand.
@@ -260,6 +263,18 @@ Most tools are configured in such a way that qualifying a user will
 automatically also grant them access to the required physical area.
 Therefore please double-check user names before adding them!
 
+### Tool event reports
+
+This page allows to display (or download) lists of reservation or usage
+events for all tools where you are primary responsible, for a given
+time span (by default from beginning of the current year to now).
+
+If events exist in the selected time range, clicking on "View event
+records" displays the corresponding list.
+You can display it also as pure text with TABs as separators, or download
+as an XLSX-formatted spreadsheet for further processing, by clicking on
+the corresponding links at the table head.
+
 ---
 
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
@@ -269,4 +284,4 @@ Therefore please double-check user names before adding them!
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*2020-12-09/Y.Bonetti*
+*ver.1.1/2020-12-16/Y.Bonetti*
