@@ -51,4 +51,5 @@
 	{% endfor %}
 	</tbody>
 </table>
+<small>[{% now 'Y-m-d,H:i:s' %}]</small>
 <a href="{% url 'calendar' '20'%}20{% for tool in visible_tools %},{{ tool.id }}{% endfor %}/DaLab/">.</a>
