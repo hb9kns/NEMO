@@ -495,7 +495,7 @@ function clear_specific_user()
 function on_load()
 {
 	create_calendar();
-	setInterval(refresh_calendar_and_sidebar, 30000);
+	setInterval(refresh_calendar_and_sidebar, 345678);
 	set_tool_link_callback(update_event_sources);
 	enable_tool_tree_toggling();
 	$('#tool_search').autocomplete('tools', on_tool_search_selection, {{ tools|json_search_base }});
