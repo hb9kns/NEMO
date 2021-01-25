@@ -280,7 +280,8 @@ def billing_sums(request):
 	""" Calculates table of billable tool usage
 	    for all projects and for a given time span. """
 # get active project ids
-	projects = Project.objects.filter(active=True)
+#	projects = Project.objects.filter(active=True)
+	projects = Project.objects.all()
 	dictionary = {}
 	dictionary['projects'] = projects
 # by default, start is beginnning of the month, end is today
@@ -324,7 +325,7 @@ def billing_sums(request):
 	bold.set_bold()
 	italic = book.add_format()
 	italic.set_italic()
-	title = [ 'NEMO usage hours for billable tools of all active projects' ]
+	title = [ 'NEMO usage hours for billable tools of all projects' ]
 	sheet.write_row('A1', title, bold)
 	title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 	sheet.write_row('A2', title)
