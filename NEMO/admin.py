@@ -242,7 +242,7 @@ class ProjectAdminForm(forms.ModelForm):
 class ProjectAdmin(admin.ModelAdmin):
 	list_display = ('name', 'id', 'application_identifier', 'account', 'billing_reference', 'project_contact', 'active')
 	search_fields = ('name', 'application_identifier', 'project_contact', 'account__name')
-	list_filter = ('active',)
+	list_filter = ('active', 'application_identifier',)
 	form = ProjectAdminForm
 
 	def save_model(self, request, obj, form, change):
