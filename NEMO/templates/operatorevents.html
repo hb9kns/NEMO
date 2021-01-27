@@ -16,10 +16,10 @@
 		<option value="usage" {% if eventtype == 'usage' %}selected{% endif %}>usage</option>
 	</select>
 	report for
-	<select name="operator" id="operatorid">{% for u in users %}
-		<option value="{{ u.id }}"
-		{% if u.id == user %}selected{% endif %}>
-		{{ u.name }}</option>
+	<select name="operatorid" id="operatorid">{% for o in operators %}
+		<option value="{{ o.id }}"
+		{% if o.id == operatorid %}selected{% endif %}>
+		{{ o.last_name }} {{ o.first_name }} ({{ o.affiliation }})</option>
 	{% endfor %}</select>
 	<br />
 		<div class="form-group">
@@ -42,7 +42,7 @@
 			<h3>{{ eventtype }} events for {{ operatorname }}</h3>
 			<h5>{{ start }} &mdash; {{ end }}</h5>
 			<p><small><em>get this data as
-			<a href="{% url 'operatorevents' %}?outputtype=txt&eventtype={{ eventtype }}&operator={{ operatorid }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
+			<a href="{% url 'operatorevents' %}?outputtype=txt&eventtype={{ eventtype }}&operatorid={{ operatorid }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
 			or <a href="{% url 'operatorevents' %}?outputtype=xlsx&eventtype={{ eventtype }}&operatorid={{ operatorid }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
 			</em></small></p>
 			<table class="table table-bordered table-condensed">
@@ -50,7 +50,8 @@
 					<tr>
 						<th>Start</th>
 						<th>End</th>
-						<th>Duration/min</th>
+						<th>Duration/h</th>
+						<th>Tool</th>
 						<th>Project</th>
 						<th>User</th>
 						<th>Affiliation</th>
@@ -64,7 +65,8 @@
 						<tr>
 							<td>{{ e.start }}</td>
 							<td>{{ e.end }}</td>
-							<td>{{ e.minutes }}</td>
+							<td>{{ e.hours|floatformat:2 }}</td>
+							<td>{{ e.toolname }}</td>
 							<td>{{ e.projectname }}</td>
 							<td>{{ e.user }}</td>
 							<td>{{ e.affiliation }}</td>
@@ -79,6 +81,7 @@
 			{% if operatorid == 0 %}<p>{# Sorry, you don't have permission for viewing "{{ operatorname }}"! #}</p>
 			{% elif start or end %}
 				No records exist between {{ start }} and {{ end }} for "{{ operatorname }}" {{ eventtype }} events.
+				(Or you may not be allowed to see them.)
 			{% endif %}
 		{% endif %}
 	</div>

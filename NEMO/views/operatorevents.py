@@ -15,20 +15,20 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from NEMO.utilities import parse_start_and_end_date
 from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
-def allowed_users(request):
-	""" users for which the requester is allowed to view usage events"""
-# reusing permissions: those allowed to change events can view all users
-	if request.user.has_perm('NEMO.change_usageevent'):
+def allowed_operators(request):
+	""" operators for which the requester is allowed to view events"""
+# reusing permissions: those allowed to change events can view all operators
+	if request.user.has_perm('NEMO.change_account'):
 		return User.objects.all()
 # others can just view themselves
 	else:
-		return User.objects.get(pk=request.user.id)
+		return User.objects.filter(pk=request.user.id)
 
 def get_operator_span_events(request, eventtype, operatorid, begin, end):
 	""" get all usage events ending after begin and before or at end
 	    (type selects between 'reservation' or 'usage') """
-	userevents = []
-	if User.objects.get(pk=operatorid) in allowed_users(request):
+	operatorevents = []
+	if User.objects.get(pk=operatorid) in allowed_operators(request):
 		if eventtype == 'reservation':
 			events = Reservation.objects.filter(user=operatorid, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start')
 		else:
@@ -62,28 +62,29 @@ def get_operator_span_events(request, eventtype, operatorid, begin, end):
 			try:
 				start = event.start
 				end = event.end
-				minutes = int((end-start)/timedelta(minutes=1)+0.5)
+				hours = int((end-start)/timedelta(minutes=1)+0.5)/60
 			except:
 				start = None
 				end = None
-				minutes = None
+				hours = None
 			start = timezone.localtime(start)
 			end = timezone.localtime(end)
-			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': username, 'operator': operatorname, 'remarks': remarks}
-			toolevents.append(event_entry)
-	return toolevents
+			event_entry = {'start': start, 'end': end, 'hours': hours, 'toolname': toolname, 'projectname': projectname, 'affiliation': affiliation, 'user': username, 'operator': operatorname, 'remarks': remarks}
+			operatorevents.append(event_entry)
+	return operatorevents
 
 @require_GET
 def operatorevents(request):
 	""" Presents a page displaying operator events for a given time span. """
 	dictionary = {}
-	dictionary['operators'] = allowed_users(request)
+	dictionary['operators'] = allowed_operators(request)
 	try:
-		operatorid = int(request.GET['operator'])
-		operatorname = User.objects.get(pk=operatorid).name
+		operatorid = int(request.GET['operatorid'])
+# try getting user, for catching nonexistent operatorid values
+		operatorname = User.objects.get(pk=operatorid).first_name+" "+User.objects.get(pk=operatorid).last_name
 	except:
-		operatorid = 0
-		operatorname = '(undefined operator)'
+		operatorid = request.user.id
+	operatorname = User.objects.get(pk=operatorid).first_name+" "+User.objects.get(pk=operatorid).last_name
 	try:
 		start, end = parse_start_and_end_date(request.GET['start'], request.GET['end'])
 	except:
@@ -96,7 +97,7 @@ def operatorevents(request):
 		eventtype = 'usage'
 	events = []
 	try:
-		if User.objects.get(pk=operatorid) in allowed_users(request):
+		if User.objects.get(pk=operatorid) in allowed_operators(request):
 			events = get_operator_span_events(request, eventtype, operatorid, start, end)
 	except:
 		pass
@@ -105,7 +106,7 @@ def operatorevents(request):
 	except:
 		outputtype = 'table'
 	if outputtype != 'xlsx':
-		dictionary['operator'] = operatorid
+		dictionary['operatorid'] = operatorid
 		dictionary['operatorname'] = operatorname
 		dictionary['start'] = start
 		dictionary['end'] = end
@@ -118,7 +119,7 @@ def operatorevents(request):
 			return render(request, 'operatorevents.html', dictionary)
 	else:
 # XLSX output
-		fn = eventtype + '_' + str(operatorid) + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
+		fn = 'op_' + eventtype + '_' + str(operatorid) + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
 		book = Workbook(response, {'in_memory': True})
@@ -127,15 +128,15 @@ def operatorevents(request):
 		bold.set_bold()
 		italic = book.add_format()
 		italic.set_italic()
-		title = [ eventtype, operatorname ]
+		title = [ eventtype + ' events for operator:', operatorname ]
 		sheet.write_row('A1', title, bold)
 		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d") ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/Remarks']
+		columntitles = ['Start', 'End', 'Hours', 'Tool', 'Project', 'User', 'Affiliation', 'Title/Remarks']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in events:
-			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['projectname'], e['user'], e['affiliation'], e['remarks'] ]
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['hours'], e['toolname'], e['projectname'], e['user'], e['affiliation'], e['remarks'] ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
