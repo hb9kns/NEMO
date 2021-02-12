@@ -327,20 +327,23 @@ def billing_sums(request):
 	italic.set_italic()
 	title = [ 'NEMO usage hours for billable tools of all projects' ]
 	sheet.write_row('A1', title, bold)
-	title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
-	sheet.write_row('A2', title)
-	columntitles = ['Reference', 'Description']+[ p.name for p in projects ]
+	sheet.write_row('A2', ['','','','begin','end','note','prefix','price','attach'], italic)
+	title = [ '','','SAPdata', start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), '','','1','','','  =', days, ' days' ]
+	sheet.write_row('A3', title)
+	columntitles = ['Reference', 'Description', 'Project']+[ p.name for p in projects ]
 	sheet.write_row('A4', columntitles, italic)
-	columntitles = ['', '']+[ p.billing_reference for p in projects ]
+	columntitles = ['', '', '']+[ p.billing_reference for p in projects ]
 	sheet.write_row('A5', columntitles, italic)
 	rownum = 5
 	for b in billrefs:
-		# prepend billing ref and description
-		row = [ b[0], b[1] ]
+		# prepend billing ref, description and empty cell
+		row = [ b[0], b[1], '' ]
 		for p in projects:
 		# two-decimals float of billrefs usage total converted to hours
 			row += [ float('{0:.2f}'.format( float(tot['usage'])/60 )) for tot in totals[p.name] if tot['ref'] == b[0] ]
 		sheet.write_row(rownum,0,row)
 		rownum += 1
+# add end marker for further processing
+	sheet.write_row(rownum,0, ['','^-^','End'])
 	book.close()
 	return response
