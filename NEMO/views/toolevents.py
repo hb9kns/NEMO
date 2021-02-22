@@ -26,13 +26,15 @@ def allowed_tools(request):
 
 def get_tool_span_events(request, eventtype, tool, begin, end):
 	""" get all usage events ending after begin and before or at end
-	    (type selects between 'reservation' or 'usage') """
+	    (type selects between 'reservation' or 'usage')
+	    and add line containing sum of all event durations at end """
 	toolevents = []
 	if Tool.objects.get(pk=tool) in allowed_tools(request):
 		if eventtype == 'reservation':
 			events = Reservation.objects.filter(tool=tool, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start')
 		else:
 			events = UsageEvent.objects.filter(tool=tool, end__gt=begin, end__lte=end).order_by('start')
+		toolsum = 0
 		for event in events:
 			try:
 				fullname = event.user.last_name + " " + event.user.first_name
@@ -57,6 +59,7 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 				start = event.start
 				end = event.end
 				minutes = int((end-start)/timedelta(minutes=1)+0.5)
+				toolsum += minutes
 			except:
 				start = None
 				end = None
@@ -65,6 +68,8 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 			end = timezone.localtime(end)
 			event_entry = {'start': start, 'end': end, 'minutes': minutes, 'projectname': projectname, 'affiliation': affiliation, 'user': fullname, 'remarks': remarks}
 			toolevents.append(event_entry)
+# append total (note: start and end will be undefined here!)
+		toolevents.append( { 'minutes': toolsum } )
 	return toolevents
 
 @permission_required('NEMO.change_tool', raise_exception=True)
@@ -113,6 +118,10 @@ def toolevents(request):
 			return render(request, 'toolevents.html', dictionary)
 	else:
 # XLSX output
+# get last entry containing sum
+		toolsum = events[-1]['minutes']
+# .. and remove it from table
+		events = events[0:-1]
 		fn = eventtype + '_' + str(tool) + '_' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
@@ -124,7 +133,7 @@ def toolevents(request):
 		italic.set_italic()
 		title = [ eventtype, toolname ]
 		sheet.write_row('A1', title, bold)
-		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d") ]
+		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), toolsum ]
 		sheet.write_row('A2', title)
 		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/Remarks']
 		sheet.write_row('A4', columntitles, italic)
