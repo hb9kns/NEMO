@@ -77,7 +77,8 @@ def userlist(request):
 		'Training required',
 		'Access expiration',
 		'Staff',
-		'Technician'
+		'Technician',
+		'Account manager',
 		]
 	columntitles += [ g.name for g in Group.objects.all() ]
 	columntitles += [
@@ -112,6 +113,13 @@ def userlist(request):
 			affiliation = u.affiliation.name
 		except:
 			affiliation = ''
+		try:
+			if Account.objects.filter(manager__in=[u]):
+				accountmanager = True
+			else:
+				accountmanager = False
+		except:
+			accountmanager = False
 		row = [ u.id, u.is_active ]
 		# last activity change of this user
 		try:
@@ -131,7 +139,7 @@ def userlist(request):
 			u.position, u.personnel_number, u.badge_number,
 			u.type.name, u.deposit, mentor,
 			u.training_required, accexp,
-			u.is_staff, u.is_technician
+			u.is_staff, u.is_technician, accountmanager,
 			]
 		row += [ g in u.groups.all() for g in Group.objects.all() ]
 		try:
