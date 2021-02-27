@@ -274,7 +274,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		# project usage for billable tools
 		url(r'^project_sums/$', projectevents.project_sums, name='project_sums'),
 		# total usage for all billable tools for all projects
-		url(r'^billing_sums/$', toolevents.billing_sums, name='billing_sums'),
+		url(r'^billing_sums/$', projectevents.billing_sums, name='billing_sums'),
 		# operator statistics
 		url(r'^operatorevents/$', operatorevents.operatorevents, name='operatorevents'),
 
