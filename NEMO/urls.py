@@ -9,7 +9,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 
 from NEMO.views import abuse, accounts_and_projects, alerts, api, area_access, authentication, beacon, calendar, configuration_agenda, consumables, customization, directory, email, feedback, get_projects, history, jumbotron, kiosk, landing, maintenance, mobile, usage, news, qualifications, remote_work, resources, safety, sensors, sidebar, staff_charges, status_dashboard, stockroom, tasks, tool_control, training, tutorials, users, user_chemicals, forgot_password, billing, consultation
-from NEMO.views import toolevents, operatorevents
+from NEMO.views import toolevents, operatorevents, projectevents
 
 # Use our custom login page instead of Django's built-in one.
 admin.site.login = login_required(admin.site.login)
@@ -269,7 +269,10 @@ if settings.ALLOW_CONDITIONAL_URLS:
 
 		# tool usage statistics
 		url(r'^toolevents/$', toolevents.toolevents, name='toolevents'),
-		url(r'^project_sums/$', toolevents.project_sums, name='project_sums'),
+		# project usage lists
+		url(r'^projectevents/$', projectevents.projectevents, name='projectevents'),
+		# project usage for billable tools
+		url(r'^project_sums/$', projectevents.project_sums, name='project_sums'),
 		# total usage for all billable tools for all projects
 		url(r'^billing_sums/$', toolevents.billing_sums, name='billing_sums'),
 		# operator statistics

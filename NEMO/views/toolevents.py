@@ -163,6 +163,7 @@ def get_project_span_tool_event_sums(projects, begin, end, billables=False):
 	for t in tools.keys():
 # populate toolsums
 		toolsums[t] = [0,0]
+# make set of list of billing refs and back to list, to make them unique
 	billrefs=set([b for b in tools.values() if b])
 	billrefs=list(billrefs)
 	billrefs.sort()

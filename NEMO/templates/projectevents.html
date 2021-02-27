@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Project event reports{% endblock %}
+{% block extrahead %}
+	{% load static %}
+	<script type="text/javascript" src="{% static "datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "datetimepicker/bootstrap-datetimepicker.css" %}" />
+{% endblock %}
+{% block content %}
+	<h1>Project event reports</h1>
+	<form id="view_records" action="{% url 'projectevents' %}" class="form-inline" method="get">
+	<input type="hidden" id="outputtype" name="outputtype" value="table">
+	<p>
+	Compile
+	<select name="eventtype" id="eventtype">
+		<option value="usage" {% if eventtype == 'usage' %}selected{% endif %}>usage</option>
+	</select>
+	report for
+	<select name="projects" id="projects">
+		<option value="{% for p in projects %}{{ p.id }},{% endfor %}{{ t.id }}" selected>current project selection</option>
+		{% for p in allprojects %}
+		<option value="{{ p.id }}">{{ p.name }}</option>
+		{% endfor %}
+	</select>
+	<br />
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				between <input type="text" id="start" name="start" class="form-control" autocomplete="off" value="{{ start|date:'Y-m-d' }}">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="datetimepicker-container">
+				and <input type="text" id="end" name="end" class="form-control" autocomplete="off" value="{{ end|date:'Y-m-d' }}">
+			</div>
+		</div>
+	<br />
+		<div class="form-group">
+			<input type="submit" class="btn btn-default" value="View event records" onclick="javascript: form.action=' {% url 'projectevents' %}';">
+		</div>
+	</form>
+	<div class="col-lg-12" style="margin-top:30px">
+		{% if events %}
+			<h3>events for {{ projects }}</h3>
+			<h5>{{ start }} &mdash; {{ end }}</h5>
+			<p><small><em>get this data as
+			<a href="{% url 'projectevents' %}?outputtype=txt&eventtype={{ eventtype }}&pjts={{ pjts }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
+			or <a href="{% url 'projectevents' %}?outputtype=xlsx&eventtype={{ eventtype }}&pjts={{ pjts }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
+			</em></small></p>
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>Start</th>
+						<th>End</th>
+						<th>Duration/h</th>
+						<th>Tool(s)</th>
+						<th>Project</th>
+						<th>User</th>
+						<th>Affiliation</th>
+				{% if eventtype == "reservation" %}
+						<th>Title</th>
+				{% endif %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for e in events %}
+						<tr>
+							<td>{{ e.start }}</td>
+							<td>{{ e.end }}</td>
+							<td>{{ e.hours|floatformat:2 }}</td>
+							<td>{{ e.tooldesc }}</td>
+							<td>{{ e.projectdesc }}</td>
+							<td>{{ e.user }}</td>
+							<td>{{ e.affiliation }}</td>
+				{% if eventtype == "reservation" %}
+							<td>{{ e.remarks }}</td>
+				{% endif %}
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			{% if start or end %}
+				No records exist between {{ start }} and {{ end }} for "{{ project }}" events.
+				(Or you may not be allowed to see them.)
+			{% endif %}
+		{% endif %}
+	</div>
+	<script>
+		function on_load()
+		{
+			var timepicker_properties =
+			{
+				format: 'YYYY-MM-DD'
+			};
+			$('#start').datetimepicker(timepicker_properties);
+			$('#end').datetimepicker(timepicker_properties);
+		}
+		$(on_load);
+	</script>
+{% endblock %}
