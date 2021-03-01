@@ -15,8 +15,8 @@
 		<option value="usage" {% if eventtype == 'usage' %}selected{% endif %}>usage</option>
 	</select>
 	report for
-	<select name="projects" id="projects">
-		<option value="{% for p in projects %}{{ p.id }},{% endfor %}{{ t.id }}" selected>current project selection</option>
+	<select name="pjts" id="pjts">
+		<option value="{% for p in pjts %}{{ p.id }},{% endfor %}{{ t.id }}" selected>current project selection</option>
 		{% for p in allprojects %}
 		<option value="{{ p.id }}">{{ p.name }}</option>
 		{% endfor %}
@@ -39,19 +39,19 @@
 	</form>
 	<div class="col-lg-12" style="margin-top:30px">
 		{% if events %}
-			<h3>events for {{ projects }}</h3>
+			<h3>events for {% for p in pjts %}{{ p.name }} {% endfor %}</h3>
 			<h5>{{ start }} &mdash; {{ end }}</h5>
 			<p><small><em>get this data as
-			<a href="{% url 'projectevents' %}?outputtype=txt&eventtype={{ eventtype }}&pjts={{ pjts }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
-			or <a href="{% url 'projectevents' %}?outputtype=xlsx&eventtype={{ eventtype }}&pjts={{ pjts }}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
+			<a href="{% url 'projectevents' %}?outputtype=txt&eventtype={{ eventtype }}&pjts={% for p in pjts %}{{ p.id }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">TAB-separated text</a>
+			or <a href="{% url 'projectevents' %}?outputtype=xlsx&eventtype={{ eventtype }}&pjts={% for p in pjts %}{{ p.id }},{% endfor %}&start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}">XLSX-formatted spreadsheet</a>
 			</em></small></p>
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
 						<th>Start</th>
 						<th>End</th>
-						<th>Duration/h</th>
-						<th>Tool(s)</th>
+						<th>Minutes</th>
+						<th>Tool (ref)</th>
 						<th>Project</th>
 						<th>User</th>
 						<th>Affiliation</th>
@@ -65,7 +65,7 @@
 						<tr>
 							<td>{{ e.start }}</td>
 							<td>{{ e.end }}</td>
-							<td>{{ e.hours|floatformat:2 }}</td>
+							<td>{{ e.minutes }}</td>
 							<td>{{ e.tooldesc }}</td>
 							<td>{{ e.projectdesc }}</td>
 							<td>{{ e.user }}</td>
@@ -79,7 +79,7 @@
 			</table>
 		{% else %}
 			{% if start or end %}
-				No records exist between {{ start }} and {{ end }} for "{{ project }}" events.
+				No records exist between {{ start }} and {{ end }} for {% for p in pjts %}{{ p.name }} {% endfor %} events.
 				(Or you may not be allowed to see them.)
 			{% endif %}
 		{% endif %}

@@ -241,12 +241,6 @@ def get_project_span_usage_events(projects, begin, end, billables=True):
 	billrefs=set([b for b in tools.values() if b])
 	billrefs=list(billrefs)
 	# billrefs.sort()
-	billnames = []
-	for b in billrefs:
-		tn=''
-		for t in Tool.objects.filter(billing_reference=b):
-			tn+=t.name+' // '
-		billnames.append( {b:tn} )
 	result = []
 	for event in UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start'):
 		try:
@@ -262,20 +256,20 @@ def get_project_span_usage_events(projects, begin, end, billables=True):
 		except:
 			uaffil = "(unknown affiliation)"
 		try:
-			estart = timezone.localtime(event.start)
-			eend = timezone.localtime(event.end)
-			ehours = 0
+			estart = event.start
+			eend = event.end
+			eminutes = int( (eend-estart)/timedelta(minutes=1)+0.5 )
 		except:
 			estart = None
 			eend = None
-			ehours = None
+			eminutes = None
+		estart = timezone.localtime(estart)
+		eend = timezone.localtime(eend)
+		etool = event.tool.name
 		if tools[event.tool.pk]:
-# if billingref exists, use accumulated names for description
-			etool = billnames[tools[event.tool.pk]]
-		else:
-# otherwise just tool name itself
-			etool = event.tool.name
-		result.append( {'start':estart, 'end':eend, 'hours':ehours, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'affiliation':uaffil} )
+# add billingref
+			etool += ' (ref.'+tools[event.tool.pk]+')'
+		result.append( {'start':estart, 'end':eend, 'minutes':eminutes, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'affiliation':uaffil} )
 	return result
 
 @staff_member_required(login_url=None)
@@ -290,7 +284,7 @@ def projectevents(request, billable_tools=True):
 	except:
 		projects = Project.objects.filter(active=True)
 	dictionary = {}
-	dictionary['projects'] = projects
+	dictionary['pjts'] = projects
 	dictionary['allprojects'] = Project.objects.all()
 	try:
 		outputtype = request.GET['outputtype']
@@ -346,11 +340,11 @@ def projectevents(request, billable_tools=True):
 		sheet.write_row('A1', title, bold)
 		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Hours', 'Tool(s)', 'Project', 'User', 'Affiliation']
+		columntitles = ['Start', 'End', 'Minutes', 'Tool (ref)', 'Project', 'User', 'Affiliation']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in pjtevents:
-			row = [ e['start'], e['end'], e['hours'], e['tooldesc'], e['projectdesc'], e['user'], e['affiliation'] ]
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['projectdesc'], e['user'], e['affiliation'] ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
