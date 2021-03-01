@@ -267,9 +267,10 @@ def get_project_span_usage_events(projects, begin, end, billables=True):
 		eend = timezone.localtime(eend)
 		etool = event.tool.name
 		if tools[event.tool.pk]:
-# add billingref
-			etool += ' (ref.'+tools[event.tool.pk]+')'
-		result.append( {'start':estart, 'end':eend, 'minutes':eminutes, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'affiliation':uaffil} )
+			etref = tools[event.tool.pk]
+		else:
+			etref = None
+		result.append( {'start':estart, 'end':eend, 'minutes':eminutes, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'toolref':etref, 'affiliation':uaffil} )
 	return result
 
 @staff_member_required(login_url=None)
@@ -340,11 +341,11 @@ def projectevents(request, billable_tools=True):
 		sheet.write_row('A1', title, bold)
 		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Minutes', 'Tool (ref)', 'Project', 'User', 'Affiliation']
+		columntitles = ['Start', 'End', 'Minutes', 'Tool', 'Ref', 'Project', 'User', 'Affiliation']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in pjtevents:
-			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['projectdesc'], e['user'], e['affiliation'] ]
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['toolref'], e['projectdesc'], e['user'], e['affiliation'] ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
