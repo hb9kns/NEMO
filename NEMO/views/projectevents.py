@@ -282,7 +282,7 @@ def projectevents(request, billable_tools=True):
 		project_ids = re.sub('[^0-9,]', '', request.GET['pjts']).rstrip(',')
 		projects = Project.objects.filter(pk__in=set(project_ids.split(",")))
 	except:
-		projects = Project.objects.filter(active=True)
+		projects = None
 	dictionary = {}
 	dictionary['pjts'] = projects
 	dictionary['allprojects'] = Project.objects.all()

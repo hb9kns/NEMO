@@ -44,7 +44,8 @@
 				</a>
 				<div style="margin-left:34px">
 					<div id="account_details" class="collapse">
-					(<a href="{% url 'project_sums' %}?outputtype=table&pjts={% for p in account.project_set.all %}{{ p.id }},{% endfor %}">click here</a> to calculate account tool usage and reservation sums)<br />
+					(<a href="{% url 'project_sums' %}?outputtype=table&pjts={% for p in account.project_set.all %}{{ p.id }},{% endfor %}">click here</a> to calculate account tool usage and reservation sums;
+					<a href="{% url 'projectevents' %}?outputtype=table&pjts={% for p in account.project_set.all %}{{ p.id }},{% endfor %}">click here</a> to display account usage events)<br />
 					<span class="grey">Financial responsible:</span> {{ account.manager }}<br />
 					<span class="grey">Technical contact:</span> {{ account.techcontact }}<br />
 					{% if account.admin_name or account.admin_email %}
@@ -78,7 +79,8 @@
 						 / billing reference: {{ project.billing_reference }}
 		{% endif %}			</span>
 						<div id="project_{{ project.id }}_details" class="collapse">
-							(<a href="{% url 'project_sums' %}?outputtype=table&pjts={{ project.id }}">click here</a> to calculate project tool usage and reservation sums)
+							(<a href="{% url 'project_sums' %}?outputtype=table&pjts={{ project.id }}">click here</a> to calculate project tool usage and reservation sums;
+							<a href="{% url 'projectevents' %}?outputtype=table&pjts={{ project.id }}">click here</a> to display project usage events)
 							<div style="height:10px"></div>
 							<div id="add_user_to_project_{{ project.id }}">
 								<label class="control-label"><input id="search_user_for_project_{{ project.id }}" type="text" class="form-control user_search" placeholder="Search for a user to add" data-project-id="{{ project.id }}"></label>
