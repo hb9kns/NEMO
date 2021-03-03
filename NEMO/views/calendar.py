@@ -120,10 +120,13 @@ def reservation_event_feed(request, start, end):
 	if personal_schedule:
 		events = events.filter(user=request.user)
 
+	modifyall = request.user.is_staff or request.user.has_perm('NEMO.change_reservation')
+
 	dictionary = {
 		'events': events,
 		'outages': outages,
 		'personal_schedule': personal_schedule,
+		'may_modify_all': modifyall,
 	}
 	return render(request, 'calendar/reservation_event_feed.html', dictionary)
 
