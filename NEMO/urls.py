@@ -293,6 +293,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 
 		# User management:
 		url(r'^users/$', users.users, name='users'),
+		url(r'^users/(?P<hidden>\d+)/', users.users, name='some_users'),
 		url(r'^user/(?P<user_id>\d+|new)/', users.create_or_modify_user, name='create_or_modify_user'),
 		url(r'^deactivate_user/(?P<user_id>\d+)/', users.deactivate, name='deactivate_user'),
 		url(r'^reset_password/(?P<user_id>\d+)/$', users.reset_password, name='reset_password'),

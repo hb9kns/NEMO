@@ -18,8 +18,21 @@ from NEMO.models import User, Project, Account, Tool, PhysicalAccessLevel, Reser
 
 @staff_member_required(login_url=None)
 @require_GET
-def users(request):
+def users(request, hidden=''):
+	''' provide a list of users for administration,
+	with the possibility to filter out some classes
+	by setting bits in <hidden>:
+	bit 1 for inactive users, bit 2 for those needing training
+	'''
 	all_users = User.objects.all()
+	if hidden:
+		hide = int(hidden)
+		filtered = all_users
+		if hide & 1:
+			filtered = filtered.filter(is_active=True)
+		if hide & 2:
+			filtered = filtered.filter(training_required=False)
+		all_users = filtered
 	return render(request, 'users/users.html', {'users': all_users})
 
 

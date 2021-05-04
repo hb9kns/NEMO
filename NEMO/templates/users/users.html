@@ -7,8 +7,13 @@
 		<a href="{% url 'create_or_modify_user' 'new' %}" class="btn btn-success pull-right">New user</a>
 	</h1>
 	<p><em>Available only to administrative staff!</em></p>
+		<a href="{% url 'users' %}" class="btn btn-success">All users</a>
+		<a href="{% url 'some_users' '1' %}" class="btn btn-warning">Exclude inactive users</a>
+		<a href="{% url 'some_users' '2' %}" class="btn btn-warning">Exclude users needing training</a>
+		<a href="{% url 'some_users' '3' %}" class="btn btn-warning">Exclude both</a>
 	<div class="row">
 		<div class="col-md-4">
+			<em>({{ users|length }} to select from)</em>
 			<input id="search" type="text" placeholder="Search for a user" class="form-control" autofocus>
 		</div>
 	</div>
