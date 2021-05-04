@@ -7,7 +7,9 @@
 		Names of persons with staff permissions are in <em style="color:green">green</em>.
 	</p>
 	<p><em>The <a href="#staffdir">list of equipment responsibles</a> is further down.</em></p>
+	{% if staffdisplay %}
 	<p><em>Administrative staff can download the <a href="{% url 'userlist' %}">user list in XLSX</a> format.</em></p>
+	{% endif %}
 
   <div class="col-lg-8" style="margin-top:30px">
 			<table class="table table-bordered table-condensed">
@@ -19,6 +21,7 @@
 						<th>Affiliation</th>
 						<th>Joined/Introday</th>
 						<th>Projects</th>
+						<th>Admin/Groups</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -33,6 +36,12 @@
 							<td>{{ person.intro }}</td>
 							<td>{% for pjt in person.projects %}{{ pjt }} {% endfor %}
 							</td>
+							{% if staffdisplay %}
+							<td><a href="{% url 'admin:NEMO_user_change' person.user.id %}">
+								<small>/</small>
+								{% for pg in person.permgroups %}{{ pg }} <small>/</small> {% endfor %}
+							</a></td>
+							{% endif %}
 						</tr>
 					{% endfor %}
 				</tbody>
@@ -49,6 +58,7 @@
 						<th>Phone</th>
 						<th>Primary responsible for</th>
 						<th>Backup responsible for</th>
+						{% if staffdisplay %}<th>Admin/Groups</th>{% endif %}
 					</tr>
 				</thead>
 				<tbody>
@@ -62,6 +72,12 @@
 					<td>{{ person.phone }}</td>
 					<td>{% for tool in person.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
 					<td>{% for tool in person.backup_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
+					{% if staffdisplay %}
+					<td><a href="{% url 'admin:NEMO_user_change' person.user.id %}">
+						<small>/</small>
+						{% for pg in person.permgroups %}{{ pg }} <small>/</small> {% endfor %}
+					</a></td>
+					{% endif %}
 					</tr>
 					{% endif %}
 					{% endfor %}
