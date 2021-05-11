@@ -1,14 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}Directory{% endblock %}
 {% block content %}
-	<h1>Labmember Directory	</h1>
+	<h1>User Directory	</h1>
 	<p>
-		This page contains a list of all active labmembers. You may email a labmember by clicking on that person's name.<br />
-		Names of persons with staff permissions are in <em style="color:green">green</em>.
+		This is a list of all active {% if showgroup %}members of group "{{ showgroup.name }}"{% else %}users{% endif %}.
+		<br />
+		You may write e-mail to a user by clicking on their name.
+		Names of people with staff permissions are in <em style="color:green">green</em>.
 	</p>
-	<p><em>The <a href="#staffdir">list of equipment responsibles</a> is further down.</em></p>
+	<form action="{% url 'directory' %}" class="form-inline" method="get">
+	<p>
+	You can filter the list for
+	<select name="affiliation" id="affiliation">
+		<option value="0">---ALL---</option>
+		{% for a in active_groups %}
+		<option value="{{ a.id }}" {% if a == showgroup %}selected{% endif %}>{{ a.name }}</option>
+		{% endfor %}
+	</select>
+		<input type="submit" value="Show">
+	</p>
+	</form>
+	<p><em>The complete <a href="#staffdir">list of equipment responsibles</a> is further down.</em></p>
 	{% if staffdisplay %}
-	<p><em>Administrative staff can download the <a href="{% url 'userlist' %}">user list in XLSX</a> format.</em></p>
+	<p><em>Administrative staff can download the <a href="{% url 'userlist' %}">complete user list in XLSX</a> format.</em></p>
 	{% endif %}
 
   <div class="col-lg-8" style="margin-top:30px">
@@ -18,32 +32,34 @@
 						<th>Name</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
-						<th>Affiliation</th>
+						<th>Affiliation/Group</th>
 						<th>Joined/Introday</th>
 						<th>Projects</th>
 						<th>Admin/Groups</th>
 					</tr>
 				</thead>
 				<tbody>
-					{% for person in people %}
+					{% for p in people %}
+						{% if not showgroup or p.user.affiliation == showgroup %}
 						<tr>
-							<td>{% if person.special %}<em>{% endif %}
-							<a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.special %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a>
-							{% if person.special %}</em>{% endif %}</td>
-							<td>{{ person.email }}</td>
-							<td>{{ person.phone }}</td>
-							<td>{{ person.group }}</td>
-							<td>{{ person.intro }}</td>
-							<td>{% for pjt in person.projects %}{{ pjt }} {% endfor %}
+							<td>{% if p.special %}<em>{% endif %}
+							<a href="{% url 'get_email_form_for_user' p.user.id %}" style="color:{% if p.special %}green{% else %}blue{% endif %};">{{ p.user.get_full_name }}</a>
+							{% if p.special %}</em>{% endif %}</td>
+							<td>{{ p.user.email }}</td>
+							<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
+							<td>{{ p.user.affiliation.name }}</td>
+							<td>{{ p.intro }}</td>
+							<td>{% for pjt in p.projects %}{{ pjt }} {% endfor %}
 							</td>
 							{% if staffdisplay %}
-							<td><a href="{% url 'admin:NEMO_user_change' person.user.id %}">
+							<td><a href="{% url 'admin:NEMO_user_change' p.user.id %}">
 								<small>/</small>
-								{% for pg in person.permgroups %}{{ pg }} <small>/</small> {% endfor %}
+								{% for pg in p.permgroups %}{{ pg }} <small>/</small> {% endfor %}
 							</a></td>
 							{% endif %}
 						</tr>
-					{% endfor %}
+					 {% endif %}
+					{%	endfor %}
 				</tbody>
 			</table>
 	</div>
@@ -62,20 +78,20 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for person in people %}
-					{% if person.primary_owning or person.backup_owning %}
+					{% for p in people %}
+					{% if p.primary_owning or p.backup_owning %}
 					<tr>
-					<td>{% if person.special %}<em>{% endif %}
-					 <a href="{% url 'get_email_form_for_user' person.user.id %}" style="color:{% if person.special %}green{% else %}blue{% endif %};">{{ person.user.get_full_name }}</a>
-					{% if person.special %}</em>{% endif %}</td>
-					<td>{{ person.email }}</td>
-					<td>{{ person.phone }}</td>
-					<td>{% for tool in person.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
-					<td>{% for tool in person.backup_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
+					<td>{% if p.special %}<em>{% endif %}
+					 <a href="{% url 'get_email_form_for_user' p.user.id %}" style="color:{% if p.special %}green{% else %}blue{% endif %};">{{ p.user.get_full_name }}</a>
+					{% if p.special %}</em>{% endif %}</td>
+					<td>{{ p.user.email }}</td>
+					<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
+					<td>{% for tool in p.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
+					<td>{% for tool in p.backup_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
 					{% if staffdisplay %}
-					<td><a href="{% url 'admin:NEMO_user_change' person.user.id %}">
+					<td><a href="{% url 'admin:NEMO_user_change' p.user.id %}">
 						<small>/</small>
-						{% for pg in person.permgroups %}{{ pg }} <small>/</small> {% endfor %}
+						{% for pg in p.permgroups %}{{ pg }} <small>/</small> {% endfor %}
 					</a></td>
 					{% endif %}
 					</tr>

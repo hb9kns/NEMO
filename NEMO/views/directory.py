@@ -17,12 +17,20 @@ from NEMO.views.customization import get_customization
 @login_required
 def directory(request):
 	users = User.objects.filter(is_active=True).exclude(type__in=settings.USERTYPES_DIRECTORY_SUPPRESS).order_by('last_name')
+	active_groups = Account.objects.filter(active=True)
 	people = []
-	for user in users:
+	try:
+		affiliation = int(request.GET['affiliation'])
+	except:
+	 affiliation = None
+	if affiliation:
 		try:
-			group = user.affiliation
+			showgroup = Account.objects.get(id=affiliation)
 		except:
-			group = "unknown"
+			showgroup = None
+	else:
+		showgroup = None
+	for user in users:
 		staffperms = user.is_staff
 		introday = user.date_joined.date()
 		projects = [pjt.name for pjt in Project.objects.filter(user=user,active=True) if pjt.name[0:1] not in settings.PROJECTNAME_BEGIN_SUPPRESS]
@@ -37,9 +45,9 @@ def directory(request):
 			backup = [tool for tool in backup_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
 		except:
 			backup = ["(none)"]
-		user_info = {'user':user, 'phone':user.phone, 'email':user.email, 'group':group, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects, 'permgroups':permgroups }
+		user_info = {'user':user, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects, 'permgroups':permgroups }
 		people.append(user_info)
-	dictionary = { 'people': people, 'staffdisplay': request.user.is_staff }
+	dictionary = { 'people': people, 'staffdisplay': request.user.is_staff, 'active_groups': active_groups, 'showgroup': showgroup }
 	return render(request, 'directory.html', dictionary)
 
 @staff_member_required(login_url=None)
