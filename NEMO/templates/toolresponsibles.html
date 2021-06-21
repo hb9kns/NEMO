@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{# {% block title %}Equipment Responsibles{% endblock %} #}
+{% block content %}
+	<h1>{{ toolname_suffix }} Equipment/Tool Responsibles</h1>
+	<p>
+	<div class="col-lg-8" style="margin-top:30px">
+	<table class="table table-bordered table-condensed">
+		<thead>
+			<tr>
+				<th>Room</th>
+				<th>Equipment/Tool</th>
+				<th>Primary (1st) Responsible</th>
+				<th>Backup Responsibles</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for l in locationlist %}
+			{% for t in l.tools %}
+			<tr>
+			<td>{% if forloop.first %}<b>{{ l.loc }}</b>{% else %}{% endif%}</td>
+				<td>{{ t.name }}</td>
+				<td>{# <a href="{% url 'get_email_form_for_user' t.primary_id %}"> #}{{ t.primary }}{# </a> #}</td>
+				<td>{% for buo in t.backup %}{{ buo }} {% endfor %}</td>
+			</tr>
+			{% endfor %}
+			{% endfor %}
+		</tbody>
+	</table>
+	</div>
+{% endblock %}
