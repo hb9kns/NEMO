@@ -50,6 +50,31 @@ def directory(request):
 	dictionary = { 'people': people, 'staffdisplay': request.user.is_staff, 'active_groups': active_groups, 'showgroup': showgroup }
 	return render(request, 'directory.html', dictionary)
 
+@login_required
+def toolresponsibles(request, namesuffix='' ):
+	''' generate list of tools sorted by locations, filtered
+	for names ending with namesuffix and excluding suppressed tools
+	'''
+	tools = Tool.objects.filter(operational=True, name__iendswith=namesuffix).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+# create sorted list of unique tool locations
+	locations = list( { t.location for t in tools } )
+	locations.sort()
+	locationlist = []
+	for l in locations:
+# loop over locations and tools for each location
+		toollist = []
+		for t in [ t for t in tools if t.location == l ]:
+			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name
+			pid = t.primary_owner.id
+# get id list of all backup owners for that tool
+			bus = User.objects.filter(id__in=t.backup_owners.values_list('id', flat=True)).all()
+# and also their initials plus name
+			bowners = [ b.first_name[0]+'.'+b.last_name for b in bus ]
+			toollist.append( { 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
+		locationlist.append( { 'loc':l, 'tools':toollist } )
+	dictionary = { 'toolname_suffix': namesuffix, 'locationlist': locationlist }
+	return render(request, 'toolresponsibles.html', dictionary)
+
 @staff_member_required(login_url=None)
 @permission_required('NEMO.change_user', raise_exception=True)
 def userlist(request):

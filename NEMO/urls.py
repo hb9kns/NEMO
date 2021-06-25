@@ -205,6 +205,7 @@ urlpatterns = [
 	# People:
 	url(r'^directory/$', directory.directory, name='directory'),
 	url(r'^userlist/$', directory.userlist, name='userlist'),
+	url(r'^toolresponsibles/(?P<namesuffix>[0-9A-Za-z_-]*)$', directory.toolresponsibles, name='toolresponsibles'),
 
 	# Area access:
 	url(r'^change_project/$', area_access.change_project, name='change_project'),
