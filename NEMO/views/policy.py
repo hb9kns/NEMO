@@ -45,6 +45,11 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 	if tool.required_resource_set.filter(available=False).exists() and not operator.is_staff:
 		return HttpResponseBadRequest("A resource that is required to operate this tool is unavailable.")
 
+	# The tool operator may not activate tools in a particular area unless they are allowed to make reservations in that area.
+	# Staff are exempt from this rule.
+	if tool.reservation_physical_access_level and tool.reservation_physical_access_level not in operator.physical_access_levels.all() and not operator.is_staff:
+		return HttpResponseBadRequest("You are missing the required area access permission.")
+
 	# The tool operator may not activate tools in a particular area unless they are logged in to the area.
 	# Staff are exempt from this rule.
 	if tool.requires_area_access and AreaAccessRecord.objects.filter(area=tool.requires_area_access, customer=operator, staff_charge=None, end=None).count() == 0 and not operator.is_staff:

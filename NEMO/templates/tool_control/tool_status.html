@@ -200,6 +200,9 @@
 			{{ rendered_configuration_html }}
 		</div>
 
+		{% if tool.reservation_physical_access_level %}
+			<p><em><small>This tool requires access to <b>{{ tool.reservation_physical_access_level }}</b>.</small></em></p>
+		{% endif %}
 		{# Display tool control... #}
 		<form id="tool_control">
 			{% if tool.in_use %}
