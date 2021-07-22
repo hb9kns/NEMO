@@ -203,8 +203,10 @@ def billing_sums(request):
 		billrefs = [ [t['ref'],t['desc']] for t in totals[good_project]['tools'] ]
 		billrefs.sort()
 # create list of active users
-	active_users = set( [ t['user'] for t in totals[p]['users'] for p in totals.keys() ] )
-	active_users = list( active_users )
+	allpjtuser = [ totals[p]['users'] for p in totals.keys() ]
+	active_users = [ t['user'] for t in allpjtuser if t != [] ]
+	#active_users = []
+	unique_active_users = list( set( active_users ) )
 	fn = 'nemo-billing-' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 	response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 	response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
@@ -237,7 +239,7 @@ def billing_sums(request):
 	columntitles = ['', '', 'User']
 	sheet.write_row(rownum, 0, columntitles, italic)
 	for u in User.objects.all().order_by('last_name'):
-		if True or u in active_users:
+		if False or u in active_users:
 			row = [ '', u.last_name+' '+u.first_name, '' ]
 			for p in projects:
 		# two-decimals float of usage total converted to hours
@@ -246,6 +248,10 @@ def billing_sums(request):
 			rownum += 1
 # add end marker for further processing
 	sheet.write_row(rownum,0, ['','^-^','End'])
+	rownum += 1
+	sheet.write_row(rownum,5, active_users)
+	rownum += 1
+	sheet.write_row(rownum,0, str(allpjtuser) )
 	book.close()
 	return response
 
