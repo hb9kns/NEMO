@@ -171,7 +171,7 @@ def billing_sums(request):
 	    for all projects and for a given time span. """
 # get active project ids
 #	projects = Project.objects.filter(active=True)
-	projects = Project.objects.all()
+	projects = Project.objects.all().order_by('name')
 # by default, start is beginnning of the month, end is today
 	def_start = '{0}-{1}-01'.format(date.today().year,date.today().month)
 	def_end = date.today().isoformat()
@@ -191,22 +191,22 @@ def billing_sums(request):
 	days = int(0.5+(end-start)/timedelta(days=1))
 # get all event sums related to all the projects
 	totals={}
+	active_users = set()
 	for p in projects:
 		try:
 			totals[p] = get_project_span_event_sums([p], start, end, billables=True)
 			# note as valid project
 			good_project = p
+			# populate list of active users
+			for s in totals[p]['users']:
+				if s != []:
+					active_users.add( s['user'] )
 		except:
 			totals[p] = []
 	if good_project:
 		# get sorted billing references from last valid project toolevents
 		billrefs = [ [t['ref'],t['desc']] for t in totals[good_project]['tools'] ]
 		billrefs.sort()
-# create list of active users
-	allpjtuser = [ totals[p]['users'] for p in totals.keys() ]
-	active_users = [ t['user'] for t in allpjtuser if t != [] ]
-	#active_users = []
-	unique_active_users = list( set( active_users ) )
 	fn = 'nemo-billing-' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 	response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 	response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
@@ -227,7 +227,7 @@ def billing_sums(request):
 	sheet.write_row('A5', columntitles, italic)
 	rownum = 5
 	for b in billrefs:
-		# prepend billing ref, description and empty cell
+		# billing ref, description and empty
 		row = [ b[0], b[1], '' ]
 		for p in projects:
 		# two-decimals float of billrefs usage total converted to hours
@@ -239,7 +239,7 @@ def billing_sums(request):
 	columntitles = ['', '', 'User']
 	sheet.write_row(rownum, 0, columntitles, italic)
 	for u in User.objects.all().order_by('last_name'):
-		if False or u in active_users:
+		if u in active_users:
 			row = [ '', u.last_name+' '+u.first_name, '' ]
 			for p in projects:
 		# two-decimals float of usage total converted to hours
