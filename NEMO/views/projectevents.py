@@ -238,20 +238,28 @@ def billing_sums(request):
 	rownum += 2
 	columntitles = ['', '', 'User']
 	sheet.write_row(rownum, 0, columntitles, italic)
-	for u in User.objects.all().order_by('last_name'):
-		if u in active_users:
-			row = [ '', u.last_name+' '+u.first_name, '' ]
+	for usr in User.objects.all().order_by('last_name'):
+		if usr.pk in active_users:
+			row = [ '', usr.last_name+' '+usr.first_name, '' ]
 			for p in projects:
-		# two-decimals float of usage total converted to hours
-				row += [ float('{0:.2f}'.format( float(tot['usage'])/60 )) for tot in totals[p]['users'] if tot['user'] == u.pk ]
+				putot = totals[p]['users']
+# get list of entries for that project for this user
+				ptot = [ u for u in putot if u['user'] == usr.pk ]
+				if ptot != []:
+# get first entry ( ptot[0] ) -- several would make no sense, as there
+# cannot be more entries for the same user in the same project)
+					row += [ float('{0:.2f}'.format( float(ptot[0]['usage'])/60 )) ]
+				else:
+					# row += [ 0.00 ]
+					row += [ '' ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 # add end marker for further processing
 	sheet.write_row(rownum,0, ['','^-^','End'])
-	rownum += 1
-	sheet.write_row(rownum,5, active_users)
-	rownum += 1
-	sheet.write_row(rownum,0, str(allpjtuser) )
+#	rownum += 1
+#	sheet.write_row(rownum,5, active_users)
+#	rownum += 1
+#	sheet.write_row(rownum,0, ['.:.'] )
 	book.close()
 	return response
 
