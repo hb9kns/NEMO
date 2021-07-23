@@ -204,7 +204,7 @@ def billing_sums(request):
 		except:
 			totals[p] = []
 	if good_project:
-		# get sorted billing references from last valid project toolevents
+# get sorted billing references from last valid project toolevents
 		billrefs = [ [t['ref'],t['desc']] for t in totals[good_project]['tools'] ]
 		billrefs.sort()
 	fn = 'nemo-billing-' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
@@ -250,16 +250,11 @@ def billing_sums(request):
 # cannot be more entries for the same user in the same project)
 					row += [ float('{0:.2f}'.format( float(ptot[0]['usage'])/60 )) ]
 				else:
-					# row += [ 0.00 ]
 					row += [ '' ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 # add end marker for further processing
 	sheet.write_row(rownum,0, ['','^-^','End'])
-#	rownum += 1
-#	sheet.write_row(rownum,5, active_users)
-#	rownum += 1
-#	sheet.write_row(rownum,0, ['.:.'] )
 	book.close()
 	return response
 
