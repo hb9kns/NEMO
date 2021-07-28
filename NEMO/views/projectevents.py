@@ -15,28 +15,34 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from NEMO.utilities import parse_start_and_end_date
 from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
-def get_project_span_tool_event_sums(projects, begin, end, billables=False):
-	""" get sums (in minutes) of all project related events for each tool,
-            ending after begin and before or at end
-            and return a list of ['tool':.., 'usage':.., 'monthly':.., 'reservation':..]
+def get_project_span_event_sums(projects, begin, end, billables=False):
+	""" get sums (in minutes) of all project related events for each tool
+            and user, ending after begin and before or at end,
+            and return a dictionary containing (with key 'tools')
+            a list of ['tool':.., 'usage':.., 'monthly':.., 'reservation':..]
 	    (if billables==True, return tool entries with existing billing
 	     reference together, and sum all usage and reservation for
 	     tools with same reference)
+            and (with key 'users') a similar list of ['user':.., 'usage':...]
 	"""
+	delta_months = abs((end-begin)/timedelta(days=30))
 # list of tool primary keys and corresponding billing references
 	tools = {tool.pk:tool.billing_reference for tool in Tool.objects.all().order_by('name')}
+# same for users (just array, no additional info required)
+	users = [u.pk for u in User.objects.all().order_by('last_name')]
 	toolsums = {}
 	refsums = {}
-	delta_months = abs((end-begin)/timedelta(days=30))
+	usersums = {}
+# populate all the lists
+	for u in users:
+		usersums[u] = [0,0]
 	for t in tools.keys():
-# populate toolsums
 		toolsums[t] = [0,0]
 # make set of list of billing refs and back to list, to make them unique
 	billrefs=set([b for b in tools.values() if b])
 	billrefs=list(billrefs)
 	billrefs.sort()
 	for b in billrefs:
-# populate refsums for billing references
 		refsums[b] = [0,0]
 	for event in UsageEvent.objects.filter(project__in=projects, end__gt=begin, end__lte=end).order_by('start'):
 		try:
@@ -45,6 +51,7 @@ def get_project_span_tool_event_sums(projects, begin, end, billables=False):
 			minutes = int((end-start)/timedelta(minutes=1)+0.5)
 			toolsums[event.tool.pk][0] += minutes
 			refsums[tools[event.tool.pk]][0] += minutes
+			usersums[event.user.pk][0] += minutes
 		except:
 			pass
 	for event in Reservation.objects.filter(project__in=projects, end__gt=begin, end__lte=end, cancelled=False, shortened=False).order_by('start'):
@@ -54,25 +61,30 @@ def get_project_span_tool_event_sums(projects, begin, end, billables=False):
 			minutes = int((end-start)/timedelta(minutes=1)+0.5)
 			toolsums[event.tool.pk][1] += minutes
 			refsums[tools[event.tool.pk]][1] += minutes
+			usersums[event.user.pk][1] += minutes
 		except:
 			pass
-	result = []
+	toolresult = []
+	userresult = []
 	if billables:
 		for b in billrefs:
 			tn=''
 			for t in Tool.objects.filter(billing_reference=b):
 				tn+=t.name+' // '
 		# monthly: average usage in hours (to one decimal) per month
-			result.append({'ref':b, 'desc':tn.rstrip(' // '), 'usage':refsums[b][0], 'monthly':int(refsums[b][0]/delta_months/6+0.5)/10, 'reservation':refsums[b][1]})
+			toolresult.append({'ref':b, 'desc':tn.rstrip(' // '), 'usage':refsums[b][0], 'monthly':int(refsums[b][0]/delta_months/6+0.5)/10, 'reservation':refsums[b][1]})
 	else:
 # use mock reference number (just running index)
 		ref=990001
 		for t in tools.keys():
 			if toolsums[t][0] != 0 or toolsums[t][1] != 0:
 		# monthly: average usage in hours (to one decimal) per month
-				result.append({'ref':ref, 'desc':Tool.objects.get(pk=t).name, 'usage':toolsums[t][0], 'monthly':int(toolsums[t][0]/delta_months/6+0.5)/10, 'reservation':toolsums[t][1]})
+				toolresult.append({'ref':ref, 'desc':Tool.objects.get(pk=t).name, 'usage':toolsums[t][0], 'monthly':int(toolsums[t][0]/delta_months/6+0.5)/10, 'reservation':toolsums[t][1]})
 				ref+=1
-	return result
+	for u in users:
+		if usersums[u][0] != 0 or usersums[u][1] != 0:
+			userresult.append({'user':u, 'usage':usersums[u][0], 'reservation':usersums[u][1]})
+	return {'tools':toolresult, 'users':userresult}
 
 @staff_member_required(login_url=None)
 @require_GET
@@ -108,7 +120,7 @@ def project_sums(request, billable_tools=True):
 # get all event sums related to all the projects as a
 # list of {'tool':.,'usage':.,'reservation':.}
 	try:
-		totals = get_project_span_tool_event_sums(projects, start, end, billables=billable_tools)
+		totals = get_project_span_event_sums(projects, start, end, billables=billable_tools)['tools']
 	except:
 		totals = []
 # tabular/textual output
@@ -159,9 +171,7 @@ def billing_sums(request):
 	    for all projects and for a given time span. """
 # get active project ids
 #	projects = Project.objects.filter(active=True)
-	projects = Project.objects.all()
-	dictionary = {}
-	dictionary['projects'] = projects
+	projects = Project.objects.all().order_by('name')
 # by default, start is beginnning of the month, end is today
 	def_start = '{0}-{1}-01'.format(date.today().year,date.today().month)
 	def_end = date.today().isoformat()
@@ -179,20 +189,23 @@ def billing_sums(request):
 	except:
 		(start, end) = parse_start_and_end_date(def_start, def_end)
 	days = int(0.5+(end-start)/timedelta(days=1))
-	dictionary['days'] = days
-# get all event sums related to all the projects as a
-# list of {'tool':.,'usage':.,'reservation':.}
+# get all event sums related to all the projects
 	totals={}
+	active_users = set()
 	for p in projects:
 		try:
-			totals[p.name] = get_project_span_tool_event_sums([p], start, end, billables=True)
+			totals[p] = get_project_span_event_sums([p], start, end, billables=True)
 			# note as valid project
-			good_name = p.name
+			good_project = p
+			# populate list of active users
+			for s in totals[p]['users']:
+				if s != []:
+					active_users.add( s['user'] )
 		except:
-			totals[p.name] = []
-	if good_name:
-		# get sorted billing references from last valid project
-		billrefs = [ [t['ref'],t['desc']] for t in totals[good_name] ]
+			totals[p] = []
+	if good_project:
+# get sorted billing references from last valid project toolevents
+		billrefs = [ [t['ref'],t['desc']] for t in totals[good_project]['tools'] ]
 		billrefs.sort()
 	fn = 'nemo-billing-' + start.strftime("%Y%m%d") + "-" + end.strftime("%Y%m%d") + ".xlsx"
 	response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -214,13 +227,32 @@ def billing_sums(request):
 	sheet.write_row('A5', columntitles, italic)
 	rownum = 5
 	for b in billrefs:
-		# prepend billing ref, description and empty cell
+		# billing ref, description and empty
 		row = [ b[0], b[1], '' ]
 		for p in projects:
 		# two-decimals float of billrefs usage total converted to hours
-			row += [ float('{0:.2f}'.format( float(tot['usage'])/60 )) for tot in totals[p.name] if tot['ref'] == b[0] ]
+			row += [ float('{0:.2f}'.format( float(tot['usage'])/60 )) for tot in totals[p]['tools'] if tot['ref'] == b[0] ]
 		sheet.write_row(rownum,0,row)
 		rownum += 1
+	sheet.write_row(rownum,0, ['','','End'])
+	rownum += 2
+	columntitles = ['', '', 'User']
+	sheet.write_row(rownum, 0, columntitles, italic)
+	for usr in User.objects.all().order_by('last_name'):
+		if usr.pk in active_users:
+			row = [ '', usr.last_name+' '+usr.first_name, '' ]
+			for p in projects:
+				putot = totals[p]['users']
+# get list of entries for that project for this user
+				ptot = [ u for u in putot if u['user'] == usr.pk ]
+				if ptot != []:
+# get first entry ( ptot[0] ) -- several would make no sense, as there
+# cannot be more entries for the same user in the same project)
+					row += [ float('{0:.2f}'.format( float(ptot[0]['usage'])/60 )) ]
+				else:
+					row += [ '' ]
+			sheet.write_row(rownum,0,row)
+			rownum += 1
 # add end marker for further processing
 	sheet.write_row(rownum,0, ['','^-^','End'])
 	book.close()
