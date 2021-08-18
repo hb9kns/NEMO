@@ -236,8 +236,9 @@ def billing_sums(request):
 		rownum += 1
 	sheet.write_row(rownum,0, ['','','End'])
 	rownum += 2
-	columntitles = ['', '', 'User']
+	columntitles = ['', '', 'Users']
 	sheet.write_row(rownum, 0, columntitles, italic)
+	rownum += 1
 	for usr in User.objects.all().order_by('last_name'):
 		if usr.pk in active_users:
 			row = [ '', usr.last_name+' '+usr.first_name, '' ]
