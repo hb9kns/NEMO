@@ -44,7 +44,7 @@ def modify_qualifications(request):
 	if not request.user.is_staff:
 		for t in tools.values():
 			if t not in permitted:
-				return HttpResponseBadRequest('Sorry, but you are not primary responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
+				return HttpResponseBadRequest('Sorry, but you are not responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
 
 	for user in users.values():
 		original_qualifications = set(user.qualifications.all())

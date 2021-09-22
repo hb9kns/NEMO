@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.http import HttpResponseBadRequest
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.template import Template, Context
 from django.views.decorators.http import require_GET, require_POST
@@ -89,7 +90,7 @@ def email_broadcast(request, audience=''):
 		dictionary['audience'] = audience
 	else:
 		dictionary['audience'] = 'tool'
-		dictionary['search_base'] = Tool.objects.filter(visible=True, primary_owner=request.user)
+		dictionary['search_base'] = Tool.objects.filter(Q(primary_owner=request.user) | Q(backup_owners__in=[request.user]), visible=True)
 	return render(request, 'email/email_broadcast.html', dictionary)
 
 
