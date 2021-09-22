@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import Template, Context
 from django.utils import timezone
+from django.conf import settings
 
 from NEMO.models import Reservation, AreaAccessRecord, ScheduledOutage, Tool
 from NEMO.utilities import format_datetime
@@ -402,3 +403,11 @@ def check_policy_to_create_outage(outage):
 
 	# No policy issues! The outage can be created...
 	return None
+
+def check_permission_to_manage_tool(tool, operator):
+  ''' Check that the operator is allowed to manage the tool. '''
+  if operator.is_staff or operator == tool.primary_owner:
+    return True
+  if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS and operator in tool.backup_owners.all():
+    return True
+  return False

@@ -11,17 +11,18 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.models import Tool, MembershipHistory, User
+from NEMO.views.policy import check_permission_to_manage_tool
 
 @permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def qualifications(request):
-	""" Present a web page to allow staff and primary owners to qualify or disqualify users on particular tools. """
+	""" Present a web page to allow tool managers to qualify or disqualify users on particular tools. """
 	users = User.objects.filter(is_active=True)
 	alltools = Tool.objects.filter(visible=True)
 	if request.user.is_staff:
 		tools = alltools
 	else:
-		tools = alltools.filter( Q(primary_owner=request.user) | Q(backup_owners__in=[request.user.id]) )
+		tools = [ t for t in alltools.all() if check_permission_to_manage_tool(t,request.user) ]
 	return render(request, 'qualifications.html', {'users': users, 'tools': tools})
 
 
@@ -40,11 +41,9 @@ def modify_qualifications(request):
 	tools = Tool.objects.in_bulk(tools)
 	if tools == {}:
 		return HttpResponseBadRequest("You must specify at least one tool.")
-	permitted = Tool.objects.filter( Q(primary_owner=request.user) | Q(backup_owners__in=[request.user.id]), visible=True )
-	if not request.user.is_staff:
-		for t in tools.values():
-			if t not in permitted:
-				return HttpResponseBadRequest('Sorry, but you are not responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
+	for t in tools.values():
+		if not check_permission_to_manage_tool(t, request.user):
+			return HttpResponseBadRequest('Sorry, but you are not responsible of tool "{0}" and may not qualify users for it!'.format(t.name))
 
 	for user in users.values():
 		original_qualifications = set(user.qualifications.all())

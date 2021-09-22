@@ -16,6 +16,7 @@ from NEMO.forms import nice_errors, CommentForm
 from NEMO.models import Comment, Configuration, ConfigurationHistory, Project, Reservation, StaffCharge, Task, TaskCategory, TaskStatus, Tool, UsageEvent, User
 from NEMO.utilities import quiet_int, extract_times
 from NEMO.views.policy import check_policy_to_enable_tool, check_policy_to_disable_tool, check_policy_to_note_pending_usage
+from NEMO.views.policy import check_permission_to_manage_tool
 from NEMO.views.customization import get_customization
 from NEMO.widgets.dynamic_form import DynamicForm
 from NEMO.widgets.tool_tree import ToolTree
@@ -23,7 +24,7 @@ from NEMO.widgets.tool_tree import ToolTree
 @login_required
 @require_GET
 def tool_control(request, tool_id=None):
-	""" Presents the tool control view to the user, allowing them to being/end using a tool or see who else is using it. """
+	""" Presents the tool control view to the user, allowing them to begin/end using a tool or see who else is using it. """
 	if request.user.active_project_count() == 0:
 		return render(request, 'no_project.html')
 	# The tool-choice sidebar is not available for mobile devices, so redirect the user to choose a tool to view.
@@ -87,9 +88,13 @@ def tool_status(request, tool_id):
 			dictionary['next_res'] = next_res
 	except Reservation.DoesNotExist:
 		pass
-	# Staff need the user list to be able to qualify users for the tool.
-	if request.user.is_staff:
+	# Staff and responsibles need the user list to be able to qualify users for the tool.
+	if check_permission_to_manage_tool(tool,request.user):
 		dictionary['users'] = User.objects.filter(is_active=True)
+# allowed_to_manage is used in various places to check for permissions
+		dictionary['allowed_to_manage'] = True
+	else:
+		dictionary['allowed_to_manage'] = False
 
 	return render(request, 'tool_control/tool_status.html', dictionary)
 

@@ -16,6 +16,7 @@ from NEMO.utilities import bootstrap_primary_color, format_datetime
 from NEMO.views.customization import get_customization, get_media_file_contents
 from NEMO.views.safety import send_safety_email_notification
 from NEMO.views.tool_control import determine_tool_status
+from NEMO.views.policy import check_permission_to_manage_tool
 
 
 @login_required
@@ -170,11 +171,11 @@ def update(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	form = TaskForm(request.user, data=request.POST, instance=task)
 	next_page = request.POST.get('next_page', 'tool_control')
-	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+	if not check_permission_to_manage_tool(task.tool, request.user):
 		dictionary = {
 			'title': 'Task update not allowed',
 			'heading': 'Insufficient permissions',
-			'content': 'Only staff and primary responsibles can do this.',
+			'content': 'Only tool managers are allowed to do this.',
 		}
 		return render(request, 'acknowledgement.html', dictionary)
 	if not form.is_valid():
@@ -201,11 +202,11 @@ def update(request, task_id):
 def task_update_form(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	categories = TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT)
-	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+	if not check_permission_to_manage_tool(task.tool, request.user):
 		dictionary = {
 			'title': 'Task update not allowed',
 			'heading': 'Insufficient permissions',
-			'content': 'Only staff and primary responsibles can do this.',
+			'content': 'Only tool managers are allowed to do this.',
 		}
 		return render(request, 'acknowledgement.html', dictionary)
 	dictionary = {
@@ -221,11 +222,11 @@ def task_update_form(request, task_id):
 def task_resolution_form(request, task_id):
 	task = get_object_or_404(Task, id=task_id)
 	categories = TaskCategory.objects.filter(stage=TaskCategory.Stage.COMPLETION)
-	if not request.user.is_staff and not request.user == task.tool.primary_owner:
+	if not check_permission_to_manage_tool(task.tool, request.user):
 		dictionary = {
 			'title': 'Task resolution not allowed',
 			'heading': 'Insufficient permissions',
-			'content': 'Only staff and primary responsibles can do this.',
+			'content': 'Only tool managers are allowed to do this.',
 		}
 		return render(request, 'acknowledgement.html', dictionary)
 	dictionary = {
@@ -237,8 +238,8 @@ def task_resolution_form(request, task_id):
 
 def set_task_status(request, task, status_name, user):
 
-	if not user.is_staff and not user == task.tool.primary_owner and status_name:
-		raise ValueError("Only staff can set task status")
+	if not check_permission_to_manage_tool(task.tool, request.user) and status_name:
+		raise ValueError("Only tool managers can set task status")
 
 		#If no status is given, assign to default status. This will make sure all tasks have a proper Task History
 	if not status_name:
