@@ -1,14 +1,12 @@
 # Account restricted
 
 You are missing the permission for booking and using equipment through NEMO,
-because your account is currently marked as "requires training"
-which can have several reasons:
+because your account is currently marked as "training required",
+for the following possible reasons:
 
-- You are a new user, and although your account is already active,
-  you did not yet pass all introductory lessons.
 - You have been inactive in FIRST-Lab for too long (see user rules),
   and as temporary measure, your account has been restricted, until
-  you have passed some refresher courses.
+  you have passed some refresher courses or another introday.
 - NEMO's database has erroneous information -- *improbable, but possible.*
 
 In any case, you should contact [our administration][1]

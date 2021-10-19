@@ -13,6 +13,7 @@ from django.utils.http import urlencode
 from django.views.decorators.http import require_POST, require_GET, require_http_methods
 
 from NEMO.utilities import parse_start_and_end_date
+from NEMO.views.policy import check_permission_to_manage_tool
 from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
 def allowed_tools(request):
@@ -20,9 +21,10 @@ def allowed_tools(request):
 # reusing permissions: those allowed to change events can view all tools
 	if request.user.has_perm('NEMO.change_usageevent'):
 		return Tool.objects.all()
-# others can just view tools where they are primary responsibles
+# others can just view tools they are allowed to manage
 	else:
-		return Tool.objects.filter(primary_owner=request.user)
+		managed_tool_ids = [ t.id for t in Tool.objects.all() if check_permission_to_manage_tool(t, request.user) ]
+		return Tool.objects.filter(id__in=managed_tool_ids)
 
 def get_tool_span_events(request, eventtype, tool, begin, end):
 	""" get all usage events ending after begin and before or at end
