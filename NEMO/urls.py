@@ -272,6 +272,8 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		url(r'^toolevents/$', toolevents.toolevents, name='toolevents'),
 		# project usage lists
 		url(r'^projectevents/$', projectevents.projectevents, name='projectevents'),
+		# tool data for projects
+		url(r'^projecttools/$', projectevents.projecttools, name='projecttools'),
 		# project usage for billable tools
 		url(r'^project_sums/$', projectevents.project_sums, name='project_sums'),
 		# total usage for all billable tools for all projects

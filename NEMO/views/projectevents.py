@@ -5,6 +5,7 @@ from xlsxwriter.utility import xl_rowcol_to_cell, xl_range
 from datetime import timedelta, date
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -380,6 +381,100 @@ def projectevents(request, billable_tools=True):
 		for e in pjtevents:
 			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['toolref'], e['projectdesc'], e['user'], e['affiliation'] ]
 			sheet.write_row(rownum,0,row)
+			rownum += 1
+		book.close()
+		return response
+
+@staff_member_required(login_url=None)
+@require_GET
+def projecttools(request):
+	''' Presents a page displaying information about tools
+	    for which users of given projects are qualified. '''
+# get project ids (only characters '0-9,' from request)
+	try:
+		project_ids = re.sub('[^0-9,]', '', request.GET['pjts']).rstrip(',')
+		projects = Project.objects.filter(pk__in=set(project_ids.split(",")))
+	except:
+		projects = None
+	dictionary = {}
+	dictionary['pjts'] = projects
+	dictionary['allprojects'] = Project.objects.all()
+	try:
+		outputtype = request.GET['outputtype']
+	except:
+		outputtype = 'table'
+
+	vistools = Tool.objects.filter(visible=True).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+	dictionary['tools'] = vistools
+
+# active users of the selected projects
+	if projects:
+		pjtusers = User.objects.filter(is_active=True, projects__in=projects)
+	else:
+# if no projects are selected, immediately call HTML (table) view
+		return render(request, 'projecttools.html', dictionary)
+# dict of these users, sorted for output
+	userdict = { pu.id:'{0} {1}'.format(pu.last_name, pu.first_name) for pu in pjtusers }
+	sortedusers = dict(sorted( userdict.items(), key = lambda x:x[1] ))
+	dictionary['users'] = User.objects.filter(pk__in=sortedusers.keys())
+
+# dict of last use dates by tool and user-id
+	usedates = {}
+	for t in vistools:
+		usedates[t.id] = {}
+		for u in sortedusers.keys():
+			try:
+				lastevent = UsageEvent.objects.filter(operator__pk=u, tool=t, end__isnull=False).latest('end')
+				lastdate = lastevent.end
+			except:
+				lastdate = None
+			if lastdate == None and User.objects.filter(pk=u).filter(qualifications__in=[t]):
+				lastdate = User.objects.get(pk=u).date_joined
+			usedates[t.id][u] = lastdate
+	dictionary['tooldates'] = usedates
+
+# tabular/textual output
+	if outputtype != 'xlsx':
+		if outputtype == 'txt':
+# preformatted text output
+			return render(request, 'projecttools.txt', dictionary, content_type="text/plain")
+		else:
+# HTML table output
+			return render(request, 'projecttools.html', dictionary)
+	else:
+# XLSX output
+		indicator = projects.first().name
+		if len(projects)>1:
+			indicator += '_etc'
+		fn = 'nemopjttools-' + indicator  + '.xlsx'
+		response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+		response['Content-Disposition'] = 'attachment; filename = "%s"' % fn
+		book = Workbook(response, {'in_memory': True})
+		sheet = book.add_worksheet(indicator)
+		bold = book.add_format()
+		bold.set_bold()
+		italic = book.add_format()
+		italic.set_italic()
+		title = [ 'NEMO tool information for project(s):' ]
+		for p in projects:
+			title.append( p.name )
+		sheet.write_row('A1', title, bold)
+		columntitles = [ 'Tool', 'Users...' ]
+		sheet.write_row('A2', columntitles, italic)
+		row = [ '' ]
+		for username in sortedusers.values():
+			row.append( username )
+		sheet.write_row('A3',row)
+		rownum = 4
+		for t in vistools:
+			row = [ t.name ]
+			for u in sortedusers.keys():
+				d = usedates[t.id][u]
+				if d == None:
+					row.append( '' )
+				else:
+					row.append( '{0}-{1}-{2}'.format( d.year, d.month, d.day ) )
+			sheet.write_row( rownum,0,row )
 			rownum += 1
 		book.close()
 		return response
