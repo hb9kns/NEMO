@@ -8,15 +8,20 @@
 				{% csrf_token %}
 				<div class="col-sm-6">
 					<h3>Recipients: {{ audience }} = {{ selection }}</h3>
+					<div class="checkbox">
+						<label><input type="checkbox" name="copy_me" checked> Send a copy of this email to myself</label>
+					</div>
+				{% if users %}
 					Active NEMO users are listed below in black. Inactive users are <span style="color:lightgrey"><em>gray</em></span>.
 					<div class="checkbox">
 						<label><input type="checkbox" name="only_active_users" checked> Only send this email to active users</label>
 					</div>
-					<div class="checkbox">
-						<label><input type="checkbox" name="copy_me" checked> Send a copy of this email to myself</label>
-					</div>
 					{% for u in users %}
 						<span {% if not u.is_active %}style="color:lightgrey"{% endif %}>{% if not u.is_active %}<em>{% endif %}"{{ u }}{% if not u.is_active %}</em>{% endif %} ({{ u.affiliation }}{% if not u.is_active %} - inactive{% endif %})"  &lt;{{ u.email }}&gt;</span><br>
+					{% endfor %}
+				{% endif %}
+					{% for a in addresses %}
+						<span>&lt;{{ a.1 }}&gt; {{ a.0 }}</span><br>
 					{% endfor %}
 				</div>
 				<div class="col-sm-6">
