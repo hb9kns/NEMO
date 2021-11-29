@@ -52,6 +52,13 @@ def send_email(request):
 	body = request.POST.get('body')
 	if request.POST.get('copy_me'):
 		recipient_list.append(sender)
+	dictionary = {
+		'title': subject,
+		'greeting': '',
+		'contents': body,
+	}
+	content = get_media_file_contents('generic_email.html')
+	body = Template(content).render(Context(dictionary))
 	try:
 		email = EmailMultiAlternatives(subject, from_email=sender, bcc=recipient_list)
 		email.attach_alternative(body, 'text/html')
