@@ -1,7 +1,7 @@
 [
 	{% for x in usage_events %}
 	{
-		"title": "Usage of the {{ x.tool.name }}",
+		"title": "{{ x.tool.name }} usage",
 		"id": {{ x.id }},
 		"color": "#33ad33",
 		"start": "{{ x.start|date:"c" }}",
@@ -23,7 +23,7 @@
 	{% endfor %}
 	{% for x in reservations %}
 	{
-		"title": "Reservation for the {{ x.tool.name }}{% if x.title %}, titled \"{{ x.title }}\"{% endif %}",
+		"title": "{{ x.tool.name }} reservation{% if x.title %} \"{{ x.title }}\"{% endif %}",
 		"id": {{ x.id }},
 		"color": "#3a87ad",
 		"start": "{{ x.start|date:"c" }}",
