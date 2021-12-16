@@ -47,11 +47,12 @@ def send_email(request):
 		recipient_list = [recipient]
 	except:
 		return HttpResponseBadRequest('The intended recipient was not a valid email address. The email was not sent.')
-	sender = request.user.email
+	sender = '"{0} {1} through NEMO" <{2}>'.format( request.user.first_name, request.user.last_name, settings.EMAIL_SENDER )
+	originator = '"{0} {1}" <{2}>'.format( request.user.first_name, request.user.last_name, request.user.email )
 	subject = request.POST.get('subject')
 	body = request.POST.get('body')
 	if request.POST.get('copy_me'):
-		recipient_list.append(sender)
+		recipient_list.append(originator)
 	dictionary = {
 		'title': subject,
 		'greeting': '',
@@ -60,7 +61,7 @@ def send_email(request):
 	content = get_media_file_contents('generic_email.html')
 	body = Template(content).render(Context(dictionary))
 	try:
-		email = EmailMultiAlternatives(subject, from_email=sender, bcc=recipient_list)
+		email = EmailMultiAlternatives(subject, from_email=sender, bcc=recipient_list, headers={'Reply-To': originator} )
 		email.attach_alternative(body, 'text/html')
 		email.send()
 	except SMTPException as error:
@@ -197,7 +198,7 @@ def send_broadcast_email(request):
 	elif audience == 'equiresp':
 		subject = '[equiresp]: ' + form.cleaned_data['subject']
 	elif audience == 'pjtresp':
-		subject = '[FIRST-Lab]: ' + form.cleaned_data['subject']
+		subject = '[projects]: ' + form.cleaned_data['subject']
 	elif audience == 'physicalaccess':
 		p = PhysicalAccessLevel.objects.filter(id=selection)
 		subject = p[0].name + ': ' + form.cleaned_data['subject']
