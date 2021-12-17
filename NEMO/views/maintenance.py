@@ -42,14 +42,16 @@ def author(request, author_id):
 		author = get_object_or_404(User, id=request.user.id)
 	tac = []
 	for c in Comment.objects.filter(author=author):
-		tac.append( { 'date': c.creation_date, 'tool': c.tool, 'text': c.content, 'type': 'comment' } )
+# ignore entries with missing date: wouldn't know where to put anyway!
+		if c.creation_date:
+			tac.append( { 'date': c.creation_date, 'tool': c.tool, 'text': c.content, 'type': 'comment' } )
 	for t in Task.objects.filter(creator=author):
-		tac.append( { 'date': t.creation_time, 'tool': t.tool, 'text': t.problem_description, 'type': 'task,created' } )
+		if t.creation_time:
+			tac.append( { 'date': t.creation_time, 'tool': t.tool, 'text': t.problem_description, 'type': 'task,created' } )
 	for t in Task.objects.filter(resolver=author):
-		if t.resolved:
+# if resolver is set, resolved should be true anyway, but just to be sure...
+		if t.resolved and t.resolution_time:
 			tac.append( { 'date': t.resolution_time, 'tool': t.tool, 'text': t.resolution_description, 'type': 'task,resolved' } )
-#	for h in TaskHistory.objects.filter(user=author):
-#		tac.append( { 'date': h.time, 'tool': h.task.tool, 'text': h.status, 'type': 'task,modified' } )
 	tac.sort( key=lambda t: t['date'], reverse=True )
 	dictionary = { 'author':author,
 		'entries': tac,
