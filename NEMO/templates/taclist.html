@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Tasks and Comments List{% endblock %}
+{% block content %}
+<h1 style="color:red;">UNDER CONSTRUCTION!</h1>
+	<h1>List of Tasks and Comments</h1>
+	<h3>for {{ author.first_name }} {{ author.last_name }}</h3>
+{#	<div class="col-lg-4" style="margin-top:30px"> #}
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Tool/<small>Type</small></th>
+						<th>Text</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for e in entries %}
+					<tr>
+						<td>{{ e.date }}</td>
+						<td><a href="{% url 'tool_control' e.tool.id %}">{{ e.tool.name }}</a><br /><small>{{ e.type }}</small></td>
+						<td>{{ e.text }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+{#	</div> #}
+{% endblock %}

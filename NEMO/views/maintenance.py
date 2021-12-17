@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET
 
-from NEMO.models import Task, TaskCategory, TaskStatus
+from NEMO.models import Task, TaskCategory, TaskStatus, TaskHistory, User, Comment
 
 
 @staff_member_required(login_url=None)
@@ -32,6 +32,29 @@ def maintenance(request, sort_by=''):
 	}
 	return render(request, 'maintenance/maintenance.html', dictionary)
 
+
+@staff_member_required(login_url=None)
+@require_GET
+def author(request, author_id):
+	try:
+		author = get_object_or_404(User, id=author_id)
+	except:
+		author = get_object_or_404(User, id=request.user.id)
+	tac = []
+	for c in Comment.objects.filter(author=author):
+		tac.append( { 'date': c.creation_date, 'tool': c.tool, 'text': c.content, 'type': 'comment' } )
+	for t in Task.objects.filter(creator=author):
+		tac.append( { 'date': t.creation_time, 'tool': t.tool, 'text': t.problem_description, 'type': 'task,created' } )
+	for t in Task.objects.filter(resolver=author):
+		if t.resolved:
+			tac.append( { 'date': t.resolution_time, 'tool': t.tool, 'text': t.resolution_description, 'type': 'task,resolved' } )
+#	for h in TaskHistory.objects.filter(user=author):
+#		tac.append( { 'date': h.time, 'tool': h.task.tool, 'text': h.status, 'type': 'task,modified' } )
+	tac.sort( key=lambda t: t['date'], reverse=True )
+	dictionary = { 'author':author,
+		'entries': tac,
+		}
+	return render(request, 'taclist.html', dictionary)
 
 @staff_member_required(login_url=None)
 @require_GET

@@ -160,6 +160,8 @@ urlpatterns = [
 	# Maintenance:
 	url(r'^maintenance/(?P<sort_by>urgency|force_shutdown|tool|problem_category|last_updated|creation_time)/$', maintenance.maintenance, name='maintenance'),
 	url(r'^maintenance/$', maintenance.maintenance, name='maintenance'),
+	# list task and comment entries by author (staff only)
+	url(r'^author/(?P<author_id>\d+)/', maintenance.author, name='tac_author'),
 	url(r'^task_details/(?P<task_id>\d+)/$', maintenance.task_details, name='task_details'),
 
 	# Resources:

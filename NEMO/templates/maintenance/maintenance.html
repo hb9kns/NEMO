@@ -15,6 +15,13 @@
 			<li><a href="#closed">Closed</a></li>
 		</ul>
 	</div>
+	<div class="container-fluid">
+		{% if user.is_staff %}
+		(
+		<a href="{% url 'tac_author' user.id %}">click here</a> to list your tasks and comments
+		)
+		{% endif %}
+	</div>
 
 	<div class="tab-content">
 		<div id="pending" class="tab-pane active">
