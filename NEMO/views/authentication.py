@@ -120,6 +120,7 @@ def login_user(request):
 		'login_banner': get_media_file_contents('login_banner.html'),
 		'user_name_or_password_incorrect': False,
 		'version': settings.VERSIONID,
+		'remote_host': request.META.get('REMOTE_ADDR', '(unknown)'),
 	}
 	if 'NEMO.views.db_authentication.DbAuthenticationBackend' in settings.AUTHENTICATION_BACKENDS:
 		dictionary['reset_password_link'] = reverse('forgot_password')
