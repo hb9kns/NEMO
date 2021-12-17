@@ -1,8 +1,8 @@
+<p><tt>Server time: {% now 'l Y-m-d,H:i' %}</tt></p>
+{% if allowed %}
 <div class="row" style="background:transparent">
-	<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
-		{% if not nanofab_occupants %}
-			<h6>.:.</h6>
-		{% else %}
+	{% if nanofab_occupants %}
+		<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
 			{% regroup nanofab_occupants by area as area_occupants %}
 			<h2>Area occupancy</h2>
 			<p>Staff members are highlighted in <span class="success-highlight">green</span></p>
@@ -37,8 +37,8 @@
 					</table>
 				</div>
 			{% endfor %}
-		{% endif %}
-	</div>
+		</div>
+	{% endif %}
 	<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
 		{% if usage_events %}
 			<h2>Tool usage</h2>
@@ -100,5 +100,9 @@
 			{% endfor %}
 		{% endif %}
 	</div>
-<center><p>Server time: {% now 'l Y-m-d H:i' %}</p></center>
 </div>
+{% else %}
+<p>
+<em>You are not logged in and your host {{ remote_host }} is not allowed to fetch this information.</em>
+</p>
+{% endif %}
