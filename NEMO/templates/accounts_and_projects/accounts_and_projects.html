@@ -80,7 +80,9 @@
 		{% endif %}			</span>
 						<div id="project_{{ project.id }}_details" class="collapse">
 							(<a href="{% url 'project_sums' %}?outputtype=table&pjts={{ project.id }}">click here</a> to calculate project tool usage and reservation sums;
-							<a href="{% url 'projectevents' %}?outputtype=table&pjts={{ project.id }}">click here</a> to display project usage events)
+							<a href="{% url 'projectevents' %}?outputtype=table&pjts={{ project.id }}">click here</a> to display project usage events;
+							<br />
+							<a href="{% url 'projecttools' %}?outputtype=xlsx&pjts={{ project.id }}">click here</a> to generate spreadsheet of last usage of any tool by project members)
 							<div style="height:10px"></div>
 							<div id="add_user_to_project_{{ project.id }}">
 								<label class="control-label"><input id="search_user_for_project_{{ project.id }}" type="text" class="form-control user_search" placeholder="Search for a user to add" data-project-id="{{ project.id }}"></label>
