@@ -24,7 +24,7 @@
 		}
 		function on_load()
 		{
-			$("#search").autocomplete('users', get_user, {{ users|json_search_base }}).focus();
+			$("#search").autocomplete('users', get_user, {{ users|json_admin_user_search_base }}).focus();
 		}
 		$(on_load);
 	</script>

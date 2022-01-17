@@ -34,6 +34,14 @@ def json_search_base(items_to_search):
 	result = result.rstrip(',') + ']'
 	return mark_safe(result)
 
+@register.filter
+def json_admin_user_search_base(items_to_search):
+	result = '['
+	for item in items_to_search:
+		result += '{{"name":"{0}", "id":{1}}},'.format(escape(str(item)+' P#'+str(item.personnel_number)+' B#'+str(item.badge_number)), item.id)
+	result = result.rstrip(',') + ']'
+	return mark_safe(result)
+
 
 @register.simple_tag
 def json_search_base_with_extra_fields(items_to_search, *extra_fields):
