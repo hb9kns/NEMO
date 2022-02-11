@@ -40,3 +40,8 @@
 {% endif %}
 <center><a href="{% url 'media' 'mavg.png' %}"><img src="{% url 'media' 'mavg.png' %}" width="90%" alt="average weekly occupancy" title="moving average of weekly FIRST-Lab occupancy" /></a></center>
 <p>Please <a href="{% url 'media' 'userstats.txt' %}">click here</a> to display the number of users recently logged in!</p>
+{% if serverstats %}
+<p><small><tt>{{ serverstats }}</tt></small></p>
+{% else %}
+<p><em><small>(no server stats available)</small></em></p>
+{% endif %}

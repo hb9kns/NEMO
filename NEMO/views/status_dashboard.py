@@ -7,6 +7,7 @@ from django.views.decorators.http import require_GET
 from NEMO.decorators import disable_session_expiry_refresh
 from NEMO.models import Area, AreaAccessRecord, Resource, ScheduledOutage, Task, Tool, UsageEvent
 
+import subprocess
 
 @login_required
 @require_GET
@@ -32,6 +33,11 @@ def status_dashboard(request):
 		dictionary = {
 			'nanofab_occupants': AreaAccessRecord.objects.filter(end=None, staff_charge=None).prefetch_related('customer', 'project', 'area'),
 		}
+		try:
+			serverstats = subprocess.check_output('hostname;echo //;uptime;echo //;free -h',shell=True,encoding='ASCII',timeout=1)
+		except:
+			serverstats = '(server stats failed)'
+		dictionary['serverstats'] = serverstats
 		return render(request, 'status_dashboard/occupancy.html', dictionary)
 
 
@@ -91,6 +97,7 @@ def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages, 
 	return result
 
 
+#### IS THIS EVER USED??
 @login_required
 @require_GET
 @disable_session_expiry_refresh
