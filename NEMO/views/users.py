@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import permission_required
+from django.core.mail import send_mail
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -161,6 +162,7 @@ def create_or_modify_user(request, user_id):
 				dictionary['warning'] = 'The user information was not modified because the identity service encountered a problem while creating the corresponding domain account. The NEMO administrator has been notified to resolve the problem.'
 				return render(request, 'users/create_or_modify_user.html', dictionary)
 
+		must_train_again = form.initial['training_required'] is False and form.cleaned_data['training_required'] is True
 		# Only save the user model for now, and wait to process the many-to-many relationships.
 		# This way, many-to-many changes can be recorded.
 		# See this web page for more information:
@@ -173,6 +175,22 @@ def create_or_modify_user(request, user_id):
 		record_local_many_to_many_changes(request, user, form, 'projects')
 		form.save_m2m()
 
+		if must_train_again:
+			subject = 'NEMO notification: training required'
+			message = '''
+
+Your account has been set to "training required".
+For further information, please contact the lab management.
+
+(sent by NEMO)
+'''
+			send_mail( subject=subject, message=message, from_email=settings.EMAIL_SENDER, recipient_list=[user.email], fail_silently=True )
+			dictionary = {
+				'title': 'User notified',
+				'heading': 'The user has been notified about change of training status: '+str(must_train_again),
+				'content': 'User {} {} has been notified on address {} about the setting of "training required".'.format( user.first_name, user.last_name, user.email ),
+				}
+			return render(request, 'acknowledgement.html', dictionary)
 		return redirect('users')
 	else:
 		return HttpResponseBadRequest('Invalid method')
