@@ -162,7 +162,12 @@ def create_or_modify_user(request, user_id):
 				dictionary['warning'] = 'The user information was not modified because the identity service encountered a problem while creating the corresponding domain account. The NEMO administrator has been notified to resolve the problem.'
 				return render(request, 'users/create_or_modify_user.html', dictionary)
 
-		must_train_again = form.initial['training_required'] is False and form.cleaned_data['training_required'] is True
+# if any of this raises an exception, then it's probably missing,
+# therefore the user is not yet set up, therefore clear flag anyway:
+		try:
+			must_train_again = form.initial['training_required'] is False and form.cleaned_data['training_required'] is True
+		except:
+			must_train_again = False
 		# Only save the user model for now, and wait to process the many-to-many relationships.
 		# This way, many-to-many changes can be recorded.
 		# See this web page for more information:
