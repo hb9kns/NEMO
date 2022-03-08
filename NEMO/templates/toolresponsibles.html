@@ -19,7 +19,7 @@
 			<tr>
 			<td>{% if forloop.first %}<b>{{ l.loc }}</b>{% else %}{% endif%}</td>
 				<td>{{ t.name }}</td>
-				<td>{# <a href="{% url 'get_email_form_for_user' t.primary_id %}"> #}{{ t.primary }}{# </a> #}</td>
+				<td><a href="{% url 'get_email_form_for_user' t.primary_id %}">{{ t.primary }}</a></td>
 				<td>{% for buo in t.backup %}{{ buo }} {% endfor %}</td>
 			</tr>
 			{% endfor %}
