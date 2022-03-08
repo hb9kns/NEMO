@@ -194,6 +194,8 @@ For further information, please contact the lab management.
 				'title': 'User notified',
 				'heading': 'The user has been notified about change of training status: '+str(must_train_again),
 				'content': 'User {} {} has been notified on address {} about the setting of "training required".'.format( user.first_name, user.last_name, user.email ),
+				'next_url': 'users',
+				'next_name': 'user administration',
 				}
 			return render(request, 'acknowledgement.html', dictionary)
 		return redirect('users')

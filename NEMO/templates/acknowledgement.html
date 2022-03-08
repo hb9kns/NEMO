@@ -5,7 +5,11 @@
 	{% if content %}<p>{{ content }}</p>{% endif %}
 	<div class="row">
 		<div class="col-xs-4">
+		{% if next_url %}
+			<a href="{% url next_url %}" class="btn btn-success">Continue{% if next_name %} to {{ next_name }}{% endif %}</a>
+		{% else %}
 			<a href="{% url 'landing' %}" class="btn btn-success">Continue to NEMO home screen</a>
+		{% endif %}
 		</div>
 	</div>
 {% endblock %}
