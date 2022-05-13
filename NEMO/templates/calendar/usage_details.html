@@ -15,4 +15,8 @@
 		This tool is currently in use.<br>
 	{% endif %}
 	Identifier: <a href="{% url 'admin:NEMO_usageevent_change' event.id %}">{{ event.id }}</a><br>
+	{% if event.run_data %}
+	Run data:
+	<em>{{ event.run_data|linebreaksbr }}</em>
+	{% endif %}
 </div>

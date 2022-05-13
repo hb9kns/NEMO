@@ -56,9 +56,7 @@
 						<th>Project</th>
 						<th>User</th>
 						<th>Affiliation</th>
-				{% if eventtype == "reservation" %}
-						<th>Title</th>
-				{% endif %}
+						<th>Title/Remarks</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -72,9 +70,7 @@
 							<td>{{ e.projectdesc }}</td>
 							<td>{{ e.user }}</td>
 							<td>{{ e.affiliation }}</td>
-				{% if eventtype == "reservation" %}
-							<td>{{ e.remarks }}</td>
-				{% endif %}
+							<td>{{ e.title }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>

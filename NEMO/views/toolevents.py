@@ -50,13 +50,10 @@ def get_tool_span_events(request, eventtype, tool, begin, end):
 				affiliation = event.user.affiliation.name
 			except:
 				affiliation = "(unknown affiliation)"
-			if eventtype == 'reservation':
-				try:
-					remarks = event.title
-				except:
-					remarks = "(unknown title)"
-			else:
-				remarks = ""
+			try:
+				remarks = event.title
+			except:
+				remarks = "(unknown title)"
 			try:
 				start = event.start
 				end = event.end
@@ -137,7 +134,7 @@ def toolevents(request):
 		sheet.write_row('A1', title, bold)
 		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), toolsum ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/Remarks']
+		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/RunData']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in events:

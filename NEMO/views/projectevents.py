@@ -290,6 +290,10 @@ def get_project_span_usage_events(projects, begin, end, billables=True):
 		except:
 			uaffil = "(unknown affiliation)"
 		try:
+			etitle = event.title
+		except:
+			etitle ="(unknown title)"
+		try:
 			estart = event.start
 			eend = event.end
 			eminutes = int( (eend-estart)/timedelta(minutes=1)+0.5 )
@@ -304,7 +308,7 @@ def get_project_span_usage_events(projects, begin, end, billables=True):
 			etref = tools[event.tool.pk]
 		else:
 			etref = None
-		result.append( {'start':estart, 'end':eend, 'minutes':eminutes, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'toolref':etref, 'affiliation':uaffil} )
+		result.append( {'start':estart, 'end':eend, 'minutes':eminutes, 'user':eufull, 'projectdesc':epjt, 'tooldesc':etool, 'toolref':etref, 'affiliation':uaffil, 'title':etitle} )
 	return result
 
 @staff_member_required(login_url=None)
@@ -375,11 +379,11 @@ def projectevents(request, billable_tools=True):
 		sheet.write_row('A1', title, bold)
 		title = [ 'beginning:', start.strftime("%Y-%m-%d"), 'ending:', end.strftime("%Y-%m-%d"), 'corresponding to', days, 'days' ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Minutes', 'Tool', 'Ref', 'Project', 'User', 'Affiliation']
+		columntitles = ['Start', 'End', 'Minutes', 'Tool', 'Ref', 'Project', 'User', 'Affiliation', 'Title/Remarks']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in pjtevents:
-			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['toolref'], e['projectdesc'], e['user'], e['affiliation'] ]
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['tooldesc'], e['toolref'], e['projectdesc'], e['user'], e['affiliation'], e['title'] ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
