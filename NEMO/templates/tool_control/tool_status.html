@@ -134,6 +134,9 @@
 					{% else %}
 						<span class="glyphicon glyphicon-wrench pull-left notification-icon warning-highlight" title="Click to toggle details about this task"></span>
 					{% endif %}
+			{% if "updated this task" in t.progress_description %}
+			<small><em>Click to show updates!</em></small>
+			{% endif %}
 					<span class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
 				</a>
 				<div class="media-body">
@@ -145,6 +148,9 @@
 							This task was created by {{ t.creator }} on {{ t.creation_time }}.
 							{% if allowed_to_manage %}
 								You can <a href="{% url 'task_update_form' t.id %}">update</a> or <a href="{% url 'task_resolution_form' t.id %}">resolve</a> this task.
+							{% endif %}
+							{% if allowed_to_manage or t.creator == user %}
+							.:.
 							{% endif %}
 							{% if t.force_shutdown %}
 								The tool will remain shut down until this task is resolved.
@@ -190,6 +196,7 @@
 								{% csrf_token %}
 								<a href="javascript:void(0)" onclick="$(this).closest('form').submit()">Hide this comment</a>.
 							</form>
+							.:.
 						</div>
 					{% endif %}
 				</div>
