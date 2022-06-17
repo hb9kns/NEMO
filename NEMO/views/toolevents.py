@@ -134,11 +134,11 @@ def toolevents(request):
 		sheet.write_row('A1', title, bold)
 		title = [ start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), toolsum ]
 		sheet.write_row('A2', title)
-		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/RunData']
+		columntitles = ['Start', 'End', 'Minutes', 'Project', 'User', 'Affiliation', 'Title/RunData', 'StartTime', 'EndTime']
 		sheet.write_row('A4', columntitles, italic)
 		rownum = 4
 		for e in events:
-			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['projectname'], e['user'], e['affiliation'], e['remarks'] ]
+			row = [ e['start'].strftime("%y-%m-%d,%H:%M"), e['end'].strftime("%y-%m-%d,%H:%M"), e['minutes'], e['projectname'], e['user'], e['affiliation'], e['remarks'], e['start'].strftime("%H:%M"), e['end'].strftime("%H:%M") ]
 			sheet.write_row(rownum,0,row)
 			rownum += 1
 		book.close()
