@@ -20,13 +20,23 @@ def jumbotron_content(request):
 	remote_host = request.META.get( 'REMOTE_ADDR', 'X.X.X.X' )
 	if request.user.id or remote_host in settings.JUMBOTRONS:
 		delete_expired_alerts()
+		exclude = ''
+		try:
+			exc = request.GET.get('exclude_tool')
+			for i in range(0, len(exc)):
+# simple whitelisting for harmless characters
+				if exc[i] in '0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_':
+					exclude += exc[i]
+		except:
+			pass
 		dictionary = {
 			'nanofab_occupants': AreaAccessRecord.objects.filter(end=None, staff_charge=None).prefetch_related('customer', 'project').order_by('area__name', 'start'),
 			'usage_events': UsageEvent.objects.filter(end=None).prefetch_related('operator', 'user', 'tool'),
 			'alerts': Alert.objects.filter(user=None, debut_time__lte=timezone.now()),
 			'disabled_resources': Resource.objects.filter(available=False),
 			'allowed': True,
-		'remote_host': remote_host,
+			'remote_host': remote_host,
+			'exclude_tool': exclude,
 		}
 	else:
 		dictionary = { 'allowed': False, 'remote_host': remote_host, }
