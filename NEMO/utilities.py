@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from dateutil.rrule import MONTHLY, rrule
 from django.utils import timezone
 from django.utils.timezone import localtime
+from django.conf import settings
 
 
 def bootstrap_primary_color(color_type):
@@ -177,3 +178,30 @@ def end_of_the_day(t, in_local_timezone=True):
 	""" Returns the END of today's day (11:59:59.999999 PM of the current day) in LOCAL time. """
 	midnight = t.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=None)
 	return localize(midnight) if in_local_timezone else midnight
+
+# simple ICAL methods
+
+def crlfy( arr=[] ):
+  '''return string of lines in arr, each terminated by CR LF'''
+  answ = ''
+  for l in arr:
+    answ += str(l)+r'\r\n'
+  return answ
+
+def ical_header():
+  '''return header for ical output'''
+  answ = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//NEMO lab management//'+settings.ICAL_ORGANIZER]
+  answ += ['CALSCALE:GREGORIAN', 'METHOD:PUBLISH']
+  return crlfy( answ )
+
+def ical_footer():
+  '''return footer for simple ical output'''
+  return crlfy( ['END:VCALENDAR'] )
+
+def ical_reservation( resr ):
+  '''return simple ical element for reservation event'''
+  if not resr:
+    return
+  answ = ['BEGIN:VEVENT','CLASS:PUBLIC']
+  answ += ['UID:'+str(resr.id)+'@'+settings.ICAL_ORGANIZER]
+  answ += ['ORGANIZER;CN="NEMO":MAILTO:noreply@'+settings.ICAL_ORGANIZER]
