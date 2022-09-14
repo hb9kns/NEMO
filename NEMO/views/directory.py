@@ -55,7 +55,7 @@ def toolresponsibles(request, namesuffix='' ):
 	''' generate list of tools sorted by locations, filtered
 	for names ending with namesuffix and excluding suppressed tools
 	'''
-	tools = Tool.objects.filter(operational=True, visible=True, name__iendswith=namesuffix).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+	tools = Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
 # create sorted list of unique tool locations
 	locations = list( { t.location for t in tools } )
 	locations.sort()
