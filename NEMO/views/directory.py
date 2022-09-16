@@ -64,7 +64,7 @@ def toolresponsibles(request, namesuffix='' ):
 # loop over locations and tools for each location
 		toollist = []
 		for t in [ t for t in tools if t.location == l ]:
-			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name
+			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name+( '' if t.primary_owner.is_active else ' (inactive)' )
 			pid = t.primary_owner.id
 # get id list of all backup owners for that tool
 			bus = User.objects.filter(id__in=t.backup_owners.values_list('id', flat=True)).all()
