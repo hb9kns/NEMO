@@ -77,6 +77,8 @@
 						<span class="grey">{{ project.application_identifier }}
 		{% if project.billing_reference %}
 						 / billing reference: {{ project.billing_reference }}
+						<br />
+						description: {{ project.project_description }}
 		{% endif %}			</span>
 						<div id="project_{{ project.id }}_details" class="collapse">
 							(<a href="{% url 'project_sums' %}?outputtype=table&pjts={{ project.id }}">click here</a> to calculate project tool usage and reservation sums;
