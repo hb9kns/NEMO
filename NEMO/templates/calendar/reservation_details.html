@@ -23,6 +23,9 @@
 	{% elif reservation.title %}
 		Title: {{ reservation.title }}<br>
 	{% endif %}
+	<p align="right">
+	<small><em>Start title with any of :+-* to set different colors!</em></small>
+	</p>
 
 	User: <a href="{% url 'get_email_form_for_user' reservation.user.id %}"> {{ reservation.user }} </a><br>
 	Created by: {{ reservation.creator }}<br>

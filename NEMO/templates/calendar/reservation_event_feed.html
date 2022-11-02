@@ -11,6 +11,11 @@
 		{% if user.id == x.user.id or user.id == x.creator.id or may_modify_all %}"editable": true,{% endif %}
 		"start": "{{ x.start|date:"c" }}",
 		"end": "{{ x.get_visual_end|date:"c" }}",
+{# set event colors according to first character in text #}
+{% if x.title|first == ":" %}		"color": "#0033cc",{% endif %}
+{% if x.title|first == "+" %}		"color": "#cc0033",{% endif %}
+{% if x.title|first == "-" %}		"color": "#006633",{% endif %}
+{% if x.title|first == "*" %}		"color": "#cc6633",{% endif %}
 		"details_url": "{% url 'reservation_details' x.id %}"
 	}{% if not forloop.last %},{% elif outages %},{% endif %}
 	{% endfor %}
