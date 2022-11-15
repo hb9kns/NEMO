@@ -222,13 +222,6 @@
 		{% endif %}
 			<small>Note: hours and minutes are irrelevant.</small>
 		</div>
-		{% if form.instance.id %}
-		<div class="form-group">
-			<div class="control-label col-sm-2">Last login</div>
-			<div class="col-sm-4 form-control-static">
-				{{ form.instance.last_login|default_if_none:"Never" }}
-			</div>
-		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="fire_trained">Firefighting training</label>
 			<div class="col-sm-2">
@@ -239,6 +232,13 @@
 					{{ form.fire_trained.errors|striptags }}
 				</div>
 			{% endif %}
+		</div>
+		{% if form.instance.id %}
+		<div class="form-group">
+			<div class="control-label col-sm-2">Last login</div>
+			<div class="col-sm-4 form-control-static">
+				{{ form.instance.last_login|default_if_none:"Never" }}
+			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="mentor_trained">Mentor training</label>
