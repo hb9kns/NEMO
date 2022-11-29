@@ -38,7 +38,7 @@ def json_search_base(items_to_search):
 def json_admin_user_search_base(items_to_search):
 	result = '['
 	for item in items_to_search:
-		result += '{{"name":"{0}", "id":{1}}},'.format(escape(str(item)+' P#'+str(item.personnel_number)+' B#'+str(item.badge_number)), item.id)
+		result += '{{"name":"{0}", "id":{1}}},'.format(escape(str(item)+' P#'+str(item.personnel_number)+' B#'+str(item.badge_number)+' / '+str(item.username)), item.id)
 	result = result.rstrip(',') + ']'
 	return mark_safe(result)
 
