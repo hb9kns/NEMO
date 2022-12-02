@@ -11,8 +11,10 @@ from NEMO.views.alerts import delete_expired_alerts
 
 @require_GET
 def jumbotron(request):
+	hidereq = request.GET.get('hide', default='')
+	# pass the hide parameter as a session property
+	request.session['jumbotron_hide'] = hidereq
 	return render(request, 'jumbotron/jumbotron.html')
-
 
 
 @require_GET
@@ -20,15 +22,12 @@ def jumbotron_content(request):
 	remote_host = request.META.get( 'REMOTE_ADDR', 'X.X.X.X' )
 	if request.user.id or remote_host in settings.JUMBOTRONS:
 		delete_expired_alerts()
-		exclude = ''
-		try:
-			exc = request.GET.get('exclude_tool')
-			for i in range(0, len(exc)):
-# simple whitelisting for harmless characters
-				if exc[i] in '0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_':
-					exclude += exc[i]
-		except:
-			pass
+		sesshide = request.session.get( 'jumbotron_hide', default='' )
+		hidepatt = ''
+		for i in range(0, len(sesshide)):
+			# simple whitelisting for harmless characters
+			if sesshide[i] in '0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_':
+				hidepatt += sesshide[i]
 		dictionary = {
 			'nanofab_occupants': AreaAccessRecord.objects.filter(end=None, staff_charge=None).prefetch_related('customer', 'project').order_by('area__name', 'start'),
 			'usage_events': UsageEvent.objects.filter(end=None).prefetch_related('operator', 'user', 'tool'),
@@ -36,7 +35,7 @@ def jumbotron_content(request):
 			'disabled_resources': Resource.objects.filter(available=False),
 			'allowed': True,
 			'remote_host': remote_host,
-			'exclude_tool': exclude,
+			'hide_tools': hidepatt,
 		}
 	else:
 		dictionary = { 'allowed': False, 'remote_host': remote_host, }
