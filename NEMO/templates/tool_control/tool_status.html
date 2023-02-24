@@ -255,7 +255,7 @@
 				<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
 				{% endif %}
 				{% if user.is_staff or tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress or tool.allow_pending_usage and not tool.pending_usage %}
-					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span>{% if tool.in_use %}Note pending usage of{% else %}Start using{% endif %} {{ tool.name }}</button>
+					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span>{% if tool.in_use %}Announce pending usage of{% else %}Start using{% endif %} {{ tool.name }}</button>
 				{% endif %}
 			{% endif %}
 			{% if tool.usage_warning and tool.usage_warning != '' %}

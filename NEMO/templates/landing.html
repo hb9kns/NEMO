@@ -69,9 +69,9 @@
 				{% endfor %}
 			</div>
 		{% endif %}
-		{% if usage_events or user.in_area or self_log_in %}
+		{% if usage_events or user.in_area or self_log_in or pending_tools %}
 			<div class="col-lg-4">
-				<h3>Current {{ facility_name }} usage</h3>
+				<h3>Current/pending {{ facility_name }} usage</h3>
 				{% for usage in usage_events %}
 					<a href="{% url 'tool_control' usage.tool.id %}" style="text-decoration: none">
 						<div class="alert alert-info">
@@ -79,6 +79,15 @@
 						</div>
 					</a>
 				{% endfor %}
+				{% if pending_tools %}
+					{% for tool in pending_tools %}
+					<a href="{% url 'tool_control' tool.id %}" style="text-decoration: none">
+					<div class="alert alert-warning">
+					pending {{ tool.name }}
+					</div>
+					</a>
+					{% endfor %}
+				{% endif %}
 				{% if user.in_area %}
 					{% with user.active_project_count as active_project_count %}
 						{% if active_project_count > 1 %}<a href="{% url 'change_project' %}" style="text-decoration: none">{% endif %}
