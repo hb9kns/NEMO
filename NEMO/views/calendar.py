@@ -529,9 +529,12 @@ def set_reservation_title(request, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	if not reservation.additional_information:
 		reservation.additional_information = ""
-	if len(reservation.additional_information) > 0 or len(reservation.title) > 0:
+	if not reservation.title:
+		reservation.title = ""
+	new_title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	if new_title != reservation.title:
 		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name+"\n"
-	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	reservation.title = new_title
 	reservation.save()
 	return HttpResponse()
 
