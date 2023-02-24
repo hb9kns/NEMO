@@ -527,14 +527,10 @@ def cancel_outage(request, outage_id):
 @require_POST
 def set_reservation_title(request, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
-	try:
-		reservation.additional_information += "\n"
-	except:
+	if not reservation.additional_information:
 		reservation.additional_information = ""
-	try:
-		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name
-	except:
-		pass
+	if len(reservation.additional_information) > 0 or len(reservation.title) > 0:
+		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name+"\n"
 	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
 	reservation.save()
 	return HttpResponse()
