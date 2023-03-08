@@ -39,9 +39,9 @@
 			{% endfor %}
 		</div>
 	{% endif %}
-	<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
+	<div class="{% if nanofab_occupants %}{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
 		{% if usage_events %}
-			<h2>Tool usage</h2>
+			<h2>Tool Usage</h2>
 			<p>
 {#			{% if usage_events|length > 1 %}{{ usage_events|length }} tool(s) in use{% endif %}	#}
 			{% if hide_tools != '' %}<em><small>(hiding tools with "{{hide_tools}}" in name)</small></em>{% endif %}
@@ -73,9 +73,9 @@
 			<h6>No interlocked tools are in use.</h6>
 		{% endif %}
 	</div>
-	<div class="col-lg-4" style="text-align:center">
+	<div class="{% if nanofab_occupants %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center">
 		{% if alerts or disabled_resources %}
-			<h2>Alerts and outages</h2>
+			<h2>Alerts and Outages</h2>
 			<p>{# For spacing #}&nbsp;</p>
 			{% for a in alerts %}
 				<div class="alert alert-danger">
