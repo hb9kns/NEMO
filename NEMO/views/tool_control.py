@@ -204,7 +204,7 @@ def enable_tool(request, tool_id, user_id, project_id, staff_charge, operator_id
 
 	# All policy checks passed so enable the tool for the user.
 	if tool.interlock and not tool.interlock.unlock():
-		error_message = f"The interlock command for the {tool} failed. The error message returned: {tool.interlock.most_recent_reply}"
+		error_message = f"The interlock command for {tool} failed with following error message: {tool.interlock.most_recent_reply}"
 		logger.error(error_message)
 		return HttpResponseServerError(error_message)
 
@@ -265,7 +265,7 @@ def disable_tool(request, tool_id):
 	# (We don't want to switch the tool off in this case!)
 	if not tool.pending_usage():
 		if tool.interlock and not tool.interlock.lock():
-			error_message = f"The interlock command for the {tool} failed. The error message returned: {tool.interlock.most_recent_reply}"
+			error_message = f"The interlock command for {tool} failed with following error message: {tool.interlock.most_recent_reply}"
 			logger.error(error_message)
 			return HttpResponseServerError(error_message)
 
