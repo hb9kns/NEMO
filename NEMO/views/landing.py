@@ -33,7 +33,7 @@ def landing(request):
 		'alerts': Alert.objects.filter(Q(user=None) | Q(user=request.user), debut_time__lte=timezone.now()),
 		'usage_events': usage_events,
 		'upcoming_reservations': Reservation.objects.filter(user=request.user.id, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False).exclude(tool_id__in=tools_in_use, start__lte=fifteen_minutes_from_now).order_by('start')[:3],
-		'pending_tools': Tool.objects.filter(Q(pending_user=request.user.id) | Q(pending_operator=request.user.id)),
+		'pending_tools': Tool.objects.filter(Q(pending_user=request.user.id) | Q(pending_operator=request.user.id), allow_pending_usage=True),
 		'disabled_resources': Resource.objects.filter(available=False),
 		'landing_page_choices': landing_page_choices,
 		'notification_counts': get_notification_counts(request.user),
