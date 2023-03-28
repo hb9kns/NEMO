@@ -368,7 +368,7 @@ def check_policy_to_cancel_reservation(reservation, user):
 
 	# Users may only cancel reservations that they own or created.
 	# Staff may break this rule.
-	if (reservation.user != user and reservation.creator != user) and not user.is_staff and not user.has_perm('NEMO.change_reservation'):
+	if (reservation.user != user and reservation.creator != user) and not user.is_staff and not reservation.tool.primary_owner == user and not user in reservation.tool.backup_owners.all():
 		return HttpResponseBadRequest("You may not cancel reservations that you do not own.")
 
 	# Users may not cancel reservations that have already ended.
