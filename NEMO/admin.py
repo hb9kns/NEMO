@@ -463,6 +463,7 @@ class ScheduledOutageCategoryAdmin(admin.ModelAdmin):
 @register(ScheduledOutage)
 class ScheduledOutageAdmin(admin.ModelAdmin):
 	list_display = ('id', 'tool', 'resource', 'creator', 'title', 'start', 'end')
+	list_filter = ('tool', 'creator')
 
 
 @register(News)
