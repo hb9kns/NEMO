@@ -4,6 +4,7 @@ import struct
 import pytz
 import re
 import subprocess
+import syslog
 from datetime import timedelta
 from logging import getLogger
 from pymodbus.client.sync import ModbusTcpClient
@@ -12,6 +13,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import Group, Permission, BaseUserManager
+from django.contrib.auth.signals import user_logged_in
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
@@ -577,6 +579,14 @@ pre_delete.connect(pre_delete_entity, sender=Account)
 pre_delete.connect(pre_delete_entity, sender=Project)
 pre_delete.connect(pre_delete_entity, sender=Tool)
 pre_delete.connect(pre_delete_entity, sender=User)
+
+# Report successful logins to syslog
+def syslog_lastuse(sender, user, request, **kwargs):
+	syslog.openlog("webserver/lastuse", syslog.LOG_NDELAY, syslog.LOG_USER)
+	syslog.syslog(syslog.LOG_INFO, f"LOGIN webshare=wwwnemo user={user.username} ip={request.META.get('REMOTE_ADDR')}")
+	syslog.closelog()
+
+user_logged_in.connect(syslog_lastuse)
 
 
 class Reservation(CalendarDisplay):
