@@ -408,7 +408,7 @@ def projecttools(request):
 	except:
 		outputtype = 'table'
 
-	vistools = Tool.objects.filter(visible=True).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+	vistools = Tool.objects.filter(visible=True).exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
 	dictionary['tools'] = vistools
 
 # active users of the selected projects

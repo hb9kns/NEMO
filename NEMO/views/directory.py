@@ -37,12 +37,12 @@ def directory(request):
 		permgroups = [pg.name for pg in Group.objects.filter(user=user)]
 		try:
 			owning_all = Tool.objects.filter(primary_owner=user.id)
-			owning = [tool for tool in owning_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
+			owning = [tool for tool in owning_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			owning = []
 		try:
 			backup_all = Tool.objects.filter(backup_owners__in=[user.id])
-			backup = [tool for tool in backup_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
+			backup = [tool for tool in backup_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			backup = ["(none)"]
 		user_info = {'user':user, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects, 'permgroups':permgroups }
@@ -55,7 +55,7 @@ def toolresponsibles(request, namesuffix='' ):
 	''' generate list of tools sorted by locations, filtered
 	for names ending with namesuffix and excluding suppressed tools
 	'''
-	tools = Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+	tools = Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
 # create sorted list of unique tool locations
 	locations = list( { t.location for t in tools } )
 	locations.sort()
