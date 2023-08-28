@@ -4,6 +4,7 @@ from re import match
 from pandas import DataFrame, to_numeric
 from dateutil import relativedelta
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
@@ -93,7 +94,7 @@ def event_feed(request):
 		return HttpResponseBadRequest('Invalid event type or operation not authorized.')
 
 
-def reservation_event_feed(request, start, end):
+def reservation_event_feed(request, start, end, suppresslimit=timezone.now()):
 	events = Reservation.objects.filter(cancelled=False, missed=False, shortened=False)
 	outages = None
 
@@ -120,6 +121,13 @@ def reservation_event_feed(request, start, end):
 	if personal_schedule:
 		events = events.filter(user=request.user)
 
+	# for non-staff, suppress historic events for tools with special names
+	if not request.user.is_staff:
+		hidetools = Tool.objects.filter(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+		events = events.exclude(tool__in=hidetools, end__lt=suppresslimit)
+		if outages:
+			outages = outages.exclude(tool__in=hidetools, end__lt=suppresslimit)
+
 	modifyall = request.user.is_staff or request.user.has_perm('NEMO.change_reservation')
 
 	dictionary = {
@@ -131,7 +139,7 @@ def reservation_event_feed(request, start, end):
 	return render(request, 'calendar/reservation_event_feed.html', dictionary)
 
 
-def usage_event_feed(request, start, end):
+def usage_event_feed(request, start, end, suppresslimit=timezone.now()):
 	usage_events = UsageEvent.objects
 	# Exclude events for which the following is true:
 	# The event starts and ends before the time-window, and...
@@ -143,6 +151,12 @@ def usage_event_feed(request, start, end):
 	tool = request.GET.get('tool_id')
 	if tool:
 		usage_events = usage_events.filter(tool__id=tool)
+
+	# for non-staff, suppress historic events for tools with special names
+	if not request.user.is_staff:
+		hidetools = Tool.objects.filter(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+		usage_events = usage_events.exclude(tool__in=hidetools, end__lt=suppresslimit)
+
 
 	area_access_events = None
 	# Filter events that only have to do with the current user.
