@@ -279,6 +279,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_display = ('id', 'user', 'creator', 'tool', 'project', 'start', 'end', 'duration', 'approved', 'cancelled', 'missed')
 	list_filter = ('approved', 'cancelled', 'missed', 'tool')
 	date_hierarchy = 'start'
+	exclude = ['descendant']
 
 
 @register(UsageEvent)
