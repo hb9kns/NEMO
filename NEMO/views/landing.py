@@ -10,7 +10,7 @@ from django.views.decorators.http import require_GET
 from NEMO.models import Alert, LandingPageChoice, Reservation, Resource, UsageEvent, Tool
 from NEMO.views.alerts import delete_expired_alerts
 from NEMO.views.area_access import able_to_self_log_in_to_area
-from NEMO.views.notifications import delete_expired_notifications, get_notification_counts
+from NEMO.views.notifications import delete_expired_notifications, get_notification_counts, get_users_on_duty
 
 
 @login_required
@@ -38,6 +38,7 @@ def landing(request):
 		'landing_page_choices': landing_page_choices,
 		'notification_counts': get_notification_counts(request.user),
 		'self_log_in': able_to_self_log_in_to_area(request.user),
+		'on_duty': get_users_on_duty(),
 	}
 	if hasattr(settings, 'VERSIONID'):
 		dictionary['versionid'] = settings.VERSIONID
