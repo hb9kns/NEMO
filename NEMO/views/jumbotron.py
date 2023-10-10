@@ -6,6 +6,7 @@ from django.views.decorators.http import require_GET
 
 from NEMO.models import AreaAccessRecord, UsageEvent, Alert, Resource
 from NEMO.views.alerts import delete_expired_alerts
+from NEMO.views.notifications import get_users_on_duty
 
 #@login_required
 
@@ -36,6 +37,7 @@ def jumbotron_content(request):
 			'allowed': True,
 			'remote_host': remote_host,
 			'hide_tools': hidepatt,
+			'on_duty': get_users_on_duty(),
 		}
 	else:
 		dictionary = { 'allowed': False, 'remote_host': remote_host, }

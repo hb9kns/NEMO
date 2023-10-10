@@ -304,6 +304,7 @@ if settings.ALLOW_CONDITIONAL_URLS:
 		url(r'^deactivate_user/(?P<user_id>\d+)/', users.deactivate, name='deactivate_user'),
 		url(r'^reset_password/(?P<user_id>\d+)/$', users.reset_password, name='reset_password'),
 		url(r'^unlock_account/(?P<user_id>\d+)/$', users.unlock_account, name='unlock_account'),
+		url(r'^toggle_on_duty/$', landing.toggle_on_duty, name='toggle_on_duty'),
 
 		# Account & project management:
 		url(r'^accounts_and_projects/$', accounts_and_projects.accounts_and_projects, name='accounts_and_projects'),

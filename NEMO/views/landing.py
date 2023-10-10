@@ -10,14 +10,20 @@ from django.views.decorators.http import require_GET
 from NEMO.models import Alert, LandingPageChoice, Reservation, Resource, UsageEvent, Tool
 from NEMO.views.alerts import delete_expired_alerts
 from NEMO.views.area_access import able_to_self_log_in_to_area
-from NEMO.views.notifications import delete_expired_notifications, get_notification_counts
+from NEMO.views.notifications import delete_expired_notifications, get_notification_counts, get_users_on_duty
 
 
 @login_required
 @require_GET
-def landing(request):
+def landing(request, toggle_duty=False):
 	delete_expired_alerts()
 	delete_expired_notifications()
+	if toggle_duty == True:
+		if request.user.is_technician == True:
+			request.user.is_technician = False
+		else:
+			request.user.is_technician = True
+		request.user.save()
 	usage_events = UsageEvent.objects.filter(operator=request.user.id, end=None).prefetch_related('tool', 'project')
 	tools_in_use = [u.tool_id for u in usage_events]
 	fifteen_minutes_from_now = timezone.now() + timedelta(minutes=15)
@@ -38,7 +44,12 @@ def landing(request):
 		'landing_page_choices': landing_page_choices,
 		'notification_counts': get_notification_counts(request.user),
 		'self_log_in': able_to_self_log_in_to_area(request.user),
+		'on_duty': get_users_on_duty(),
 	}
 	if hasattr(settings, 'VERSIONID'):
 		dictionary['versionid'] = settings.VERSIONID
 	return render(request, 'landing.html', dictionary)
+
+@login_required
+def toggle_on_duty(request):
+	return landing(request, toggle_duty=True)
