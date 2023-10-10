@@ -18,7 +18,7 @@ from NEMO.views.notifications import delete_expired_notifications, get_notificat
 def landing(request, toggle_duty=False):
 	delete_expired_alerts()
 	delete_expired_notifications()
-	if toggle_duty == True:
+	if toggle_duty and request.user.is_staff:
 		if request.user.is_technician == True:
 			request.user.is_technician = False
 		else:
