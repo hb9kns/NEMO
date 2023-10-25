@@ -1,8 +1,8 @@
 <p>
 <tt>Server time: {% now 'l Y-m-d,H:i' %}</tt>
-{% if on_duty %} &mdash; <em>on duty:
-{% for d in on_duty %}{{ d.first_name }} {{ d.last_name }}{% if not forloop.last %} , {% endif %}{% endfor %}
-</em>{% endif %}
+{% if on_duty %} &mdash; <b>cleanroom support:
+{% for d in on_duty %}{{ d.first_name }} {{ d.last_name }} ({{ d.phone }}){% if not forloop.last %} , {% endif %}{% endfor %}
+</b>{% endif %}
 </p>
 {% if allowed %}
 <div class="row" style="background:transparent">
