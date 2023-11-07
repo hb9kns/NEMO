@@ -549,6 +549,8 @@ def set_reservation_title(request, reservation_id):
 	if new_title != reservation.title:
 		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name+"\n"
 	reservation.title = new_title
+	if reservation.title[0:1] == ":" and reservation.user.id != request.user.id and reservation.creator.id != request.user.id:
+		reservation.title = " "+reservation.title
 	reservation.save()
 	return HttpResponse()
 
