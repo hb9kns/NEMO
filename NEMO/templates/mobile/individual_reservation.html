@@ -1,6 +1,16 @@
 <div class="alert {% if personal_schedule %}alert-success{% else %}alert-info{% endif %}" role="alert">
 	<span style="cursor:pointer" class="pull-right glyphicon glyphicon-chevron-down" data-toggle="collapse" data-target="#extended_reservation_information_{{ reservation.id }}"></span>
-	<span style="cursor:pointer" data-toggle="collapse" data-target="#extended_reservation_information_{{ reservation.id }}"><strong>{% if personal_schedule %}{{ reservation.title|default:reservation.tool }}{% else %}{{ reservation.title|default:reservation.user }}{% endif %}</strong></span><br>
+	<span style="cursor:pointer" data-toggle="collapse" data-target="#extended_reservation_information_{{ reservation.id }}">
+		<strong>{% if personal_schedule %}
+			{{ reservation.title|default:reservation.tool }}
+		{% else %}
+			{% if reservation.title|first != ":" or reservation.user.id == user.id or reservation.creator.id == user.id %}
+			{{ reservation.title|default:reservation.user }}
+			{% else %}
+			<em>private entry, hidden</em>
+			{% endif %}
+		{% endif %}</strong>
+	</span><br>
 	Starting {{ reservation.start|time }}<br>
 	Ending {{ reservation.end|time }}<br>
 	<div id="extended_reservation_information_{{ reservation.id }}" class="collapse">
@@ -17,8 +27,10 @@
 			{% endif %}
 		{% endif %}
 		{% if reservation.additional_information %}
+			{% if reservation.title|first != ":" or reservation.user.id == user.id or reservation.creator.id == user.id %}
 			Additional information:<br>
 			{{ reservation.additional_information|linebreaksbr }}
+			{% endif %}
 		{% endif %}
 		{# Allow the user to cancel the reservation if they have that priviledge. #}
 		{% if not reservation.missed and not reservation.cancelled %}
