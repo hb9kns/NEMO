@@ -23,7 +23,7 @@
 	{% endfor %}
 	{% for x in reservations %}
 	{
-		"title": "{{ x.tool.name }} reservation{% if x.title %} \"{{ x.title }}\"{% endif %}",
+		"title": "{{ x.tool.name }} reservation {% if x.title %}{% if x.title|first == ":" and x.user.id != user.id and x.creator.id != user.id %}[private]{% else %}\"{{ x.title }}\"{% endif %}{% endif %}",
 		"id": {{ x.id }},
 		"color": "#3a87ad",
 		"start": "{{ x.start|date:"c" }}",
