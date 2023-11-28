@@ -17,7 +17,7 @@
 			{% for l in locationlist %}
 			{% for t in l.tools %}
 			<tr>
-			<td>{% if forloop.first %}<b>{{ l.loc }}</b>{% else %}{% endif%}</td>
+			<td>{% if forloop.first %}<a href="{% url 'calendar' defaulttool l.toolids %}/{{ l.loc|cut:"/" }}"><b>{{ l.loc }}</b></a>{% else %}{% endif%}</td>
 				<td>{{ t.name }}</td>
 				<td><a href="{% url 'get_email_form_for_user' t.primary_id %}">{{ t.primary }}</a></td>
 				<td>{% for buo in t.backup %}{{ buo }} {% endfor %}</td>

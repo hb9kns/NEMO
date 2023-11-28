@@ -317,8 +317,8 @@
 				{% endif %}
 				<h5>Deep links for this tool:</h5>
 				<ul>
-				<li><a href="/calendar/{{ tool.id }}">Calendar</a></li>
-				<li><a href="/tool_control/{{ tool.id }}">Tool control</a></li>
+				<li><a href="{% url 'calendar' tool.id %}">Calendar</a></li>
+				<li><a href="{% url 'tool_control' tool.id %}">Tool control</a></li>
 				</ul>
 			</div>
 		</div>
@@ -458,6 +458,7 @@
 			<div class="form-group">
 				<div class="checkbox"><label><input name="safety_hazard" type="checkbox"/>This problem represents a safety hazard to the lab and should be regarded as urgent. Notify the {{ facility_name }} safety officer of this issue.</label></div>
 				<div class="checkbox"><label><input name="force_shutdown" type="checkbox"/>Shut down the tool so that it may not be used until this problem is resolved.</label></div>
+				<div class="checkbox"><label><input name="notify_users" type="checkbox"/>Notify also all qualified users by e-mail about this problem.</div>
 			</div>
 			<div class="form-group">
 				<button type="submit" class="btn btn-danger">Report problem</button>

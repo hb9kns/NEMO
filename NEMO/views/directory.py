@@ -22,7 +22,7 @@ def directory(request):
 	try:
 		affiliation = int(request.GET['affiliation'])
 	except:
-	 affiliation = None
+		affiliation = None
 	if affiliation:
 		try:
 			showgroup = Account.objects.get(id=affiliation)
@@ -50,20 +50,23 @@ def directory(request):
 	dictionary = { 'people': people, 'staffdisplay': request.user.is_staff, 'active_groups': active_groups, 'showgroup': showgroup }
 	return render(request, 'directory.html', dictionary)
 
+# generate list of tools sorted by locations, filtered for names ending with namesuffix and excluding suppressed tools
+def filteredtools(namesuffix=''):
+	return Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+# create sorted list of unique tool locations
+def sortedlocations(namesuffix=''):
+	locations = list( { t.location for t in filteredtools(namesuffix) } )
+	locations.sort()
+	return locations
+
 @login_required
 def toolresponsibles(request, namesuffix='' ):
-	''' generate list of tools sorted by locations, filtered
-	for names ending with namesuffix and excluding suppressed tools
-	'''
-	tools = Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
-# create sorted list of unique tool locations
-	locations = list( { t.location for t in tools } )
-	locations.sort()
 	locationlist = []
-	for l in locations:
+	for l in sortedlocations(namesuffix):
 # loop over locations and tools for each location
 		toollist = []
-		for t in [ t for t in tools if t.location == l ]:
+		toolids = ''
+		for t in [ t for t in filteredtools(namesuffix) if t.location == l ]:
 			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name+( '' if t.primary_owner.is_active else ' (inactive)' )
 			pid = t.primary_owner.id
 # get id list of all backup owners for that tool
@@ -71,8 +74,11 @@ def toolresponsibles(request, namesuffix='' ):
 # and also their initials plus name
 			bowners = [ b.first_name[0]+'.'+b.last_name for b in bus ]
 			toollist.append( { 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
-		locationlist.append( { 'loc':l, 'tools':toollist } )
-	dictionary = { 'toolname_suffix': namesuffix, 'locationlist': locationlist }
+			if toolids != '':
+				toolids += ','
+			toolids += str(t.id)
+		locationlist.append( { 'loc':l, 'tools':toollist, 'toolids':toolids } )
+	dictionary = { 'toolname_suffix': namesuffix, 'locationlist': locationlist, 'defaulttool': settings.DEFAULT_TOOLID }
 	return render(request, 'toolresponsibles.html', dictionary)
 
 @staff_member_required(login_url=None)
