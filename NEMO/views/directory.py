@@ -73,7 +73,7 @@ def toolresponsibles(request, namesuffix='' ):
 			bus = User.objects.filter(id__in=t.backup_owners.values_list('id', flat=True)).all()
 # and also their initials plus name
 			bowners = [ b.first_name[0]+'.'+b.last_name for b in bus ]
-			toollist.append( { 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
+			toollist.append( { 'id':t.id, 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
 			if toolids != '':
 				toolids += ','
 			toolids += str(t.id)
