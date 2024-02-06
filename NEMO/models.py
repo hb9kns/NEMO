@@ -765,7 +765,7 @@ class Interlock(models.Model):
 			self.save()
 			return True
 # 'shwitch://' designates a switch controlled through a shell script
-# first argument: channel, second argument: new status/command_type, remaining arguments ignored
+# first argument: channel, second argument: new status/command_type, third argument: card
 		if self.card.server[0:10] == 'shwitch://':
 			self.most_recent_reply = format_datetime(timezone.now()) +': '
 			self.state = self.State.UNKNOWN
@@ -779,7 +779,7 @@ class Interlock(models.Model):
 			try:
 # execute script in subprocess
 # TODO: timeout seems to be useless??
-				procrep=subprocess.run([swscript,str(self.channel),str(command_type)],stdout=subprocess.PIPE,encoding='ASCII',timeout=15)
+				procrep=subprocess.run([swscript,str(self.channel),str(command_type),str(self.card.number)],stdout=subprocess.PIPE,encoding='ASCII',timeout=15)
 			except subprocess.TimeoutExpired:
 				self.most_recent_reply += 'script timed out after 15 sec!'
 				self.save()
