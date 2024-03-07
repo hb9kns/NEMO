@@ -57,6 +57,7 @@ def send_email(request):
 		'title': subject,
 		'greeting': '',
 		'contents': body,
+		'originator': originator,
 	}
 	content = get_media_file_contents('generic_email.html')
 	body = Template(content).render(Context(dictionary))
