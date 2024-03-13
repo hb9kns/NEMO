@@ -36,12 +36,12 @@ def directory(request):
 		projects = [pjt.name for pjt in Project.objects.filter(user=user,active=True) if pjt.name[0:1] not in settings.PROJECTNAME_BEGIN_SUPPRESS]
 		permgroups = [pg.name for pg in Group.objects.filter(user=user)]
 		try:
-			owning_all = Tool.objects.filter(primary_owner=user.id)
+			owning_all = Tool.objects.filter(primary_owner=user.id, visible=True)
 			owning = [tool for tool in owning_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			owning = []
 		try:
-			backup_all = Tool.objects.filter(backup_owners__in=[user.id])
+			backup_all = Tool.objects.filter(backup_owners__in=[user.id], visible=True)
 			backup = [tool for tool in backup_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			backup = ["(none)"]
