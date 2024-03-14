@@ -23,8 +23,8 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 		return HttpResponseBadRequest("This tool is currently hidden from users.")
 
 	# The tool must be operational.
-	# If the tool is non-operational then it may only be accessed by staff members.
-	if not tool.operational and not operator.is_staff:
+	# If the tool is non-operational then it may only be accessed by staff members or primary responsibles.
+	if not tool.operational and not operator.is_staff and not operator == tool.primary_owner:
 		return HttpResponseBadRequest("This tool is currently non-operational.")
 
 	# The tool must not be in use or be virtual.
