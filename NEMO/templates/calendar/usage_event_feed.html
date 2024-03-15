@@ -2,9 +2,9 @@
 	{% for x in usage_events %}
 	{
 		{% if personal_schedule %}
-			"title": "{{ x.tool.name }}{% if x.title %} # {{ x.title }}{% endif %}",
+			"title": "{{ x.tool.name }}{% if x.title %} # {{ x.title|escapejs }}{% endif %}",
 		{% else %}
-			"title": "{% if x.operator.id != x.user.id %}{{ x.operator }} on behalf of {% endif %}{{ x.user }}: {{ x.tool.name }}{% if x.title %} # {{ x.title }}{% endif %}",
+			"title": "{% if x.operator.id != x.user.id %}{{ x.operator }} on behalf of {% endif %}{{ x.user }}: {{ x.tool.name }}{% if x.title %} # {{ x.title|escapejs }}{% endif %}",
 		{% endif %}
 		"id": {{ x.id }},
 		"start": "{{ x.start|date:"c" }}",
