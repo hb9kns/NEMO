@@ -224,6 +224,9 @@
 					<div id="stop_wrapper" style="display:inline-block" data-toggle="tooltip" data-placement="bottom" title="Please answer the required questions (above) to proceed"><button id="stop" class="btn btn-default" onclick="disable_tool('{% url 'disable_tool' tool.id %}'); return false"><span class="glyphicon glyphicon-stop"></span> Stop using {{ tool.name }}</button></div><p>
 				{% endif %}
 			{% endif %}
+			{% if tool.usage_warning and tool.usage_warning != '' %}
+			<p>Warning: <b>{{ tool.usage_warning }}</b></p>
+			{% endif %}
 			{# show user and project selection if tool is unused #}
 			{# or it allows pending usage but none is noted yet #}
 			{% if not tool.in_use or tool.allow_pending_usage and not tool.pending_usage %}
@@ -257,9 +260,6 @@
 			{% endif %}
 			{% if tool.external_link != Null and tool.external_link != '' %}
 			<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
-			{% endif %}
-			{% if tool.usage_warning and tool.usage_warning != '' %}
-			<p>Warning: <b>{{ tool.usage_warning }}</b></p>
 			{% endif %}
 		</form>
 		<hr />
