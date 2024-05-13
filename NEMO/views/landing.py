@@ -36,7 +36,7 @@ def landing(request, toggle_duty=False):
 		landing_page_choices = landing_page_choices.exclude(hide_from_users=True)
 	dictionary = {
 		'now': timezone.now(),
-		'alerts': Alert.objects.filter(Q(user=None) | Q(user=request.user), debut_time__lte=timezone.now()),
+		'alerts': Alert.objects.filter(Q(user=None) | Q(user=request.user), debut_time__lte=timezone.now()).order_by("user"),
 		'usage_events': usage_events,
 		'upcoming_reservations': Reservation.objects.filter(user=request.user.id, end__gt=timezone.now(), cancelled=False, missed=False, shortened=False).exclude(tool_id__in=tools_in_use, start__lte=fifteen_minutes_from_now).order_by('start')[:3],
 		'pending_tools': Tool.objects.filter(Q(pending_user=request.user.id) | Q(pending_operator=request.user.id), allow_pending_usage=True),
