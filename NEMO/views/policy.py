@@ -262,11 +262,11 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 	if new_reservation.user != user:
 		policy_problems.append("You may not change reservations that you do not own.")
 
-	# The user may not create or move a reservation to have a start time that is earlier than the current time.
+	# The user may not create or move a reservation to have a start time that is much earlier than the current time.
 	# Staff may break this rule.
 	# An explicit policy override allows this rule to be broken.
-	if new_reservation.start < timezone.now():
-		policy_problems.append("Reservation start time (" + format_datetime(new_reservation.start) + ") is earlier than the current time (" + format_datetime(timezone.now()) + ").")
+	if new_reservation.start < timezone.now()-timedelta(minutes=15):
+		policy_problems.append("Reservation start time (" + format_datetime(new_reservation.start) + ") is more than 15 min earlier than the current time (" + format_datetime(timezone.now()) + ").")
 
 	# The user may not move or resize a reservation to have an end time that is earlier than the current time.
 	# Staff may break this rule.

@@ -58,9 +58,14 @@
 				<div>{% if tool.pending_usage %}
 					<b>Next pending usage by
 					{% if tool.pending_operator != tool.pending_user %}{{ tool.pending_operator }} on behalf of{% endif %}
-					{{ tool.pending_user }} for project {{ tool.pending_project }}.</b>
+					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id %} you
+					{% else %}{{ tool.pending_user }}{% endif %}
+					for project {{ tool.pending_project }}.</b>
 					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id or user.is_staff %}
 					<br /><b><a href="{% url 'cancel_pending' tool.id %}">CANCEL</a></b> this pending usage.
+					<br />If you have a current reservation, you may
+						<a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">
+						<b>FORCE</b></a> the current user off the tool and take over its usage.
 					{% endif %}
 				{% else %}
 				<em>Tool is in use, but pending usage may be announced.</em>
