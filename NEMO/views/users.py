@@ -1,6 +1,7 @@
 from datetime import timedelta
 from http import HTTPStatus
 from urllib.parse import urljoin
+from logging import getLogger
 
 import requests
 from django.conf import settings
@@ -10,7 +11,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_http_methods, require_POST, logger
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from NEMO.admin import record_local_many_to_many_changes, record_active_state
 from NEMO.forms import UserForm
