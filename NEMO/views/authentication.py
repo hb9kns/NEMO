@@ -1,6 +1,6 @@
 from _ssl import PROTOCOL_TLSv1_2, CERT_REQUIRED
 from base64 import b64decode
-from logging import exception
+from logging import exception, getLogger
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, REDIRECT_FIELD_NAME, logout
@@ -10,13 +10,15 @@ from django.shortcuts import render
 from django.urls import reverse, resolve
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
-from django.views.decorators.http import require_http_methods, require_GET, logger
+from django.views.decorators.http import require_http_methods, require_GET
 from ldap3 import Tls, Server, Connection, AUTO_BIND_TLS_BEFORE_BIND, SIMPLE
 from ldap3.core.exceptions import LDAPBindError, LDAPExceptionError
 
 from NEMO.models import User
 from NEMO.views.customization import get_media_file_contents
 
+
+logger = getLogger('django.request')
 
 class RemoteUserAuthenticationBackend(RemoteUserBackend):
 	""" The web server performs Kerberos authentication and passes the user name in via the REMOTE_USER environment variable. """

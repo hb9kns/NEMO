@@ -2,6 +2,7 @@ from copy import deepcopy
 from datetime import timedelta
 from http import HTTPStatus
 from itertools import chain
+from logging import getLogger
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -10,7 +11,7 @@ from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponse, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.views.decorators.http import logger, require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from NEMO.forms import nice_errors, CommentForm
 from NEMO.models import Comment, Configuration, ConfigurationHistory, Project, Reservation, StaffCharge, Task, TaskCategory, TaskStatus, Tool, UsageEvent, User
