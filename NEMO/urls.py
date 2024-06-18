@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.static import serve
@@ -38,21 +38,21 @@ urlpatterns = [
 	re_path(
 		r'^favicon.ico$',
 		RedirectView.as_view(
-			url=staticfiles_storage.re_path('favicon.ico'),
+			url=staticfiles_storage.url('favicon.ico'),
 			permanent=False),
 		name="favicon"
 	),
 	re_path(
 		r'^robots.txt$',
 		RedirectView.as_view(
-			url=staticfiles_storage.re_path('robots.txt'),
+			url=staticfiles_storage.url('robots.txt'),
 			permanent=False),
 		name="robots"
 	),
 	re_path(
 		r'^([0-9A-Za-z]{1,}).php$',
 		RedirectView.as_view(
-			url=staticfiles_storage.re_path('howtos/changemarks.html'),
+			url=staticfiles_storage.url('howtos/changemarks.html'),
 			permanent=False),
 		name="changemarks"
 	),
@@ -244,7 +244,7 @@ urlpatterns = [
 
 if settings.ALLOW_CONDITIONAL_URLS:
 	urlpatterns += [
-		re_path(r'^admin/', include(admin.site.urls)),
+		path("admin/", admin.site.urls),
 		re_path(r'^api/', include(router.urls)),
 
 		# Tablet area access
