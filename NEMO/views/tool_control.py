@@ -116,8 +116,8 @@ def tool_configuration(request):
 		configuration = Configuration.objects.get(id=request.POST['configuration_id'])
 	except:
 		return HttpResponseNotFound('Configuration not found.')
-	if configuration.tool.in_use():
-		return HttpResponseBadRequest('Cannot change a configuration while a tool is in use.')
+	if configuration.tool.in_use() and not configuration.tool.operated_by(request.user):
+		return HttpResponseBadRequest('Cannot change a configuration while a tool is operated by somebody else.')
 	if not configuration.user_is_maintainer(request.user):
 		return HttpResponseBadRequest('You are not authorized to change this configuration.')
 	try:

@@ -318,6 +318,10 @@ class Tool(models.Model):
 		result = UsageEvent.objects.filter(tool=self.id, end=None).exists()
 		return result
 
+	def operated_by(self, user):
+		result = UsageEvent.objects.filter(tool=self.id, operator=user, end=None).exists()
+		return result
+
 	def delayed_logoff_in_progress(self):
 		result = UsageEvent.objects.filter(tool=self.id, end__gt=timezone.now()).exists()
 		return result
