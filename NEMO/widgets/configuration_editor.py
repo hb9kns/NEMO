@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.forms import Widget
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -12,6 +13,11 @@ class ConfigurationEditor(Widget):
 				result += self.__render_for_one(config, value["user"])
 			else:
 				result += self.__render_for_multiple(config, value["user"])
+		if settings.CONFIGURATION_BY_PRIMARY_OWNER:
+			result += "<p><em><small>Primary owner "
+			if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS:
+				result += "and backup owners "
+			result += "can modify configurations in general.</small></em></p>"
 		return mark_safe(result)
 
 	def __render_for_one(self, config, user):

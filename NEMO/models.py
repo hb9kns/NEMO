@@ -448,6 +448,11 @@ class Configuration(models.Model):
 			return True
 		if self.qualified_users_are_maintainers and (user in self.tool.user_set.all() or user.is_staff):
 			return True
+		if settings.CONFIGURATION_BY_PRIMARY_OWNER:
+			if self.tool.primary_owner == user:
+				return True
+			if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS and (user in self.tool.backup_owners.all()):
+				return True
 		return False
 
 	class Meta:
