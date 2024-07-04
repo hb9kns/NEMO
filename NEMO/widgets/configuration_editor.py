@@ -13,16 +13,16 @@ class ConfigurationEditor(Widget):
 				result += self.__render_for_one(config, value["user"])
 			else:
 				result += self.__render_for_multiple(config, value["user"])
-		if settings.CONFIGURATION_BY_PRIMARY_OWNER:
-			result += "<p><em><small>Primary owner "
+		if result != "" and settings.CONFIGURATION_BY_PRIMARY_OWNER:
+			result += "<em><small>(Primary owner "
 			if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS:
 				result += "and backup owners "
-			result += "can modify configurations in general.</small></em></p>"
-		return mark_safe(result)
+			result += "can modify configurations in general.)</small></em>"
+		return mark_safe("<p>" + result + "</p>")
 
 	def __render_for_one(self, config, user):
 		current_setting = config.current_settings_as_list()[0]
-		result = "<p><label class='form-inline'>" + escape(config.name) + ": "
+		result = "<label class='form-inline'>" + escape(config.name) + ": "
 		if config.user_is_maintainer(user) and ( not config.tool.in_use() or config.tool.operated_by(user) ):
 			result += "<select class='form-control' style='width:300px; max-width:100%' onchange=\"on_change_configuration(" + str(config.id) + ", 0, this.value)\">"
 			for index, option in enumerate(config.available_settings_as_list()):
@@ -33,11 +33,11 @@ class ConfigurationEditor(Widget):
 			result += "</select>"
 		else:
 			result += escape(current_setting)
-		result += "</label></p>"
+		result += "</label><br />"
 		return result
 
 	def __render_for_multiple(self, config, user):
-		result = "<p>" + escape(config.name) + ":<ul>"
+		result = escape(config.name) + ":<ul>"
 		for setting_index, current_setting in enumerate(config.current_settings_as_list()):
 			result += "<li>"
 			if config.user_is_maintainer(user) and ( not config.tool.in_use() or config.tool.operated_by(user) ):
@@ -51,5 +51,5 @@ class ConfigurationEditor(Widget):
 				result += "</select></label>"
 			else:
 				result += config.configurable_item_name + " #" + str(setting_index + 1) + ": " + escape(current_setting)
-		result += "</ul></p>"
+		result += "</ul><br />"
 		return result
