@@ -291,6 +291,10 @@ def create_reservation(request):
 	# If a reservation is requested and configuration information is present also...
 	elif tool.is_configurable() and configured:
 		new_reservation.additional_information, new_reservation.self_configuration = extract_configuration(request)
+		# pre-populate title with additional information for visibility
+		if new_reservation.additional_information and not new_reservation.title:
+			# split at linebreaks and join with spaces (i.e convert breaks to spaces)
+			new_reservation.title = " ".join(new_reservation.additional_information.splitlines())
 		# Reservation can't be short notice if the user is configuring the tool themselves.
 		if new_reservation.self_configuration:
 			new_reservation.short_notice = False
