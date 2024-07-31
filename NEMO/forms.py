@@ -32,6 +32,7 @@ class TaskForm(ModelForm):
 	resolution_category = ModelChoiceField(queryset=TaskCategory.objects.filter(stage=TaskCategory.Stage.COMPLETION), required=False, label="Resolution category")
 	action = ChoiceField(choices=[('create', 'create'), ('update', 'update'), ('resolve', 'resolve')], label="Action")
 	description = CharField(required=False, label="Description")
+	notify_users = BooleanField(required=False, label="Notify Users")
 
 	class Meta:
 		model = Task
@@ -42,6 +43,7 @@ class TaskForm(ModelForm):
 		self.user = user
 		self.fields['tool'].required = False
 		self.fields['urgency'].required = False
+		self.notify_users = True
 
 	def clean_description(self):
 		return self.cleaned_data['description'].strip()

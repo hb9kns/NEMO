@@ -15,6 +15,7 @@ from django.views.decorators.http import require_GET, require_POST
 from NEMO.forms import EmailBroadcastForm
 from NEMO.models import Tool, Account, Project, User, PhysicalAccessLevel
 from NEMO.views.customization import get_media_file_contents
+from NEMO.utilities import originator
 
 
 logger = getLogger(__name__)
@@ -48,7 +49,7 @@ def send_email(request):
 	except:
 		return HttpResponseBadRequest('The intended recipient was not a valid email address. The email was not sent.')
 	sender = '"{0} {1} through NEMO" <{2}>'.format( request.user.first_name, request.user.last_name, settings.EMAIL_SENDER )
-	originator = '"{0} {1}" <{2}>'.format( request.user.first_name, request.user.last_name, request.user.email )
+	originator = request-originator(request)
 	subject = request.POST.get('subject')
 	body = request.POST.get('body')
 	if request.POST.get('copy_me'):
@@ -107,6 +108,7 @@ def email_broadcast(request, audience=''):
 @require_GET
 def compose_email(request):
 	audience = request.GET.get('audience')
+	originator = request-originator(request)
 	selection = request.GET.get('selection')
 	try:
 		if audience == 'tool':
@@ -146,6 +148,7 @@ def compose_email(request):
 			'title': 'TITLE',
 			'greeting': 'Greeting',
 			'contents': 'Contents',
+			'originator': originator,
 		}
 		dictionary['generic_email_sample'] = Template(generic_email_sample).render(Context(generic_email_context))
 	return render(request, 'email/compose_email.html', dictionary)
@@ -158,10 +161,12 @@ def send_broadcast_email(request):
 	form = EmailBroadcastForm(request.POST)
 	if not form.is_valid():
 		return render(request, 'email/compose_email.html', {'form': form})
+	originator = request-originator(request)
 	dictionary = {
 		'title': form.cleaned_data['title'],
 		'greeting': form.cleaned_data['greeting'],
 		'contents': form.cleaned_data['contents'],
+		'originator': originator,
 	}
 	content = get_media_file_contents('generic_email.html')
 	content = Template(content).render(Context(dictionary))
@@ -220,7 +225,7 @@ def send_broadcast_email(request):
 				return HttpResponseBadRequest('Invalid Cc: field "'+cc+'"')
 		users += cc_recipients
 	try:
-		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users))
+		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users), headers={'Reply-To': originator} )
 		email.attach_alternative(content, 'text/html')
 		email.send()
 	except SMTPException as e:
