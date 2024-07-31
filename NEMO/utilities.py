@@ -177,7 +177,3 @@ def end_of_the_day(t, in_local_timezone=True):
 	""" Returns the END of today's day (11:59:59.999999 PM of the current day) in LOCAL time. """
 	midnight = t.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=None)
 	return localize(midnight) if in_local_timezone else midnight
-
-def request-originator(request):
-	""" Returns a formatted string of the originator (name+address) of a request, for e-mails. """
-	return '"{0} {1}" <{2}>'.format( request.user.first_name, request.user.last_name, request.user.email )
