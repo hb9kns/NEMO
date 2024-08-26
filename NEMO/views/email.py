@@ -15,13 +15,10 @@ from django.views.decorators.http import require_GET, require_POST
 from NEMO.forms import EmailBroadcastForm
 from NEMO.models import Tool, Account, Project, User, PhysicalAccessLevel
 from NEMO.views.customization import get_media_file_contents
+from NEMO.utilities import request_originator
 
 
 logger = getLogger(__name__)
-
-def request_originator(request):
-	""" Returns a formatted string of the originator (name+address) of a request, for e-mails. """
-	return '"{0} {1}" <{2}>'.format( request.user.first_name, request.user.last_name, request.user.email )
 
 @login_required
 @require_GET
