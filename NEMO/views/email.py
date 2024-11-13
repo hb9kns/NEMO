@@ -33,9 +33,14 @@ def get_email_form(request):
 
 @login_required
 @require_GET
-def get_email_form_for_user(request, user_id):
+def get_email_form_for_user(request, user_id, tool_id=None):
 	recipient = get_object_or_404(User, id=user_id)
-	return render(request, 'email/email_form.html', {'name': recipient.get_full_name(), 'recipient': recipient.email})
+	if tool_id:
+		tool = get_object_or_404(Tool, id=tool_id)
+		subject = '[{0}] '.format( tool.name )
+	else:
+		subject = ''
+	return render(request, 'email/email_form.html', {'name': recipient.get_full_name(), 'recipient': recipient.email, 'subject': subject})
 
 
 @login_required
