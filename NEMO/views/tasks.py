@@ -62,12 +62,12 @@ def create(request):
 		issue = SafetyIssue.objects.create(reporter=request.user, location=task.tool.location, concern=concern)
 		send_safety_email_notification(request, issue)
 
-	send_new_task_emails(request, task)
+	send_new_task_emails(request, task, form.notify_users)
 	set_task_status(request, task, request.POST.get('status'), request.user)
 	return redirect('tool_control')
 
 
-def send_new_task_emails(request, task):
+def send_new_task_emails(request, task, notify_users=False ):
 	message = get_media_file_contents('new_task_email.html')
 	if message:
 		dictionary = {
@@ -86,7 +86,7 @@ def send_new_task_emails(request, task):
 	# Send an email to active users (excluding staff) qualified on the tool:
 	user_office_email = get_customization('user_office_email_address')
 	message = get_media_file_contents('new_task_email.html')
-	if user_office_email and message:
+	if user_office_email and message and notify_users:
 		users = User.objects.filter(qualifications__id=task.tool.id, is_staff=False,is_active=True)
 		dictionary = {
 			'template_color': bootstrap_primary_color('danger') if task.force_shutdown else bootstrap_primary_color('warning'),

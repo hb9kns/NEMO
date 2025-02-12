@@ -1,10 +1,14 @@
 # NEMO/FIRST-Lab, Short Manual
 
-(for users and [equipment responsibles]( #equiresp ))
+*(for users and [equipment responsibles]( #equiresp ))*
 
 Laboratory and user management for [FIRST-Lab]( https://first.phys.ethz.ch)
 is done on an instance of [NEMO,][nemorepo]
 an open-source web application based on Django/Python and SQL databases.
+
+*See also the [Tips and Tricks]( #tat ) further down!*
+
+---
 
 ## Login/Logout
 
@@ -277,6 +281,29 @@ the corresponding links at the table head.
 
 ---
 
+<a id="tat"></a>
+## Tips and Tricks
+
+### Regular Expressions in Input Fields
+
+Most text input fields allow to search, e.g user or tool names.
+They provide pattern matching through regular expressions (regexps):
+
+- `^` at the beginning of a field anchors the expression to the beginning.
+- `$` at the end of a field anchors the expression to the end.
+- `.` matches any character.
+- `?` after a character requires the latter to occur 0 or 1 time.
+- `+` after a character requires the latter to occur at least once.
+- `*` after a character permits it to occur 0 or more times.
+- `[AW-Z]` represents the characters A or W or X or Y or Z.
+- `\` before one of the special characters from above represents it literally.
+  (Therefore `\\` must be used to represent a literal backslash.)
+
+If you need more information, ask your preferred search engine about
+"extended regular expression".
+
+---
+
 [nemoresp]: mailto:yargo.bonetti@first.ethz.ch "Yargo Bonetti / 37541"
 [nemorepo]: https://github.com/hb9kns/NEMO "NEMO Github repository"
 [nemo]: https://nemo.first.ethz.ch "NEMO/FIRST-Lab main page"
@@ -284,4 +311,4 @@ the corresponding links at the table head.
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*ver.1.1/2020-12-16/Y.Bonetti*
+*ver.1.2/2023-08-18/Y.Bonetti*

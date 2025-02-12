@@ -179,6 +179,10 @@ def end_of_the_day(t, in_local_timezone=True):
 	midnight = t.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=None)
 	return localize(midnight) if in_local_timezone else midnight
 
+def request_originator(request):
+	""" Returns a formatted string of the originator (name+address) of a request, for e-mails. """
+	return '"{0} {1}" <{2}>'.format( request.user.first_name, request.user.last_name, request.user.email )
+
 # simple ICAL methods
 
 def crlfy( arr=[] ):

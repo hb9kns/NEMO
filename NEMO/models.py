@@ -4,6 +4,7 @@ import struct
 import pytz
 import re
 import subprocess
+import syslog
 from datetime import timedelta
 from logging import getLogger
 from pymodbus.client.sync import ModbusTcpClient
@@ -12,6 +13,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import Group, Permission, BaseUserManager
+from django.contrib.auth.signals import user_logged_in
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
@@ -185,8 +187,8 @@ class User(models.Model):
 		send_mail(subject=subject, message='', from_email=from_email, recipient_list=[self.email], html_message=message)
 
 	def get_full_name(self):
-		return self.last_name + ' ' + self.first_name
-#		return self.last_name + ' ' + self.first_name + ' (' + self.username + ')'
+#		return self.last_name + ' ' + self.first_name
+		return self.last_name + ' ' + self.first_name + ( '' if self.is_active else ' (inactive)' )
 
 	def get_short_name(self):
 		return self.first_name
@@ -316,6 +318,10 @@ class Tool(models.Model):
 		result = UsageEvent.objects.filter(tool=self.id, end=None).exists()
 		return result
 
+	def operated_by(self, user):
+		result = UsageEvent.objects.filter(tool=self.id, operator=user, end=None).exists()
+		return result
+
 	def delayed_logoff_in_progress(self):
 		result = UsageEvent.objects.filter(tool=self.id, end__gt=timezone.now()).exists()
 		return result
@@ -400,7 +406,7 @@ class Tool(models.Model):
 
 class Configuration(models.Model):
 	tool = models.ForeignKey(Tool, help_text="The tool that this configuration option applies to.")
-	name = models.CharField(max_length=200, help_text="The name of this overall configuration. This text is displayed as a label on the tool control page.")
+	name = models.CharField(max_length=200, help_text="The name of this overall configuration. This text is displayed as a label on the tool control page. Start with '-' to prevent users from being able to request a setting when making a new reservation.")
 	configurable_item_name = models.CharField(blank=True, null=True, max_length=200, help_text="The name of the tool part being configured. This text is displayed as a label on the tool control page. Leave this field blank if there is only one configuration slot.")
 	advance_notice_limit = models.PositiveIntegerField(help_text="Configuration changes must be made this many hours in advance.")
 	display_priority = models.PositiveIntegerField(help_text="The order in which this configuration will be displayed beside others when making a reservation and controlling a tool. Can be any positive integer including 0. Lower values are displayed first.")
@@ -442,6 +448,11 @@ class Configuration(models.Model):
 			return True
 		if self.qualified_users_are_maintainers and (user in self.tool.user_set.all() or user.is_staff):
 			return True
+		if settings.CONFIGURATION_BY_PRIMARY_OWNER:
+			if self.tool.primary_owner == user:
+				return True
+			if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS and (user in self.tool.backup_owners.all()):
+				return True
 		return False
 
 	class Meta:
@@ -577,6 +588,14 @@ pre_delete.connect(pre_delete_entity, sender=Account)
 pre_delete.connect(pre_delete_entity, sender=Project)
 pre_delete.connect(pre_delete_entity, sender=Tool)
 pre_delete.connect(pre_delete_entity, sender=User)
+
+# Report successful logins to syslog
+def syslog_lastuse(sender, user, request, **kwargs):
+	syslog.openlog("webserver/lastuse", syslog.LOG_NDELAY, syslog.LOG_USER)
+	syslog.syslog(syslog.LOG_INFO, f"LOGIN webshare=wwwnemo user={user.username} ip={request.META.get('REMOTE_ADDR')}")
+	syslog.closelog()
+
+user_logged_in.connect(syslog_lastuse)
 
 
 class Reservation(CalendarDisplay):
@@ -755,7 +774,7 @@ class Interlock(models.Model):
 			self.save()
 			return True
 # 'shwitch://' designates a switch controlled through a shell script
-# first argument: channel, second argument: new status/command_type, remaining arguments ignored
+# first argument: channel, second argument: new status/command_type, third argument: card
 		if self.card.server[0:10] == 'shwitch://':
 			self.most_recent_reply = format_datetime(timezone.now()) +': '
 			self.state = self.State.UNKNOWN
@@ -769,7 +788,7 @@ class Interlock(models.Model):
 			try:
 # execute script in subprocess
 # TODO: timeout seems to be useless??
-				procrep=subprocess.run([swscript,str(self.channel),str(command_type)],stdout=subprocess.PIPE,encoding='ASCII',timeout=15)
+				procrep=subprocess.run([swscript,str(self.channel),str(command_type),str(self.card.number)],stdout=subprocess.PIPE,encoding='ASCII',timeout=15)
 			except subprocess.TimeoutExpired:
 				self.most_recent_reply += 'script timed out after 15 sec!'
 				self.save()

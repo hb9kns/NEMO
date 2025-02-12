@@ -22,7 +22,7 @@ def directory(request):
 	try:
 		affiliation = int(request.GET['affiliation'])
 	except:
-	 affiliation = None
+		affiliation = None
 	if affiliation:
 		try:
 			showgroup = Account.objects.get(id=affiliation)
@@ -36,13 +36,13 @@ def directory(request):
 		projects = [pjt.name for pjt in Project.objects.filter(user=user,active=True) if pjt.name[0:1] not in settings.PROJECTNAME_BEGIN_SUPPRESS]
 		permgroups = [pg.name for pg in Group.objects.filter(user=user)]
 		try:
-			owning_all = Tool.objects.filter(primary_owner=user.id)
-			owning = [tool for tool in owning_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
+			owning_all = Tool.objects.filter(primary_owner=user.id, visible=True)
+			owning = [tool for tool in owning_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			owning = []
 		try:
-			backup_all = Tool.objects.filter(backup_owners__in=[user.id])
-			backup = [tool for tool in backup_all if tool.name[0:1] not in settings.TOOLNAME_BEGIN_SUPPRESS]
+			backup_all = Tool.objects.filter(backup_owners__in=[user.id], visible=True)
+			backup = [tool for tool in backup_all if not tool.name.startswith(settings.TOOLNAME_BEGIN_SUPPRESS)]
 		except:
 			backup = ["(none)"]
 		user_info = {'user':user, 'special':staffperms, 'intro':introday, 'primary_owning':owning, 'backup_owning':backup, 'projects':projects, 'permgroups':permgroups }
@@ -50,29 +50,35 @@ def directory(request):
 	dictionary = { 'people': people, 'staffdisplay': request.user.is_staff, 'active_groups': active_groups, 'showgroup': showgroup }
 	return render(request, 'directory.html', dictionary)
 
+# generate list of tools sorted by locations, filtered for names ending with namesuffix and excluding suppressed tools
+def filteredtools(namesuffix=''):
+	return Tool.objects.filter(visible=True, name__iendswith=namesuffix).exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+# create sorted list of unique tool locations
+def sortedlocations(namesuffix=''):
+	locations = list( { t.location for t in filteredtools(namesuffix) } )
+	locations.sort()
+	return locations
+
 @login_required
 def toolresponsibles(request, namesuffix='' ):
-	''' generate list of tools sorted by locations, filtered
-	for names ending with namesuffix and excluding suppressed tools
-	'''
-	tools = Tool.objects.filter(operational=True, visible=True, name__iendswith=namesuffix).exclude(name__istartswith=settings.TOOLNAME_BEGIN_SUPPRESS)
-# create sorted list of unique tool locations
-	locations = list( { t.location for t in tools } )
-	locations.sort()
 	locationlist = []
-	for l in locations:
+	for l in sortedlocations(namesuffix):
 # loop over locations and tools for each location
 		toollist = []
-		for t in [ t for t in tools if t.location == l ]:
-			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name
+		toolids = ''
+		for t in [ t for t in filteredtools(namesuffix) if t.location == l ]:
+			powner = t.primary_owner.first_name[0]+'.'+t.primary_owner.last_name+( '' if t.primary_owner.is_active else ' (inactive)' )
 			pid = t.primary_owner.id
 # get id list of all backup owners for that tool
 			bus = User.objects.filter(id__in=t.backup_owners.values_list('id', flat=True)).all()
 # and also their initials plus name
 			bowners = [ b.first_name[0]+'.'+b.last_name for b in bus ]
-			toollist.append( { 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
-		locationlist.append( { 'loc':l, 'tools':toollist } )
-	dictionary = { 'toolname_suffix': namesuffix, 'locationlist': locationlist }
+			toollist.append( { 'id':t.id, 'name':t.name, 'primary':powner, 'primary_id':pid, 'backup':bowners } )
+			if toolids != '':
+				toolids += ','
+			toolids += str(t.id)
+		locationlist.append( { 'loc':l, 'tools':toollist, 'toolids':toolids } )
+	dictionary = { 'toolname_suffix': namesuffix, 'locationlist': locationlist, 'defaulttool': settings.DEFAULT_TOOLID }
 	return render(request, 'toolresponsibles.html', dictionary)
 
 @staff_member_required(login_url=None)

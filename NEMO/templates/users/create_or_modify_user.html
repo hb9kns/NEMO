@@ -58,7 +58,7 @@
 			{% endif %}
 		</div>
 		<div class="form-group">
-			<label class="control-label col-sm-2" for="username"><strong>User name</strong></label>
+			<label class="control-label col-sm-2" for="username"><strong>User name &mdash; case sensitive!</strong></label>
 			<div class="col-sm-4">
 				<input id="username" name="username" type="text" autocomplete="off" class="form-control" value="{{ form.username.value|default_if_none:"" }}" required>
 			</div>
@@ -189,7 +189,7 @@
 			{% endif %}
 				<small>&mdash; modify in <a href="{% url 'admin:NEMO_user_change' form.instance.id %}">Detailed administration</a></small>
 				<br />
-				<small>Permission groups: {% for g in form.groups.value %}{{ g }} {% endfor %}</small>
+				<small>Permission groups: {% for v in form.groups.value %}{{ v }} {% endfor %}</small>
 			</div>
 			<div class="col-sm-offset-2 col-sm-10">
 				<div class="checkbox">
@@ -222,13 +222,6 @@
 		{% endif %}
 			<small>Note: hours and minutes are irrelevant.</small>
 		</div>
-		{% if form.instance.id %}
-		<div class="form-group">
-			<div class="control-label col-sm-2">Last login</div>
-			<div class="col-sm-4 form-control-static">
-				{{ form.instance.last_login|default_if_none:"Never" }}
-			</div>
-		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="fire_trained">Firefighting training</label>
 			<div class="col-sm-2">
@@ -239,6 +232,13 @@
 					{{ form.fire_trained.errors|striptags }}
 				</div>
 			{% endif %}
+		</div>
+		{% if form.instance.id %}
+		<div class="form-group">
+			<div class="control-label col-sm-2">Last login</div>
+			<div class="col-sm-4 form-control-static">
+				{{ form.instance.last_login|default_if_none:"Never" }}
+			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="mentor_trained">Mentor training</label>

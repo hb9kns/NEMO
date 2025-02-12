@@ -4,6 +4,7 @@ from re import match
 from pandas import DataFrame, to_numeric
 from dateutil import relativedelta
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
@@ -93,7 +94,7 @@ def event_feed(request):
 		return HttpResponseBadRequest('Invalid event type or operation not authorized.')
 
 
-def reservation_event_feed(request, start, end):
+def reservation_event_feed(request, start, end, suppresslimit=timezone.now()):
 	events = Reservation.objects.filter(cancelled=False, missed=False, shortened=False)
 	outages = None
 
@@ -120,6 +121,13 @@ def reservation_event_feed(request, start, end):
 	if personal_schedule:
 		events = events.filter(user=request.user)
 
+	# for non-staff, suppress historic events for tools with special names
+	if not request.user.is_staff:
+		hidetools = Tool.objects.filter(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+		events = events.exclude(tool__in=hidetools, end__lt=suppresslimit)
+		if outages:
+			outages = outages.exclude(tool__in=hidetools, end__lt=suppresslimit)
+
 	modifyall = request.user.is_staff or request.user.has_perm('NEMO.change_reservation')
 
 	dictionary = {
@@ -131,7 +139,7 @@ def reservation_event_feed(request, start, end):
 	return render(request, 'calendar/reservation_event_feed.html', dictionary)
 
 
-def usage_event_feed(request, start, end):
+def usage_event_feed(request, start, end, suppresslimit=timezone.now()):
 	usage_events = UsageEvent.objects
 	# Exclude events for which the following is true:
 	# The event starts and ends before the time-window, and...
@@ -143,6 +151,12 @@ def usage_event_feed(request, start, end):
 	tool = request.GET.get('tool_id')
 	if tool:
 		usage_events = usage_events.filter(tool__id=tool)
+
+	# for non-staff, suppress historic events for tools with special names
+	if not request.user.is_staff:
+		hidetools = Tool.objects.filter(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+		usage_events = usage_events.exclude(tool__in=hidetools, end__lt=suppresslimit)
+
 
 	area_access_events = None
 	# Filter events that only have to do with the current user.
@@ -277,6 +291,10 @@ def create_reservation(request):
 	# If a reservation is requested and configuration information is present also...
 	elif tool.is_configurable() and configured:
 		new_reservation.additional_information, new_reservation.self_configuration = extract_configuration(request)
+		# pre-populate title with additional information for visibility
+		if new_reservation.additional_information and not new_reservation.title:
+			# split at linebreaks and join with spaces (i.e convert breaks to spaces)
+			new_reservation.title = " ".join(new_reservation.additional_information.splitlines())
 		# Reservation can't be short notice if the user is configuring the tool themselves.
 		if new_reservation.self_configuration:
 			new_reservation.short_notice = False
@@ -309,9 +327,9 @@ def parse_configuration_entry(key, value):
 	configuration = Configuration.objects.get(pk=config_id)
 	available_setting = configuration.get_available_setting(value)
 	if len(configuration.current_settings_as_list()) == 1:
-		return display_priority, configuration.name + " needs to be set to " + available_setting + "."
+		return display_priority, configuration.name + " to be set to " + available_setting + "."
 	else:
-		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " needs to be set to " + available_setting + "."
+		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " to be set to " + available_setting + "."
 
 
 @staff_member_required(login_url=None)
@@ -527,15 +545,17 @@ def cancel_outage(request, outage_id):
 @require_POST
 def set_reservation_title(request, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
-	try:
-		reservation.additional_information += "\n"
-	except:
+	if not reservation.additional_information:
 		reservation.additional_information = ""
-	try:
-		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name
-	except:
-		pass
-	reservation.title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	if not reservation.title:
+		reservation.title = ""
+	new_title = request.POST.get('title', '')[:reservation._meta.get_field('title').max_length]
+	if new_title != reservation.title:
+		reservation.additional_information += "# Title was `"+reservation.title+"`, modified by "+request.user.first_name+" "+request.user.last_name+"\n"
+	reservation.title = new_title
+	if reservation.title[0:1] == ":" and reservation.user.id != request.user.id and reservation.creator.id != request.user.id:
+# prevent other users from setting reservations as private, by prepending SPC if new title starts with ':'
+		reservation.title = " "+reservation.title
 	reservation.save()
 	return HttpResponse()
 

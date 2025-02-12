@@ -58,9 +58,14 @@
 				<div>{% if tool.pending_usage %}
 					<b>Next pending usage by
 					{% if tool.pending_operator != tool.pending_user %}{{ tool.pending_operator }} on behalf of{% endif %}
-					{{ tool.pending_user }} for project {{ tool.pending_project }}.</b>
+					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id %} you
+					{% else %}{{ tool.pending_user }}{% endif %}
+					for project {{ tool.pending_project }}.</b>
 					{% if tool.pending_operator.id == user.id or tool.pending_user.id == user.id or user.is_staff %}
 					<br /><b><a href="{% url 'cancel_pending' tool.id %}">CANCEL</a></b> this pending usage.
+					<br />If you have a current reservation, you may
+						<a href="javascript:void(0)" onclick="disable_tool('{% url 'disable_tool' tool.id %}')">
+						<b>FORCE</b></a> the current user off the tool and take over its usage.
 					{% endif %}
 				{% else %}
 				<em>Tool is in use, but pending usage may be announced.</em>
@@ -134,7 +139,7 @@
 					{% else %}
 						<span class="glyphicon glyphicon-wrench pull-left notification-icon warning-highlight" title="Click to toggle details about this task"></span>
 					{% endif %}
-			{% if "updated this task" in t.progress_description %}
+			{% if "update" in t.progress_description %}
 			<small><em>Click to show updates!</em></small>
 			{% endif %}
 					<span class="glyphicon glyphicon-chevron-right pull-left chevron"></span>
@@ -145,7 +150,7 @@
 					{% if t.estimated_resolution_time %}<br>Estimated resolution time is {{ t.estimated_resolution_time }}.{% endif %}
 					<div id="task_{{ t.id }}_details" class="collapse">
 						<span class="grey">
-							This task was created by {{ t.creator }} on {{ t.creation_time }}.
+							This task was created by <a href="{% url 'get_email_form_for_user' t.creator.id %}">{{ t.creator }}</a> on {{ t.creation_time }}.
 							{% if allowed_to_manage %}
 								You can <a href="{% url 'task_update_form' t.id %}">update</a> or <a href="{% url 'task_resolution_form' t.id %}">resolve</a> this task.
 							{% endif %}
@@ -218,11 +223,14 @@
 					{% if tool.allow_delayed_logoff and not tool.delayed_logoff_in_progress %}
 						<div class="form-group">
 							Prevent others from using the tool for <input type="number" name="downtime" class="form-control" style="display:inline; width:auto" min="1" max="120" inputmode="numeric" pattern="[0-9]*" placeholder="0"> minutes after disabling the tool.
-							<a id="delayed_logoff_help" class="pointer" tabindex="0" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="Some tools may require downtime after you finish using them. (For example, to perform automated cleaning or pump-down). Once you click &quot;Stop using the {{ tool }}&quot; the tool interlock will immediately disable the tool and it will remain unusable for the specified duration. Leave the duration blank to indicate that no post-usage downtime is required.">What's this?</a>
+							<a id="delayed_logoff_help" class="pointer" tabindex="0" data-toggle="popover" data-placement="bottom" data-trigger="focus" data-content="Some tools may require downtime after you finish using them. (For example, to perform automated cleaning or pump-down). Once you click &quot;Stop using {{ tool }}&quot; the tool interlock will immediately disable the tool and it will remain unusable for the specified duration. Leave the duration blank to indicate that no post-usage downtime is required.">What's this?</a>
 						</div>
 					{% endif %}
-					<div id="stop_wrapper" style="display:inline-block" data-toggle="tooltip" data-placement="bottom" title="Please answer the required questions (above) to proceed"><button id="stop" class="btn btn-default" onclick="disable_tool('{% url 'disable_tool' tool.id %}'); return false"><span class="glyphicon glyphicon-stop"></span> Stop using the {{ tool.name }}</button></div><p>
+					<div id="stop_wrapper" style="display:inline-block" data-toggle="tooltip" data-placement="bottom" title="Please answer the required questions (above) to proceed"><button id="stop" class="btn btn-default" onclick="disable_tool('{% url 'disable_tool' tool.id %}'); return false"><span class="glyphicon glyphicon-stop"></span> Stop using {{ tool.name }}</button></div><p>
 				{% endif %}
+			{% endif %}
+			{% if tool.usage_warning and tool.usage_warning != '' %}
+			<p>Warning: <b>{{ tool.usage_warning }}</b></p>
 			{% endif %}
 			{# show user and project selection if tool is unused #}
 			{# or it allows pending usage but none is noted yet #}
@@ -251,15 +259,12 @@
 				{% elif tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress %}
 					{% include 'tool_control/get_projects.html' with active_projects=active_projects_filtered user_id=user.id %}
 				{% endif %}
-				{% if tool.external_link != Null and tool.external_link != '' %}
-				<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
-				{% endif %}
 				{% if user.is_staff or tool.operational and not tool.required_resource_is_unavailable and not tool.delayed_logoff_in_progress and not tool.scheduled_outage_in_progress or tool.allow_pending_usage and not tool.pending_usage %}
-					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span>{% if tool.in_use %}Note pending usage of{% else %}Start using{% endif %} {{ tool.name }}</button>
+					<button id="start" class="btn btn-default" style="display:none" onclick="enable_tool({{ tool.id }}); return false"><span class="glyphicon glyphicon-play"></span>{% if tool.in_use %}Announce pending usage of{% else %}Start using{% endif %} {{ tool.name }}</button>
 				{% endif %}
 			{% endif %}
-			{% if tool.usage_warning and tool.usage_warning != '' %}
-			<p>Warning: <b>{{ tool.usage_warning }}</b></p>
+			{% if tool.external_link != Null and tool.external_link != '' %}
+			<p>Tool manual/information: <a target="_blank" rel="noopener noreferrer" href="{{ tool.external_link }}"> {{ tool.external_link }}</a></p>
 			{% endif %}
 		</form>
 		<hr />
@@ -279,18 +284,18 @@
 		<div class="media">
 			<span class="glyphicon glyphicon-info-sign pull-left notification-icon primary-highlight"></span>
 			<div class="media-body">
-				<p><a href="{% url 'get_email_form_for_user' tool.primary_owner.id %}" title="Email {{ tool.primary_owner.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ tool.primary_owner }}</a> is primarily responsible for this tool and can be contacted with any questions or concerns about the tool.</p>
+				<p><a href="{% url 'get_email_form_for_user' tool.primary_owner.id tool.id %}" title="Email {{ tool.primary_owner.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ tool.primary_owner }}</a> is primarily responsible for this tool and can be contacted with any questions or concerns about the tool.</p>
 				{% if tool.backup_owners.all.count == 1 %}
 					{% with tool.backup_owners.all|first as backup %}
-						<p>If you are unable to reach {{ tool.primary_owner }} then please contact the backup tool owner, <a href="{% url 'get_email_form_for_user' backup.id %}" title="Email {{ backup.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ backup }}</a>.</p>
+						<p>If you are unable to reach {{ tool.primary_owner }} then please contact the backup tool owner, <a href="{% url 'get_email_form_for_user' backup.id tool.id %}" title="Email {{ backup.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ backup }}</a>.</p>
 					{% endwith %}
 				{% elif tool.backup_owners.all.count > 1 %}
 					<p>If you are unable to reach {{ tool.primary_owner }} then please contact
 					{% for x in tool.backup_owners.all %}
 						{% if not forloop.last %}
-							<a href="{% url 'get_email_form_for_user' x.id %}" title="Email {{ x.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ x }}</a>,
+							<a href="{% url 'get_email_form_for_user' x.id tool.id %}" title="Email {{ x.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ x }}</a>,
 						{% else %}
-							or <a href="{% url 'get_email_form_for_user' x.id %}" title="Email {{ x.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ x }}</a>.
+							or <a href="{% url 'get_email_form_for_user' x.id tool.id %}" title="Email {{ x.first_name }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ x }}</a>.
 						{% endif %}
 					{% endfor %}
 					</p>
@@ -317,8 +322,8 @@
 				{% endif %}
 				<h5>Deep links for this tool:</h5>
 				<ul>
-				<li><a href="/calendar/{{ tool.id }}">Calendar</a></li>
-				<li><a href="/tool_control/{{ tool.id }}">Tool control</a></li>
+				<li><a href="{% url 'calendar' tool.id %}">Calendar</a></li>
+				<li><a href="{% url 'tool_control' tool.id %}">Tool control</a></li>
 				</ul>
 			</div>
 		</div>
@@ -458,6 +463,7 @@
 			<div class="form-group">
 				<div class="checkbox"><label><input name="safety_hazard" type="checkbox"/>This problem represents a safety hazard to the lab and should be regarded as urgent. Notify the {{ facility_name }} safety officer of this issue.</label></div>
 				<div class="checkbox"><label><input name="force_shutdown" type="checkbox"/>Shut down the tool so that it may not be used until this problem is resolved.</label></div>
+				<div class="checkbox"><label><input name="notify_users" type="checkbox"/>Notify also all qualified users by e-mail about this problem.</div>
 			</div>
 			<div class="form-group">
 				<button type="submit" class="btn btn-danger">Report problem</button>

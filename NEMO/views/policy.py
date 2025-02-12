@@ -23,8 +23,8 @@ def check_policy_to_enable_tool(tool, operator, user, project, staff_charge):
 		return HttpResponseBadRequest("This tool is currently hidden from users.")
 
 	# The tool must be operational.
-	# If the tool is non-operational then it may only be accessed by staff members.
-	if not tool.operational and not operator.is_staff:
+	# If the tool is non-operational then it may only be accessed by staff members or primary responsibles.
+	if not tool.operational and not operator.is_staff and not operator == tool.primary_owner:
 		return HttpResponseBadRequest("This tool is currently non-operational.")
 
 	# The tool must not be in use or be virtual.
@@ -262,11 +262,11 @@ def check_policy_to_save_reservation(cancelled_reservation, new_reservation, use
 	if new_reservation.user != user:
 		policy_problems.append("You may not change reservations that you do not own.")
 
-	# The user may not create or move a reservation to have a start time that is earlier than the current time.
+	# The user may not create or move a reservation to have a start time that is much earlier than the current time.
 	# Staff may break this rule.
 	# An explicit policy override allows this rule to be broken.
-	if new_reservation.start < timezone.now():
-		policy_problems.append("Reservation start time (" + format_datetime(new_reservation.start) + ") is earlier than the current time (" + format_datetime(timezone.now()) + ").")
+	if new_reservation.start < timezone.now()-timedelta(minutes=15):
+		policy_problems.append("Reservation start time (" + format_datetime(new_reservation.start) + ") is more than 15 min earlier than the current time (" + format_datetime(timezone.now()) + ").")
 
 	# The user may not move or resize a reservation to have an end time that is earlier than the current time.
 	# Staff may break this rule.
@@ -368,7 +368,7 @@ def check_policy_to_cancel_reservation(reservation, user):
 
 	# Users may only cancel reservations that they own or created.
 	# Staff may break this rule.
-	if (reservation.user != user and reservation.creator != user) and not user.is_staff and not user.has_perm('NEMO.change_reservation'):
+	if (reservation.user != user and reservation.creator != user) and not user.is_staff and not reservation.tool.primary_owner == user and not user in reservation.tool.backup_owners.all():
 		return HttpResponseBadRequest("You may not cancel reservations that you do not own.")
 
 	# Users may not cancel reservations that have already ended.

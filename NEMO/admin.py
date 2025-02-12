@@ -156,7 +156,7 @@ class ToolAdmin(admin.ModelAdmin):
 	form = ToolAdminForm
 	fieldsets = (
 		(None, {'fields': ('name', 'billing_reference', 'category', 'qualified_users', 'post_usage_questions'),}),
-		('Current state', {'fields': ('visible', 'operational', 'private'),}),
+		('Current state', {'fields': ('visible', 'operational', 'private', 'pending_user', 'pending_operator', 'pending_project'),}),
 		('Contact information', {'fields': ('primary_owner', 'backup_owners', 'notification_email_address', 'location', 'phone_number', 'external_link', 'usage_link'),}),
 		('Usage policy', {'fields': ('multiplicity', 'allow_pending_usage', 'usage_warning', 'reservation_horizon', 'minimum_usage_block_time', 'maximum_usage_block_time', 'maximum_reservations_per_day', 'minimum_time_between_reservations', 'maximum_future_reservation_time', 'missed_reservation_threshold', 'requires_area_access', 'reservation_physical_access_level', 'grant_physical_access_level_upon_qualification', 'grant_badge_reader_access_upon_qualification', 'interlock', 'allow_delayed_logoff', 'reservation_required'),}),
 		('Dependencies', {'fields': ('required_resources', 'nonrequired_resources'),}),
@@ -279,6 +279,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_display = ('id', 'user', 'creator', 'tool', 'project', 'start', 'end', 'duration', 'approved', 'cancelled', 'missed')
 	list_filter = ('approved', 'cancelled', 'missed', 'tool')
 	date_hierarchy = 'start'
+	exclude = ['descendant']
 
 
 @register(UsageEvent)
@@ -463,6 +464,7 @@ class ScheduledOutageCategoryAdmin(admin.ModelAdmin):
 @register(ScheduledOutage)
 class ScheduledOutageAdmin(admin.ModelAdmin):
 	list_display = ('id', 'tool', 'resource', 'creator', 'title', 'start', 'end')
+	list_filter = ('tool', 'creator')
 
 
 @register(News)

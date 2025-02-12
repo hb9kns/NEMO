@@ -2,15 +2,21 @@
 	{% for x in events %}
 	{
 		{% if personal_schedule %}
-			"title": "{% if x.approved %}(OK) {% endif %}{{ x.title|default:x.tool.name|escapejs }}",
+			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" %}{private} {% endif %}{{ x.title|default:x.tool.name|escapejs }}",
 		{% else %}
-			"title": "{% if x.approved %}(OK) {% endif %}{{ x.title|default:x.user|escapejs }}: {{x.tool.name|escapejs}}",
+			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" and x.user.id != user.id and x.operator.id != user.id %}[private]{% else %}{{ x.title|default:x.user|escapejs }}{% endif %}: {{x.tool.name|escapejs}}",
 		{% endif %}
 		"id": "Reservation {{ x.id }}",
 		{# The reservation creator or staff may edit the event: #}
 		{% if user.id == x.user.id or user.id == x.creator.id or may_modify_all %}"editable": true,{% endif %}
 		"start": "{{ x.start|date:"c" }}",
 		"end": "{{ x.get_visual_end|date:"c" }}",
+{# set event colors according to first character in text #}
+{% if x.title|length > 0 %}		"color": "#006699",{% endif %}
+{% if x.title|first == ":" %}		"color": "#0033cc",{% endif %}
+{% if x.title|first == "+" %}		"color": "#cc0033",{% endif %}
+{% if x.title|first == "-" %}		"color": "#006633",{% endif %}
+{% if x.title|first == "*" %}		"color": "#cc6633",{% endif %}
 		"details_url": "{% url 'reservation_details' x.id %}"
 	}{% if not forloop.last %},{% elif outages %},{% endif %}
 	{% endfor %}

@@ -1,4 +1,9 @@
-<p><tt>Server time: {% now 'l Y-m-d,H:i' %}</tt></p>
+<p>
+<tt>Server time: {% now 'l Y-m-d,H:i' %}</tt>
+{% if on_duty %} &mdash; <b>cleanroom support:
+{% for d in on_duty %}{{ d.first_name }} {{ d.last_name }} ({{ d.phone }}){% if not forloop.last %} , {% endif %}{% endfor %}
+</b>{% endif %}
+</p>
 {% if allowed %}
 <div class="row" style="background:transparent">
 	{% if nanofab_occupants %}
@@ -39,10 +44,13 @@
 			{% endfor %}
 		</div>
 	{% endif %}
-	<div class="{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
+	<div class="{% if nanofab_occupants %}{% if alerts or disabled_resources %}col-lg-4{% else %}col-lg-6{% endif %}{% else %}col-lg-6{% endif %}" style="text-align:center; background:transparent">
 		{% if usage_events %}
-			<h2>Tool usage</h2>
-			<p>{% if usage_events|length > 1 %}{{ usage_events|length }} tools are in use{% endif %}&nbsp;</p>
+			<h2>Tool Usage</h2>
+			<p>
+{#			{% if usage_events|length > 1 %}{{ usage_events|length }} tool(s) in use{% endif %}	#}
+			{% if hide_tools != '' %}<em><small>(hiding tools with "{{hide_tools}}" in name)</small></em>{% endif %}
+			</p>
 			{# Panel is used to make table borders rounded. #}
 			<div class="panel panel-default" style="background:transparent">
 				<table class="table table-bordered table-condensed" style="background:transparent">
@@ -50,16 +58,18 @@
 					<tr>
 						<th style="text-align: center">Tool</th>
 						<th style="text-align: center">User</th>
-						<th style="text-align: center">In use since...</th>
+						<th style="text-align: center">In use since</th>
 					</tr>
 					</thead>
 					<tbody style="background:transparent">
 					{% for u in usage_events %}
+						{% if hide_tools == '' or hide_tools not in u.tool.name %}
 						<tr style="background:transparent">
 							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.tool }}</td>
 							<td style="background:rgba(255, 255, 255, 0.7)"><span {% if u.operator.is_staff %}class="success-highlight"{% endif %}>{{ u.operator.first_name }} {{ u.operator.last_name }}{% if u.user != u.operator %} on behalf of {{ u.user.first_name }} {{ u.user.last_name }}{% endif %}</span></td>
-							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.start|date:"l @ H:i" }}</td>
+							<td style="background:rgba(255, 255, 255, 0.7)">{{ u.start|timesince }}</td>
 						</tr>
+						{% endif %}
 					{% endfor %}
 					</tbody>
 				</table>
@@ -68,9 +78,9 @@
 			<h6>No interlocked tools are in use.</h6>
 		{% endif %}
 	</div>
-	<div class="col-lg-4" style="text-align:center">
+	<div class="{% if nanofab_occupants %}col-lg-4{% else %}col-lg-6{% endif %}" style="text-align:center">
 		{% if alerts or disabled_resources %}
-			<h2>Alerts and outages</h2>
+			<h2>Alerts and Outages</h2>
 			<p>{# For spacing #}&nbsp;</p>
 			{% for a in alerts %}
 				<div class="alert alert-danger">

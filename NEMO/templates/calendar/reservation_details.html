@@ -10,6 +10,7 @@
 		<div class="alert alert-danger">This reservation was automatically removed from the tool calendar due to tool inactivity.</div>
 	{% endif %}
 
+	{% if reservation.title|first != ":" or reservation.user.id == user.id or reservation.creator.id == user.id %}
 	{% if "1" == "1" %}
 		<div class="input-group">
 			<span class="input-group-addon">
@@ -22,6 +23,12 @@
 		</div>
 	{% elif reservation.title %}
 		Title: {{ reservation.title }}<br>
+	{% endif %}
+	<p align="right">
+	<small><em>Start title with any of +-* to set different colors, with : to make private!</em></small>
+	</p>
+	{% else %}
+	<em>private entry, hidden</em><br />
 	{% endif %}
 
 	User: <a href="{% url 'get_email_form_for_user' reservation.user.id %}"> {{ reservation.user }} </a><br>
@@ -45,9 +52,11 @@
 	{% if reservation.self_configuration %}
 		{{ reservation.user }} has opted to perform the tool configuration.<br>
 	{% endif %}
+	{% if reservation.title|first != ":" or reservation.user.id == user.id or reservation.creator.id == user.id %}
 	{% if reservation.additional_information %}
 		Additional information:<br>
 		{{ reservation.additional_information|linebreaksbr }}
+	{% endif %}
 	{% endif %}
 </div>
 {# Allow the user to cancel the reservation if they have that priviledge. #}

@@ -54,3 +54,7 @@ def create_safety_notification(safety_issue):
 def delete_safety_notification(issue):
 	content_type = ContentType.objects.get_for_model(SafetyIssue)
 	Notification.objects.filter(content_type=content_type, object_id=issue.id).delete()
+
+def get_users_on_duty():
+	onduty = User.objects.filter(is_staff=True, is_technician=True, is_active=True)
+	return onduty

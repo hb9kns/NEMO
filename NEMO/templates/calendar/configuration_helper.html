@@ -12,9 +12,12 @@
 				{% if config.absence_string %}
 					<option value="">{{ config.absence_string }}</option>
 				{% endif %}
+{# only permit reservation choices if name does not start with "-" #}
+			{% if config.name|stringformat:".1s" != "-" %}
 				{% for setting in config.available_settings_as_list %}
 					<option value={{ forloop.counter0 }}>{{ setting }}</option>
 				{% endfor %}
+			{% endif %}
 			</select>
 		{% else %}
 			{{ config.name }}:<br>
@@ -24,9 +27,12 @@
 					{% if config.absence_string %}
 						<option value="">{{ config.absence_string }}</option>
 					{% endif %}
+{# only permit reservation choices if name does not start with "-" #}
+			{% if config.name|stringformat:".1s" != "-" %}
 					{% for setting in config.available_settings_as_list %}
 						<option value={{ forloop.counter0 }}>{{ setting }}</option>
 					{% endfor %}
+			{% endif %}
 				</select>
 				<br>
 			{% endfor %}
