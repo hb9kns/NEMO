@@ -2,9 +2,9 @@
 	{% for x in events %}
 	{
 		{% if personal_schedule %}
-			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" %}{private} {% endif %}{{ x.title|default:x.tool.name|escapejs }}",
+			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" %}(private) {% endif %}{{ x.title|default:x.tool.name|escapejs }}",
 		{% else %}
-			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" and x.user.id != user.id and x.operator.id != user.id %}[private]{% else %}{{ x.title|default:x.user|escapejs }}{% endif %}: {{x.tool.name|escapejs}}",
+			"title": "{% if x.approved %}(OK) {% endif %}{% if x.title|first == ":" and x.user.id != user.id and x.operator.id != user.id %}*private*{% else %}{{ x.title|escapejs }}{% endif %} ({{x.tool.name|escapejs}} by {{x.user|escapejs}})",
 		{% endif %}
 		"id": "Reservation {{ x.id }}",
 		{# The reservation creator or staff may edit the event: #}
