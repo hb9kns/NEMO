@@ -116,7 +116,9 @@ def get_qualified_users(request):
 
 @permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
-def users_qualifications(request):
+def users_qualifications(request, user_id):
+  user = get_object_or_404(User, id=request.GET.get('user_id'))
   dictionary = {
+    'user': user,
   }
   return render(request, 'users_qualifications.html', dictionary)

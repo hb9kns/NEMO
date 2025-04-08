@@ -115,7 +115,7 @@ urlpatterns = [
 	url(r'^qualifications/$', qualifications.qualifications, name='qualifications'),
 	url(r'^modify_qualifications/$', qualifications.modify_qualifications, name='modify_qualifications'),
 	url(r'^get_qualified_users/$', qualifications.get_qualified_users, name='get_qualified_users'),
-	url(r'^users_qualifications/$', qualifications.users_qualifications, name='users_qualifications'),
+	url(r'^users_qualifications/(?P<user_id>\d+)/$', qualifications.users_qualifications, name='users_qualifications'),
 
 	# Staff charges:
 	url(r'^staff_charges/$', staff_charges.staff_charges, name='staff_charges'),
