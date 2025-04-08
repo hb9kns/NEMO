@@ -113,3 +113,10 @@ def get_qualified_users(request):
 		'expanded': True
 	}
 	return render(request, 'tool_control/qualified_users.html', dictionary)
+
+@permission_required('NEMO.change_tool', raise_exception=True)
+@require_GET
+def users_qualifications(request):
+  dictionary = {
+  }
+  return render(request, 'users_qualifications.html', dictionary)
