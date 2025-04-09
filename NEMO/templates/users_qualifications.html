@@ -3,9 +3,9 @@
 {% block title %}User's qualifications{% endblock %}
 
 {% block content %}
-  <h1>User's qualifications</h1>
-  <p>
-WORK IN PROGRESS
-  </p>
+  <h3>User Qualifications for {{ showuser.get_full_name }}</h3>
+<ul>
+{% for t in tools %}<li>{{ t.name }}</li>{% endfor %}
+</ul>
 
 {% endblock %}
