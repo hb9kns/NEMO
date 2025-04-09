@@ -29,7 +29,7 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Name{% if staffdisplay %} / Tools{% endif %}</th>
+						<th>Name [Tools]</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
 						<th>Affiliation/Group</th>
@@ -42,10 +42,10 @@
 					{% for p in people %}
 						{% if not showgroup or p.user.affiliation == showgroup %}
 						<tr>
-							<td>{% if p.special %}<em style="color:green">{% endif %}
-								{% if staffdisplay %}<a href="{% url 'users_qualifications' p.user.id %}">{% endif %}
+							<td>{% if p.special %}<em>{% endif %}
+								<a href="{% url 'users_qualifications' p.user.id %}"{% if p.special %} style="color:green"{% endif %}>
 								{{ p.user.get_full_name }}
-								{% if staffdisplay %}</a>{% endif %}
+								</a>
 							{% if p.special %}</em>{% endif %}</td>
 							<td><a href="{% url 'get_email_form_for_user' p.user.id %}">{{ p.user.email }}</a></td>
 							<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
@@ -71,7 +71,7 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Name{% if staffdisplay %} / Tools{% endif %}</th>
+						<th>Name [Tools]</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
 						<th>Primary responsible for</th>
@@ -83,9 +83,11 @@
 					{% for p in people %}
 					{% if p.primary_owning or p.backup_owning %}
 					<tr>
-					<td>{% if p.special %}<em style="color:green">{% endif %}
+						<td>{% if p.special %}<em>{% endif %}
+						<a href="{% url 'users_qualifications' p.user.id %}"{% if p.special %} style="color:green"{% endif %}>
 						{{ p.user.get_full_name }}
-					{% if p.special %}</em>{% endif %}</td>
+						</a>
+						{% if p.special %}</em>{% endif %}</td>
 					<td><a href="{% url 'get_email_form_for_user' p.user.id %}">{{ p.user.email }}</a></td>
 					<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
 					<td>{% for tool in p.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>

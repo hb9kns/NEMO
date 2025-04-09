@@ -114,9 +114,8 @@ def get_qualified_users(request):
 	}
 	return render(request, 'tool_control/qualified_users.html', dictionary)
 
-@permission_required('NEMO.change_tool', raise_exception=True)
 @require_GET
 def users_qualifications(request, user_id):
   u = get_object_or_404(User, id=user_id)
-  ts = u.qualifications.all()
+  ts = u.qualifications.exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
   return render(request, 'users_qualifications.html', { 'showuser': u, 'tools': ts })
