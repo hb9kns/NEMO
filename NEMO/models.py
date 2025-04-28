@@ -318,6 +318,10 @@ class Tool(models.Model):
 		result = UsageEvent.objects.filter(tool=self.id, end=None).exists()
 		return result
 
+	def operated_by(self, user):
+		result = UsageEvent.objects.filter(tool=self.id, operator=user, end=None).exists()
+		return result
+
 	def delayed_logoff_in_progress(self):
 		result = UsageEvent.objects.filter(tool=self.id, end__gt=timezone.now()).exists()
 		return result
@@ -402,7 +406,7 @@ class Tool(models.Model):
 
 class Configuration(models.Model):
 	tool = models.ForeignKey(Tool, help_text="The tool that this configuration option applies to.", on_delete=models.CASCADE)
-	name = models.CharField(max_length=200, help_text="The name of this overall configuration. This text is displayed as a label on the tool control page.")
+	name = models.CharField(max_length=200, help_text="The name of this overall configuration. This text is displayed as a label on the tool control page. Start with '-' to prevent users from being able to request a setting when making a new reservation.")
 	configurable_item_name = models.CharField(blank=True, null=True, max_length=200, help_text="The name of the tool part being configured. This text is displayed as a label on the tool control page. Leave this field blank if there is only one configuration slot.")
 	advance_notice_limit = models.PositiveIntegerField(help_text="Configuration changes must be made this many hours in advance.")
 	display_priority = models.PositiveIntegerField(help_text="The order in which this configuration will be displayed beside others when making a reservation and controlling a tool. Can be any positive integer including 0. Lower values are displayed first.")
@@ -444,6 +448,11 @@ class Configuration(models.Model):
 			return True
 		if self.qualified_users_are_maintainers and (user in self.tool.user_set.all() or user.is_staff):
 			return True
+		if settings.CONFIGURATION_BY_PRIMARY_OWNER:
+			if self.tool.primary_owner == user:
+				return True
+			if settings.BACKUP_OWNERS_HAVE_FULL_PERMISSIONS and (user in self.tool.backup_owners.all()):
+				return True
 		return False
 
 	class Meta:

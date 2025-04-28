@@ -16,6 +16,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from NEMO.admin import record_local_many_to_many_changes, record_active_state
 from NEMO.forms import UserForm
 from NEMO.models import User, Project, Account, Tool, PhysicalAccessLevel, Reservation, StaffCharge, UsageEvent, AreaAccessRecord, ActivityHistory
+from NEMO.views.customization import get_customization
 
 
 @staff_member_required(login_url=None)
@@ -183,14 +184,15 @@ def create_or_modify_user(request, user_id):
 
 		if must_train_again:
 			subject = 'NEMO notification: training required'
-			message = '''
+			subject += ' for '+user.get_full_name()+' ('+user.get_username()+')'
+			message = subject + '''
 
-Your account has been set to "training required".
+This account has been set to "training required".
 For further information, please contact the lab management.
 
 (sent by NEMO)
 '''
-			send_mail( subject=subject, message=message, from_email=settings.EMAIL_SENDER, recipient_list=[user.email], fail_silently=True )
+			send_mail( subject=subject, message=message, from_email=settings.EMAIL_SENDER, recipient_list=[user.email, get_customization('abuse_email_address')], fail_silently=True )
 			dictionary = {
 				'title': 'User notified',
 				'heading': 'The user has been notified about change of training status: '+str(must_train_again),

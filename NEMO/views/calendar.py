@@ -291,6 +291,10 @@ def create_reservation(request):
 	# If a reservation is requested and configuration information is present also...
 	elif tool.is_configurable() and configured:
 		new_reservation.additional_information, new_reservation.self_configuration = extract_configuration(request)
+		# pre-populate title with additional information for visibility
+		if new_reservation.additional_information and not new_reservation.title:
+			# split at linebreaks and join with spaces (i.e convert breaks to spaces)
+			new_reservation.title = " ".join(new_reservation.additional_information.splitlines())
 		# Reservation can't be short notice if the user is configuring the tool themselves.
 		if new_reservation.self_configuration:
 			new_reservation.short_notice = False
@@ -323,9 +327,9 @@ def parse_configuration_entry(key, value):
 	configuration = Configuration.objects.get(pk=config_id)
 	available_setting = configuration.get_available_setting(value)
 	if len(configuration.current_settings_as_list()) == 1:
-		return display_priority, configuration.name + " needs to be set to " + available_setting + "."
+		return display_priority, configuration.name + " to be set to " + available_setting + "."
 	else:
-		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " needs to be set to " + available_setting + "."
+		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " to be set to " + available_setting + "."
 
 
 @staff_member_required(login_url=None)

@@ -151,6 +151,7 @@ urlpatterns = [
 	# Email broadcasts:
 	re_path(r'^get_email_form/$', email.get_email_form, name='get_email_form'),
 	re_path(r'^get_email_form_for_user/(?P<user_id>\d+)/$', email.get_email_form_for_user, name='get_email_form_for_user'),
+	re_path(r'^get_email_form_for_user/(?P<user_id>\d+)/(?P<tool_id>\d+)/$', email.get_email_form_for_user, name='get_email_form_for_user'),
 	re_path(r'^send_email/$', email.send_email, name='send_email'),
 	re_path(r'^email_broadcast/$', email.email_broadcast, name='email_broadcast'),
 	re_path(r'^email_broadcast/(?P<audience>tool|account|project|physicalaccess|equiresp|pjtresp|all)/$', email.email_broadcast, name='email_broadcast'),
