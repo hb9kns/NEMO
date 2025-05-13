@@ -17,8 +17,7 @@ from NEMO.models import User, Tool, Project, Account, UsageEvent, Reservation
 
 def allowed_operators(request):
 	""" operators for which the requester is allowed to view events"""
-# reusing permissions: those allowed to change events can view all operators
-	if request.user.has_perm('NEMO.change_account'):
+	if request.user.is_staff:
 		return User.objects.all()
 # others can just view themselves
 	else:
