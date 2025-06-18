@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load custom_tags_and_filters %}
+{% block title %}User's qualifications{% endblock %}
+
+{% block content %}
+  <h3>User Qualifications for {{ showuser.get_full_name }}</h3>
+<ul>
+{% for t in tools %}<li>{{ t.name }}</li>{% endfor %}
+</ul>
+
+{% endblock %}

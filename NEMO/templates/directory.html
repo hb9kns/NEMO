@@ -6,7 +6,7 @@
 		This is a list of all active {% if showgroup %}members of group "{{ showgroup.name }}"{% else %}users{% endif %}.
 		<br />
 		You may write e-mail to a user by clicking on their name.
-		Names of people with staff permissions are in <em style="color:green">green</em>.
+		Names of people with <em style="color:green">staff permissions are in green</em>.
 	</p>
 	<form action="{% url 'directory' %}" class="form-inline" method="get">
 	<p>
@@ -29,13 +29,13 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Name</th>
+						<th>Name [Tools]</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
 						<th>Affiliation/Group</th>
 						<th>Joined/Introday</th>
 						<th>Projects</th>
-						<th>Admin/Groups</th>
+						{% if staffdisplay %}<th>Admin/Groups</th>{% endif %}
 					</tr>
 				</thead>
 				<tbody>
@@ -43,9 +43,11 @@
 						{% if not showgroup or p.user.affiliation == showgroup %}
 						<tr>
 							<td>{% if p.special %}<em>{% endif %}
-							<a href="{% url 'get_email_form_for_user' p.user.id %}" style="color:{% if p.special %}green{% else %}blue{% endif %};">{{ p.user.get_full_name }}</a>
+								<a href="{% url 'users_qualifications' p.user.id %}"{% if p.special %} style="color:green"{% endif %}>
+								{{ p.user.get_full_name }}
+								</a>
 							{% if p.special %}</em>{% endif %}</td>
-							<td>{{ p.user.email }}</td>
+							<td><a href="{% url 'get_email_form_for_user' p.user.id %}">{{ p.user.email }}</a></td>
 							<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
 							<td>{{ p.user.affiliation.name }}</td>
 							<td>{{ p.intro }}</td>
@@ -69,7 +71,7 @@
 			<table class="table table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th>Name</th>
+						<th>Name [Tools]</th>
 						<th>E-Mail</th>
 						<th>Phone</th>
 						<th>Primary responsible for</th>
@@ -81,10 +83,12 @@
 					{% for p in people %}
 					{% if p.primary_owning or p.backup_owning %}
 					<tr>
-					<td>{% if p.special %}<em>{% endif %}
-					 <a href="{% url 'get_email_form_for_user' p.user.id %}" style="color:{% if p.special %}green{% else %}blue{% endif %};">{{ p.user.get_full_name }}</a>
-					{% if p.special %}</em>{% endif %}</td>
-					<td>{{ p.user.email }}</td>
+						<td>{% if p.special %}<em>{% endif %}
+						<a href="{% url 'users_qualifications' p.user.id %}"{% if p.special %} style="color:green"{% endif %}>
+						{{ p.user.get_full_name }}
+						</a>
+						{% if p.special %}</em>{% endif %}</td>
+					<td><a href="{% url 'get_email_form_for_user' p.user.id %}">{{ p.user.email }}</a></td>
 					<td>{% if p.user.phone %}{{ p.user.phone }}{% else %} {% endif %}</td>
 					<td>{% for tool in p.primary_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>
 					<td>{% for tool in p.backup_owning %}&bull; <a href="{% url 'tool_control' tool.id %}">{{ tool.name }}</a><br />{% endfor %}</td>

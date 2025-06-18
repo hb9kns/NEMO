@@ -327,9 +327,9 @@ def parse_configuration_entry(key, value):
 	configuration = Configuration.objects.get(pk=config_id)
 	available_setting = configuration.get_available_setting(value)
 	if len(configuration.current_settings_as_list()) == 1:
-		return display_priority, configuration.name + " to be set to " + available_setting + "."
+		return display_priority, configuration.name + " := " + available_setting + "."
 	else:
-		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " to be set to " + available_setting + "."
+		return display_priority, configuration.configurable_item_name + " #" + str(slot + 1) + " := " + available_setting + "."
 
 
 @staff_member_required(login_url=None)

@@ -113,3 +113,9 @@ def get_qualified_users(request):
 		'expanded': True
 	}
 	return render(request, 'tool_control/qualified_users.html', dictionary)
+
+@require_GET
+def users_qualifications(request, user_id):
+  u = get_object_or_404(User, id=user_id)
+  ts = u.qualifications.exclude(name__startswith=settings.TOOLNAME_BEGIN_SUPPRESS)
+  return render(request, 'users_qualifications.html', { 'showuser': u, 'tools': ts })
