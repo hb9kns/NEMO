@@ -5,7 +5,7 @@ from dateutil import parser
 from dateutil.parser import parse
 from dateutil.rrule import MONTHLY, rrule
 from django.utils import timezone
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, make_aware
 
 
 def bootstrap_primary_color(color_type):
@@ -158,9 +158,9 @@ def format_datetime(universal_time):
 def localize(dt, tz=None):
 	tz = tz or timezone.get_current_timezone()
 	if isinstance(dt, list):
-		return [tz.localize(d) for d in dt]
+		return [localtime(make_aware(d),tz) for d in dt]
 	else:
-		return tz.localize(dt)
+		return localtime(make_aware(dt),tz)
 
 
 def naive_local_current_datetime():
