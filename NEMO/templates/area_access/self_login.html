@@ -12,7 +12,7 @@
 				<p>Charge area access to which project?</p>
 				{% for p in projects %}
 					<div class="radio">
-						<label><input type="radio" name="project" value="{{ p.id }}" required>{{ p }}</label>
+						<label><input type="radio" name="project" value="{{ p.id }}" required {% if forloop.first %}checked{% endif %}>{{ p }}</label>
 					</div>
 				{% endfor %}
 			{% endif %}
@@ -25,7 +25,7 @@
 			<p>Log in to which area?</p>
 			{% for a in areas %}
 				<div class="radio">
-					<label><input type="radio" name="area" value="{{ a.id }}" required>{{ a }}</label>
+					<label><input type="radio" name="area" value="{{ a.id }}" required {% if forloop.first %}checked{% endif %}>{{ a }}</label>
 				</div>
 			{% endfor %}
 		{% endif %}

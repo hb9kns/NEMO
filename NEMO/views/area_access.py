@@ -344,10 +344,22 @@ def self_log_in(request):
 		return redirect(reverse('landing'))
 
 
-def able_to_self_log_in_to_area(user):
-	# 'Self log in' must be enabled
-	if not get_customization('self_log_in') == 'enabled':
-		return False
+@login_required
+@require_GET
+def self_log_out(request):
+# obviously the user should be in an area, therefore ignore this part of the check
+	if not able_to_self_log_in_to_area(request.user,observe_in_area=False):
+		return redirect(reverse('landing'))
+	record = request.user.area_access_record()
+	if record:
+		record.end = timezone.now()
+		record.save()
+		return redirect(reverse('landing'))
+	else:
+		return render(request, 'area_access/not_logged_in.html')
+
+
+def able_to_self_log_in_to_area(user, observe_in_area=True):
 	# Check if the user is active
 	if not user.is_active:
 		return False
@@ -355,11 +367,21 @@ def able_to_self_log_in_to_area(user):
 	if user.active_project_count() < 1:
 		return False
 	# Check if the user is already in an area. If so, the /change_project/ URL can be used to change their project.
-	if user.in_area():
+# (for using the same logics for self-log-out, in_area can be ignored)
+	if user.in_area() and observe_in_area:
 		return False
 	# Check if the user has any physical access levels
 	if not user.physical_access_levels.all().exists():
 		return False
+	# Check that the user's physical access has not expired
+	if user.access_expiration is not None and user.access_expiration < date.today():
+		return False
+	# 'Self log in' must be enabled
+	if not get_customization('self_log_in') == 'enabled':
+		return False
+	# Staff are exempt from the remaining rule checks
+	if user.is_staff:
+		return True
 	# Check if the user normally has access to this area at the current time
 	accessible_areas = []
 	for access_level in user.physical_access_levels.all():
@@ -367,12 +389,6 @@ def able_to_self_log_in_to_area(user):
 			accessible_areas.append(access_level.area)
 	if not accessible_areas:
 		return False
-	# Check that the user's physical access has not expired
-	if user.access_expiration is not None and user.access_expiration < date.today():
-		return False
-	# Staff are exempt from the remaining rule checks
-	if user.is_staff:
-		return True
 	# Users may not access an area if a required resource is unavailable,
 	# so return true if there exists at least one area they are able to log in to.
 	for area in accessible_areas:

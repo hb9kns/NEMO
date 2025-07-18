@@ -95,16 +95,11 @@
 					{% endfor %}
 				{% endif %}
 				{% if user.in_area %}
-					{% with user.active_project_count as active_project_count %}
-						{% if active_project_count > 1 %}<a href="{% url 'change_project' %}" style="text-decoration: none">{% endif %}
-						<div class="alert alert-info">
-							You are logged in to the <b>{{ user.area_access_record.area|lower }}</b>. Usage time is being billed to the project named <b>{{ user.billing_to_project }}</b>.
-							{% if active_project_count > 1 %}
-								Click to bill to a different project at any time.
-							{% endif %}
-						</div>
-						{% if active_project_count > 1 %}</a>{% endif %}
-					{% endwith %}
+					<a href="{% url 'change_project' %}" style="text-decoration: none">
+					<div class="alert alert-info">
+					You are logged in to the <b>{{ user.area_access_record.area }}</b>. Usage time is being billed to the project named <b>{{ user.billing_to_project }}</b>.
+					</div>
+					</a>
 				{% endif %}
 				{% if self_log_in %}
 					<a href="{% url 'self_log_in' %}" style="text-decoration: none">

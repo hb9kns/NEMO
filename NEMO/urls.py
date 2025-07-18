@@ -217,6 +217,7 @@ urlpatterns = [
 	re_path(r'^change_project/(?P<new_project>\d+)/$', area_access.change_project, name='change_project'),
 	re_path(r'^force_area_logout/(?P<user_id>\d+)/$', area_access.force_area_logout, name='force_area_logout'),
 	re_path(r'^self_log_in/$', area_access.self_log_in, name='self_log_in'),
+        re_path(r'^self_log_out/$', area_access.self_log_out, name='self_log_out'),
 
 	# NanoFab usage:
 	re_path(r'^usage/$', usage.usage, name='usage'),
