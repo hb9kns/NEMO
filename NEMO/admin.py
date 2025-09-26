@@ -168,9 +168,9 @@ class ToolAdmin(admin.ModelAdmin):
 		"""
 		record_remote_many_to_many_changes_and_save(request, obj, form, change, 'qualified_users', super(ToolAdmin, self).save_model)
 		if 'required_resources' in form.changed_data:
-			obj.required_resource_set = form.cleaned_data['required_resources']
+			obj.required_resource_set.set(form.cleaned_data['required_resources'])
 		if 'nonrequired_resources' in form.changed_data:
-			obj.nonrequired_resource_set = form.cleaned_data['nonrequired_resources']
+			obj.nonrequired_resource_set.set(form.cleaned_data['nonrequired_resources'])
 
 
 @register(TrainingSession)
