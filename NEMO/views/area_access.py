@@ -65,7 +65,7 @@ def process_area_access(request, badge_number, project_id, door):
 	if not badge_number:
 # if no badge number given, try the user's badge
 		badge_number = request.user.badge_number
-	if badge_number == '':
+	if badge_number == None or badge_number == '':
 # an explicitly empty string will always fail
 		return render(request, 'area_access/badge_not_found.html')
 	try:

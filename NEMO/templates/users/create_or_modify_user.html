@@ -148,6 +148,7 @@
 			<div class="col-sm-4">
 				<input id="badge_number" name="badge_number" autocomplete="off" type="text" class="form-control" value="{{ form.badge_number.value|default_if_none:"" }}">
 			</div>
+			<small>Note: Must be a positive integer (0 is ok) for area login to work (i.e also door opening)!</small>
 			{% if form.badge_number.errors %}
 				<div class="col-sm-6 form-control-static danger-highlight">
 					{{ form.badge_number.errors|striptags }}
