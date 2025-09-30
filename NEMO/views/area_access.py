@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.conf import settings
 
 from NEMO.models import Area, AreaAccessRecord, Door, PhysicalAccessLog, PhysicalAccessType, Project, User
 from NEMO.tasks import postpone
@@ -37,7 +38,6 @@ def area_access(request):
 
 
 @login_required
-@permission_required('NEMO.add_areaaccessrecord')
 @require_GET
 def welcome_screen(request, door_id):
 	door = get_object_or_404(Door, id=door_id)
@@ -53,12 +53,18 @@ def farewell_screen(request, door_id):
 
 
 @login_required
-@permission_required('NEMO.add_areaaccessrecord')
 @require_POST
 def login_to_area(request, door_id):
 	door = get_object_or_404(Door, id=door_id)
-
 	badge_number = request.POST.get('badge_number', '')
+	project_id = request.POST.get('project_id')
+	return process_area_access(request, badge_number=badge_number, project_id=project_id, door=door)
+
+# separate process logic from login_to_area view, for reuse from self_log_in
+def process_area_access(request, badge_number, project_id, door):
+	if not badge_number or badge_number == '':
+# if no badge number given, try the user's badge
+		badge_number = request.user.badge_number
 	if badge_number == '':
 		return render(request, 'area_access/badge_not_found.html')
 	try:
@@ -83,7 +89,7 @@ def login_to_area(request, door_id):
 	if not user.physical_access_levels.all().exists():
 		log.details = "This user does not belong to ANY physical access levels."
 		log.save()
-		message = "You have not been granted physical access to any access-controlled area. Please visit the User Office if you believe this is an error."
+		message = "You have not been granted physical access to any access-controlled area."
 		return render(request, 'area_access/physical_access_denied.html', {'message': message})
 
 	# Check if the user normally has access to this door at the current time
@@ -97,7 +103,7 @@ def login_to_area(request, door_id):
 	if user.access_expiration is not None and user.access_expiration < date.today():
 		log.details = "This user was blocked from this physical access level because their physical access has expired."
 		log.save()
-		message = "Your physical access has expired. Have you completed your safety training within the last year? Please contact staff to renew your access."
+		message = "Your physical access has expired."
 		return render(request, 'area_access/physical_access_denied.html', {'message': message})
 
 	# Users may not access an area if a required resource is unavailable.
@@ -140,7 +146,6 @@ def login_to_area(request, door_id):
 		unlock_door(door)
 		return render(request, 'area_access/login_success.html', {'area': door.area, 'name': user.first_name, 'project': record.project, 'previous_area': previous_area})
 	elif user.active_project_count() > 1:
-		project_id = request.POST.get('project_id')
 		if project_id:
 			project = get_object_or_404(Project, id=project_id)
 			if project not in user.active_projects():
@@ -167,15 +172,24 @@ def login_to_area(request, door_id):
 			return render(request, 'area_access/login_success.html', {'area': door.area, 'name': user.first_name, 'project': record.project, 'previous_area': previous_area})
 		else:
 			# No log entry necessary here because all validation checks passed, and the user must indicate which project
-			# the wish to login under. The log entry is captured when the subsequent choice is made by the user.
+			# they wish to login under. The log entry is captured when the subsequent choice is made by the user.
 			return render(request, 'area_access/choose_project.html', {'area': door.area, 'user': user})
 
 
 @postpone
 def unlock_door(door):
-	door.interlock.unlock()
-	sleep(8)
-	door.interlock.lock()
+	if settings.INVERSE_DOORLOCKS:
+		door.interlock.lock()
+	else:
+		door.interlock.unlock()
+	if settings.DOOR_TIME_OPEN:
+		sleep(settings.DOOR_TIME_OPEN)
+	else:
+		sleep(8)
+	if settings.INVERSE_DOORLOCKS:
+		door.interlock.unlock()
+	else:
+		door.interlock.lock()
 	sleep(3)
 
 
@@ -294,10 +308,10 @@ def new_area_access_record(request):
 			dictionary['error_message'] = 'Your request contained an invalid identifier.'
 			return render(request, 'area_access/new_area_access_record.html', dictionary)
 		if user.access_expiration is not None and user.access_expiration < timezone.now().date():
-			dictionary['error_message'] = '{} does not have access to the {} because the user\'s physical access expired on {}. You must update the user\'s physical access expiration date before creating a new area access record.'.format(user, area.name.lower(), user.access_expiration.strftime('%B %m, %Y'))
+			dictionary['error_message'] = '{} does not have access to the {} because the user\'s physical access expired on {}. You must update the user\'s physical access expiration date before creating a new area access record.'.format(user, area.name, user.access_expiration.strftime('%B %m, %Y'))
 			return render(request, 'area_access/new_area_access_record.html', dictionary)
 		if not any([access_level.accessible() for access_level in user.physical_access_levels.filter(area=area)]):
-			dictionary['error_message'] = '{} does not have a physical access level that allows access to the {} at this time.'.format(user, area.name.lower())
+			dictionary['error_message'] = '{} does not have a physical access level that allows access to the {} at this time.'.format(user, area.name)
 			return render(request, 'area_access/new_area_access_record.html', dictionary)
 		if user.billing_to_project():
 			dictionary['error_message'] = '{} is already billing area access to another area. The user must log out of that area before entering another.'.format(user)
@@ -306,14 +320,14 @@ def new_area_access_record(request):
 			dictionary['error_message'] = '{} is not authorized to bill that project.'.format(user)
 			return render(request, 'area_access/new_area_access_record.html', dictionary)
 		if area.required_resources.filter(available=False).exists():
-			dictionary['error_message'] = 'The {} is inaccessible because a required resource is unavailable. You must make all required resources for this area available before creating a new area access record.'.format(area.name.lower())
+			dictionary['error_message'] = 'The {} is inaccessible because a required resource is unavailable. You must make all required resources for this area available before creating a new area access record.'.format(area.name)
 			return render(request, 'area_access/new_area_access_record.html', dictionary)
 		record = AreaAccessRecord()
 		record.area = area
 		record.customer = user
 		record.project = project
 		record.save()
-		dictionary['success'] = '{} is now logged in to the {}.'.format(user, area.name.lower())
+		dictionary['success'] = '{} is now logged in to the {}.'.format(user, area.name)
 		return render(request, 'area_access/new_area_access_record.html', dictionary)
 
 
@@ -331,16 +345,38 @@ def self_log_in(request):
 		if access_level.accessible() and not unavailable_resources:
 			areas.append(access_level.area)
 	dictionary['areas'] = areas
+# all doors in areas accessible by the user
+	doors = { d:[d.name,d.area] for d in Door.objects.filter(area__in=areas) }
+	dictionary['doors'] = doors
 	if request.method == 'GET':
 		return render(request, 'area_access/self_login.html', dictionary)
 	if request.method == 'POST':
+# door -- if none, then no door opening will be needed
 		try:
-			a = Area.objects.get(id=request.POST['area'])
-			p = Project.objects.get(id=request.POST['project'])
-			if a in dictionary['areas'] and p in dictionary['projects']:
-				AreaAccessRecord.objects.create(area=a, customer=request.user, project=p)
+			d = Door.objects.get(id=request.POST['door'])
 		except:
-			pass
+			d = None
+		if d:
+# if defined, door will implicitly define area
+			a = d.area
+		else:
+# otherwise, area must be defined (for login only without door opening)
+			try:
+				a = Area.objects.get(id=request.POST['area'])
+			except:
+				a = None
+		try:
+			p = Project.objects.get(id=request.POST['project'])
+		except:
+			p = None
+		if a in dictionary['areas'] and p in dictionary['projects']:
+# if door was given, open it and log in accordingly
+			if d:
+				return process_area_access(request, badge_number='', project_id=p.id, door=d)
+# if not, just log the area access
+			else:
+				AreaAccessRecord.objects.create(area=a, customer=request.user, project=p)
+# if area or project are not in the allowed range, do nothing
 		return redirect(reverse('landing'))
 
 
@@ -373,6 +409,9 @@ def able_to_self_log_in_to_area(user, observe_in_area=True):
 	# Check if the user has any physical access levels
 	if not user.physical_access_levels.all().exists():
 		return False
+	# Superusers are exempt from the remaining rule checks
+	if user.is_superuser:
+		return True
 	# Check that the user's physical access has not expired
 	if user.access_expiration is not None and user.access_expiration < date.today():
 		return False
