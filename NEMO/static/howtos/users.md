@@ -27,6 +27,34 @@ please go to the landing page (e.g by clicking onto "NEMO" in the
 top left corner of any page), and then the "Logout" link at the bottom
 of the page (with a red-white NO-ENTRY symbol).
 
+### Area/Door Login/out
+
+When you're logged into NEMO (and have the proper permissions to access
+an area, which normally comes with the first introduction to a tool
+in that area), then you can also log access to an area by clicking on
+the button on the landing page with the text "You are not logged in to
+an access controlled area."  This will provide you with a selection
+of areas and projects (if you have several ones at your disposition)
+as well as doors to choose.
+
+If you select a door (currently we only have two: for the service area
+and for the cleanroom in HC1, but they are treated as one single door
+in NEMO), this door will be opened during 5 sec after you click on the
+"Log in" button.
+
+If you only select an area, access will be logged, but without opening
+the corresponding door. If you unlock the door with your card at the
+reader stations, you do not have to also log area access, as we do not
+currently bill area usage.  (Therefore you will most probably not use
+this functionality, but it comes for free.)
+
+Once you're logged into an area, this will be displayed on the landing
+page, and you can change the area or log out of all by clicking the
+corresponding button.
+
+Please note that area access shows up on the display in the corridor, and
+can also be seen on the Status dashboard under the "Area occupancy" tab.
+
 ## Calendar for Reservations
 
 The [reservation Calendar][calendar] consists of two panes. The left pane
@@ -311,4 +339,4 @@ If you need more information, ask your preferred search engine about
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*ver.1.2/2023-08-18/Y.Bonetti*
+*ver.1.3/2025-09-30/Y.Bonetti*
