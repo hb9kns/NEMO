@@ -62,16 +62,17 @@ def login_to_area(request, door_id):
 
 # separate process logic from login_to_area view, for reuse from self_log_in
 def process_area_access(request, badge_number, project_id, door):
-	if not badge_number or badge_number == '':
+	if not badge_number:
 # if no badge number given, try the user's badge
 		badge_number = request.user.badge_number
 	if badge_number == '':
+# an explicitly empty string will always fail
 		return render(request, 'area_access/badge_not_found.html')
 	try:
 		badge_number = int(badge_number)
 		user = User.objects.get(badge_number=badge_number)
 	except (User.DoesNotExist, ValueError):
-		return render(request, 'area_access/badge_not_found.html')
+		return render(request, 'area_access/illegal_badge_number.html')
 
 	log = PhysicalAccessLog()
 	log.user = user
@@ -371,11 +372,13 @@ def self_log_in(request):
 			p = None
 		if a in dictionary['areas'] and p in dictionary['projects']:
 # if door was given, open it and log in accordingly
+# (and use the badge number of the requesting user)
 			if d:
-				return process_area_access(request, badge_number='', project_id=p.id, door=d)
+				return process_area_access(request, badge_number=None, project_id=p.id, door=d)
 # if not, just log the area access
 			else:
 				AreaAccessRecord.objects.create(area=a, customer=request.user, project=p)
+				return render(request, 'area_access/login_success.html', {'area': a, 'name': request.user.first_name, 'project': p, 'previous_area': None})
 # if area or project are not in the allowed range, do nothing
 		return redirect(reverse('landing'))
 

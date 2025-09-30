@@ -5,12 +5,12 @@
 {% block content %}
 	<div class="row">
 	 <div class="col-lg-12">
-	  <p style="text-align: right"><small><em>
-            {% if user.is_staff %}<a href="{% url 'toggle_on_duty' %}">change on/off duty</a> :{% endif %}
-            {% if on_duty %}<b>cleanroom support:
+	  <p style="text-align: right"><small><em>{{ user.username }}
+            {% if user.is_staff %}<a href="{% url 'toggle_on_duty' %}">&mdash; change on/off duty</a>{% endif %}
+            {% if on_duty %}<b>&mdash; cleanroom support:
             {% for d in on_duty %}{{ d.first_name }} {{ d.last_name }} ({{ d.phone }}){% if not forloop.last %} , {% endif %}{% endfor %}
-            </b>&mdash;{% endif %}
-            Server time: {% now 'l, Y-m-d, H:i' %}
+            </b>{% endif %}
+            &mdash; {% now 'l, Y-m-d, H:i' %}
           </em></small></p>
 	 </div>
 	</div>
