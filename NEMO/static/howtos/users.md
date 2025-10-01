@@ -30,12 +30,12 @@ of the page (with a red-white NO-ENTRY symbol).
 ### Area/Door Login/out
 
 When you're logged into NEMO (and have the proper permissions to access
-an area, which normally comes with the first introduction to a tool
-in that area), then you can also log access to an area by clicking on
-the button on the landing page with the text "You are not logged in to
-an access controlled area."  This will provide you with a selection
-of areas and projects (if you have several ones at your disposition)
-as well as doors to choose.
+an area, which normally comes with the first introduction to a tool in
+that area), then you can also log access to an area by clicking on the
+light-green button on the landing page under the title "Current/pending usage"
+with the text "You are not logged in to an access controlled area. Click
+here to log in."  This will provide you with a selection of doors, areas
+and projects (if you have several ones at your disposition) to choose.
 
 If you select a door (currently we only have two: for the service area
 and for the cleanroom in HC1, but they are treated as one single door
@@ -50,7 +50,8 @@ this functionality, but it comes for free.)
 
 Once you're logged into an area, this will be displayed on the landing
 page, and you can change the area or log out of all by clicking the
-corresponding button.
+button under "Current/pending usage" that has turned light-blue and is
+now mentioning the area.
 
 Please note that area access shows up on the display in the corridor, and
 can also be seen on the Status dashboard under the "Area occupancy" tab.
@@ -339,4 +340,4 @@ If you need more information, ask your preferred search engine about
 [toolcontrol]: https://nemo.first.ethz.ch/tool_control/ "tool control"
 [dashboard]: https://nemo.first.ethz.ch/status_dashboard/ "status dashboard"
 
-*ver.1.3/2025-09-30/Y.Bonetti*
+*ver.1.4/2025-10-01/Y.Bonetti*

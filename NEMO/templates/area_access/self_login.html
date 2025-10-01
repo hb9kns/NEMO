@@ -5,19 +5,6 @@
 	<form method="post" action="{% url 'self_log_in' %}">
 		{% csrf_token %}
 		<div class="form-group">
-			{% if projects|length == 1 %}
-				You only have one active project. Area access will be billed to: {{ projects.0 }}
-				<input type="hidden" name="project" value="{{ projects.0.id }}">
-			{% else %}
-				<h4>Charge area access to which project?</h4>
-				{% for p in projects %}
-					<div class="radio">
-						<label><input type="radio" name="project" value="{{ p.id }}" required {% if forloop.first %}checked{% endif %}>{{ p }}</label>
-					</div>
-				{% endfor %}
-			{% endif %}
-		</div>
-		<div class="form-group">
 			<h4>Open which door? (Not needed, if only access should be logged.)</h4>
 		{% for d in doors %}
 			<div class="radio">
@@ -43,6 +30,19 @@
 				</div>
 			{% endfor %}
 		{% endif %}
+		</div>
+		<div class="form-group">
+			{% if projects|length == 1 %}
+				You only have one active project. Area access will be billed to: {{ projects.0 }}
+				<input type="hidden" name="project" value="{{ projects.0.id }}">
+			{% else %}
+				<h4>Charge area access to which project?</h4>
+				{% for p in projects %}
+					<div class="radio">
+						<label><input type="radio" name="project" value="{{ p.id }}" required {% if forloop.first %}checked{% endif %}>{{ p }}</label>
+					</div>
+				{% endfor %}
+			{% endif %}
 		</div>
 		<input type="submit" class="btn btn-success" value="Log in">
 	</form>
