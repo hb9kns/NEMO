@@ -17,6 +17,8 @@
 {% if x.title|first == "+" %}		"color": "#cc0033",{% endif %}
 {% if x.title|first == "-" %}		"color": "#006633",{% endif %}
 {% if x.title|first == "*" %}		"color": "#cc6633",{% endif %}
+{# following is for Ela ^-^ #}
+{% if x.title|first == ";" %}		"color": "#ff8800",{% endif %}
 		"details_url": "{% url 'reservation_details' x.id %}"
 	}{% if not forloop.last %},{% elif outages %},{% endif %}
 	{% endfor %}
