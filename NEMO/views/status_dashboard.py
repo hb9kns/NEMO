@@ -64,6 +64,7 @@ def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages, 
 			'id': tool.id,
 			'user': '',
 			'operator': '',
+			'project': '',
 			'in_use': False,
 			'in_use_since': '',
 			'delayed_logoff_in_progress': tool.id in tools_with_delayed_logoff_in_effect,
@@ -79,6 +80,7 @@ def merge(tools, tasks, unavailable_resources, usage_events, scheduled_outages, 
 	for event in usage_events:
 		result[event.tool.id]['operator'] = str(event.operator)
 		result[event.tool.id]['user'] = str(event.operator)
+		result[event.tool.id]['project'] = str(event.project)
 		if event.user != event.operator:
 			result[event.tool.id]['user'] += " on behalf of " + str(event.user)
 		result[event.tool.id]['in_use'] = True

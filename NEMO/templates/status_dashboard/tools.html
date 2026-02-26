@@ -3,6 +3,7 @@
 	<tr>
 		<th>Tool</th>
 		<th>User</th>
+		<th>Project</th>
 		<th>In use since...</th>
 	</tr>
 	</thead>
@@ -42,8 +43,10 @@
 					{% endif %}
 					{{ tool.user }}
 				</td>
+				<td>{{ tool.project }}</td>
 				<td>{{ tool.in_use_since|date:"D (M-j) H:i" }}</td>
 			{% else %}
+				<td></td>
 				<td></td>
 				<td></td>
 			{% endif %}
