@@ -81,7 +81,7 @@ def process_area_access(request, badge_number, project_id, door):
 	log.result = PhysicalAccessType.DENY  # Assume the user does not have access
 
 	# Check if the user is active
-	if not user.is_active:
+	if not user.is_active or user.training_required:
 		log.details = "This user is not active, preventing them from entering any access controlled areas."
 		log.save()
 		return render(request, 'area_access/inactive.html')
