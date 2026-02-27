@@ -31,6 +31,15 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label for="billing_reference" class="control-label col-sm-2">Billing reference</label>
+			<div class="col-sm-4">
+				<input type="text" name="billing_reference" id="billing_reference" maxlength="20" class="form-control" value="{{ form.billing_reference.value }}">
+			</div>
+			<div class="col-sm-6 form-control-static danger-highlight">
+				{{ form.billing_reference.errors|striptags }}
+			</div>
+		</div>
+		<div class="form-group">
 			<label for="application_identifier" class="control-label col-sm-2">Application identifier</label>
 			<div class="col-sm-4">
 				<input type="text" name="application_identifier" id="application_identifier" maxlength="100" class="form-control" value="{{ form.application_identifier.value }}">
