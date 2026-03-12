@@ -271,7 +271,6 @@
 		{% if tool.usage_link != Null and tool.usage_link != '' %}
 		<p><a target="_blank" rel="noopener noreferrer" href="{{ tool.usage_link }}">External logging for this tool</a> (should open in a new page/tab)</p>
 		{% endif %}
-		<p><small><em><a href="{% url 'logout' %}">Logout</a></em></small></p>
 		<div style="height:150px">{# Spacer #}</div>
 	</div>
 
@@ -325,6 +324,9 @@
 				<li><a href="{% url 'calendar' tool.id %}">Calendar</a></li>
 				<li><a href="{% url 'tool_control' tool.id %}">Tool control</a></li>
 				</ul>
+				{% if interlock != "None" %}
+				<p>Interlock for this tool: <tt>{{ interlock }}</tt>.</p>
+				{% endif %}
 			</div>
 		</div>
 			<div id="qualified_users_container" class="media">

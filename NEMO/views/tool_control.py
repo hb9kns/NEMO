@@ -53,6 +53,7 @@ def tool_status(request, tool_id):
 		projects_to_exclude = [int(s) for s in exclude.split() if s.isdigit()]
 	dictionary = {
 		'tool': tool,
+		'interlock': str(tool.interlock),
 		'task_categories': TaskCategory.objects.filter(stage=TaskCategory.Stage.INITIAL_ASSESSMENT),
 		'rendered_configuration_html': tool.configuration_widget(request.user),
 		'mobile': request.device == 'mobile',
