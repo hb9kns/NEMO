@@ -100,7 +100,7 @@ def send_new_task_emails(request, task, notify_users=False ):
 		users = [x.email for x in users]
 		rendered_message = Template(message).render(Context(dictionary))
 		try:
-			email = EmailMultiAlternatives(subject, from_email=user_office_email, bcc=set(users))
+			email = EmailMultiAlternatives(subject, from_email=user_office_email, bcc=set(users), headers={'To': 'undisclosed-recipients:;'})
 			email.attach_alternative(rendered_message, 'text/html')
 			email.send()
 		except SMTPException as e:

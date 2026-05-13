@@ -67,7 +67,7 @@ def send_email(request):
 	content = get_media_file_contents('generic_email.html')
 	body = Template(content).render(Context(dictionary))
 	try:
-		email = EmailMultiAlternatives(subject, from_email=sender, bcc=recipient_list, headers={'Reply-To': originator} )
+		email = EmailMultiAlternatives(subject, from_email=sender, bcc=recipient_list, headers={'To': 'undisclosed-recipients:;', 'Reply-To': originator} )
 		email.attach_alternative(body, 'text/html')
 		email.send()
 	except SMTPException as error:
@@ -229,7 +229,7 @@ def send_broadcast_email(request):
 				return HttpResponseBadRequest('Invalid Cc: field "'+cc+'"')
 		users += cc_recipients
 	try:
-		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users), headers={'Reply-To': originator} )
+		email = EmailMultiAlternatives(subject, from_email=request.user.email, bcc=set(users), headers={'To': 'undisclosed-recipients:;', 'Reply-To': originator} )
 		email.attach_alternative(content, 'text/html')
 		email.send()
 	except SMTPException as e:
