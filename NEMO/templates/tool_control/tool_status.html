@@ -302,7 +302,7 @@
 				{% if tool.notification_email_address %}
 					<p>Problem reports for the {{ tool.name }} are automatically emailed to <a href="{% url 'get_email_form' %}?recipient={{ tool.notification_email_address }}" title="Email {{ tool.notification_email_address }}"><span class="glyphicon glyphicon-send small-icon"></span>{{ tool.notification_email_address }}</a>.</p>
 				{% endif %}
-				<p>This tool is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.</p>
+				<p>This tool is located in room <span class="glyphicon glyphicon-map-marker small-icon"></span>{{ tool.location }}.{% if tool.billing_reference != Null %} It has billing reference <b>{{ tool.billing_reference }}</b>.{% endif %}</p>
 				{% if tool.reservation_physical_access_level %}
 				<p>For making reservations, permission to access &laquo;{{ tool.reservation_physical_access_level }}&raquo; is required.</p>
 				{% endif %}
